@@ -1,0 +1,160 @@
+# ===============================================================================================================#
+# Copyright 2024 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+# Template to trigger benchmark pipeline for embedding modality
+{
+    "projectId": "{{projectId}}", 
+    "description": "{{payload['description']}}",
+    "pipeline": {
+      "name": "{{payload["name"]}}",
+      "version": 1,
+      "operator": "kubeflow",
+      "runtime": "kubernetes",
+      "dataStorage": [
+          {
+        "storageType": "{{payload['configuration']['dataStorage']['storageType']}}",
+        "name": "vp-test-run",
+        "uri": "{{payload['configuration']['dataStorage']['uri']}}"
+          }
+        ],
+      "flow": {
+    
+          {% set maxlength = payload['configuration']['model']|length %}
+   
+    {% set depend = [] %}
+    
+    
+    {% for i in range(1,maxlength+1) %}
+        {% set task_name = "mteb-eval-task"+i|string %}
+        "{{task_name}}": {
+          "type": "generic",
+          "dependsOn": [ ],
+          "input": {
+            {% set input_name = "config"+i|string %}
+            {% set input_value = "{{pipeline.variables.config"+i|string+"}}" %}
+            "config" : "{{input_value}}"
+          },
+          "output": {
+              "outartifactevaljson": "/app/evaluation.json"
+          },
+          "stepConfig": {
+            "entryPoint": [
+              "python", 
+              "scripts/main.py"
+            ],
+            "stepArguments": [],
+            "imageUri": "{{taskImage}}"
+          },
+          "resourceConfig": {
+            "computes": [
+              {
+                "type": "GPU",
+                "maxQty": {{payload['resourceConfig']['gpuQty']}},
+                "memory":  "{{payload['resourceConfig']['gpuMemory']}}",
+                "minQty": 1
+              }
+            ]
+          }
+        },
+    
+    {% set _ = depend.append(task_name) %}
+      {% endfor %}  
+      
+      "consolidated-report": {
+          "type": "generic",
+          "dependsOn": [
+            {% for i in range(maxlength) %}
+            {% if i != maxlength-1 %}
+              "{{depend[i]}}",
+            {% else %}
+              "{{depend[i]}}"
+            {% endif %}
+            {% endfor %}
+          ],
+
+          "input": {
+        {% for i in range(1,maxlength+1) %}
+              {% set consol_input_name = "model"+i|string+"evalfile" %}
+              {% set consol_input_value = "{{mteb-eval-task"+i|string+".output.outartifactevaljson}}" %}
+              {% if i != maxlength %} 
+                "{{consol_input_name}}": "{{consol_input_value}}",
+                {% else %}
+              "{{consol_input_name}}": "{{consol_input_value}}"
+              {% endif %}
+              {% endfor %}
+          },
+          "output": { },
+          "stepConfig": {
+            "entryPoint": [
+              "python", 
+              "scripts/consolidated.py"
+            ],
+            "stepArguments": [],
+            "imageUri": "{{consolidatedImage}}"
+          },
+          "resourceConfig": {
+            "computes": [
+              {
+                  "type": "CPU",
+                  "maxQty": 2,
+                  "memory": "4GB",
+                  "minQty": 1
+              }
+            ]
+          }
+        },
+        "pushdata-to-es": {
+          "type": "generic",
+          "dependsOn": [
+              "consolidated-report"
+          ],
+          "input": { },
+          "output": { },
+          "stepConfig": {
+            "entryPoint": [
+              "python", 
+              "scripts/ElasticSearchUtils.py"
+            ],
+            "stepArguments": [],
+            "imageUri": "{{esImage}}"
+          },
+          "resourceConfig": {
+            "computes": [
+              {
+                "type": "CPU",
+                  "maxQty": 2,
+                  "memory": "4GB",
+                  "minQty": 1
+              }
+            ]
+          }
+        }
+      },
+	{% set dataset = payload['configuration']['data'][0] %}
+    {% set l= payload['configuration']['model']|length %}
+    
+    "variables": {
+		{% for i in range(1,l+1) %}
+        {% set model_data = payload['configuration']['model'][i-1] %}
+        {% set model_args = model_data['args'] %}           
+        {% set config_name = "config"+i|string %}
+	  
+	    {% set config_value = "{'model' : '"+model_data['modelPathorId'] +"','language':'"+ dataset['language'] +	"','dataset_name':'"+dataset['name'] + "','tasks' : '" + payload['configuration']['task'] +  "','s3_dataset_dir_name':'" +payload['configuration']['dataStorage']['uri'] + "','device':'cpu','" + "quantization_techniques':'"+  model_data['quantizeMethod'] + "','datatype':'" + model_data['datatype'] + "'}" %}
+      {% set config_value = config_value|replace("'","\\\\\\\"") %}
+        {% if i != l %} 
+        "{{config_name}}" : "{{config_value}}",
+        {% else %}
+        "{{config_name}}" : "{{config_value}}"
+        {% endif %}
+        {% endfor %}
+	    },
+    "globalVariables": {
+     
+     "TOKENIZERS_PARALLELISM": "false",
+	 "ES_INDEX" : "{{indexName}}",
+   "BENCHMARK_CFG_MAP_REF" : "embeddings"
+    }
+  }
+}
