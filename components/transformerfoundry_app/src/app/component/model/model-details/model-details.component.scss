@@ -1,0 +1,126 @@
+$text-neutral-60: #999999;
+
+.tf_wb_card-widget.mat-card {
+  padding: 24px;
+  min-height: 50px;
+  border-radius: 0;
+  margin-top: 10px;
+  background-color: YELLOW;
+}
+
+.table-inner {
+  font-size: x-small;
+}
+
+.tdAI {
+  width: 50% !important;
+  vertical-align: top !important;
+  height: 60px !important;
+
+  strong {
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+
+  .tf_wb_caption {
+    font-size: 12px;
+  }
+
+  .tf_wb_mainBodyTxtXS {
+    margin: 6px 0;
+    font-size: 12px;
+
+    &.inCustomTable {
+      margin: 0;
+    }
+  }
+}
+
+.tf_h5Inner {
+  margin: 0;
+  font-size: 14px;
+  padding: 8px 5px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #edcfff;
+  }
+}
+
+td {
+  overflow-wrap: break-word;
+  overflow: hidden;
+}
+
+.table-responsive {
+  table {
+    table-layout: fixed;
+    width: 100%;
+  }
+}
+
+.tf_wb_custom-table {
+  justify-content: center;
+  tbody tr td {
+    padding: 8px 4px;
+    height: fit-content !important;
+  }
+
+  thead tr th {
+    padding: 0 4px 4px;
+    text-transform: capitalize;
+  }
+}
+
+.tf_wb_overline {
+  font-size: 12px;
+  // background-color: red;
+}
+
+.tf_wb_mainBodyTxt2 {
+  font-size: 12px;
+  // background-color: red;
+}
+
+.tf_panelBody {
+  min-height: 10vh;
+}
+
+.tab-label {
+  font-family: "roboto", Arial, sans-serif !important;
+}
+
+// ::ng-deep.tf_wb_Secondary .mat-tab-label,
+// .tf_wb_Secondary .mat-tab-link {
+//   height: 25px !important;
+//   font-size: 17px !important;
+// }
+
+.customColorChip {
+  background-color: (0, 0, 0);
+  color: $text-neutral-60;
+  border: 0.5px solid $text-neutral-60;
+  text-transform: capitalize;
+
+  $chip-pink: #ff0263;
+  $chip-indigo: #17009b;
+  $chip-cyan: #04b3b3;
+
+  &.pink {
+    color: $chip-pink;
+    border: 0.5px solid $chip-pink;
+  }
+  &.indigo {
+    color: $chip-indigo;
+    border: 0.5px solid $chip-indigo;
+  }
+  &.cyan {
+    color: $chip-cyan;
+    border: 0.5px solid $chip-cyan;
+  }
+}
+::ng-deep.tf_wb_Secondary .mat-tab-label,
+.tf_wb_Secondary .mat-tab-link {
+  height: 25px !important;
+  font-size: 15px !important;
+}

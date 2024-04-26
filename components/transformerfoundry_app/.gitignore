@@ -1,0 +1,11 @@
+node_modules
+*-lock*
+dist
+target
+build
+src/4-node-test.json
+src/extra/file1.yml
+src/extra/file2.yml
+src/assets/4-node-test.json
+src/assets/NodeData copy.yml
+src/assets/NodeData1.yml

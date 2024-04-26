@@ -1,0 +1,29 @@
+<div class="marT8">
+    <ng-container *ngIf="model.isDataLoaded; else Loading">
+        <mat-tab-group (selectedTabChange)="onTabChange($event)" [selectedIndex]="model.selectedTabIndex" disableRipple>
+            <mat-tab label="Models">
+                <ng-template mat-tab-label class="mat-tab-sm">
+                    Models ({{model.modelCount}})
+                </ng-template>
+                <ng-template matTabContent>
+                    <app-list-model [modelListData]="model.modelListData" [modelErrorMessage]="model.errormsg"></app-list-model>
+                </ng-template>
+            </mat-tab>
+            <ng-container *ngIf=" checkIfModelZoo()">
+                <mat-tab label="Leaderboard" class="mat-tab-sm">
+                    <ng-template matTabContent>
+                        <app-model-leader-board [leaderData]="model.leaderData" [leaderDataCount]="model.leaderDataCount" [selectedBenchmarkData]="model.selectedBenchmarkData" (resetFiltersFlag)="onResetFilters($event)"></app-model-leader-board>
+                    </ng-template>
+                </mat-tab>
+            </ng-container>
+        </mat-tab-group>
+    </ng-container>
+    <ng-template #Loading>
+        <div class="loading-dots">
+            <div class="loading-dots--dot"></div>
+            <div class="loading-dots--dot"></div>
+            <div class="loading-dots--dot"></div>
+        </div>
+    </ng-template>
+
+</div>

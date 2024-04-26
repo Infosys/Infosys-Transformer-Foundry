@@ -1,0 +1,9 @@
+{
+  "config": {
+    "environment": "local",
+    "aiCloudManagementServiceBaseUrl": "http://localhost:8090",
+    "tsGlobalProjectID": "85e24b401351413eb2c2f7c3da1095j7",
+    "tsGlobalProjectAdminID": "admin",
+    "leaderboardMfeUrl":"http://localhost:4102/mfe-tf-leaderboard.js?v="
+  }
+}

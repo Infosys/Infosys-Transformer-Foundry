@@ -1,0 +1,14 @@
+<div class="small-size" >
+    <ng-container *ngFor="let breadcrumb of model.breadcrumbItems; let last = last">
+        <ng-container *ngIf="breadcrumb.routerLink; else disabledLink">
+            <a [routerLink]="breadcrumb.routerLink">
+                <span>{{ breadcrumb.path }}</span>
+            </a>
+        </ng-container>
+        <ng-template #disabledLink >
+            <span class="web-GreyLight">{{ breadcrumb.path }}</span>
+        </ng-template>
+        <span class="web-GreyLight" *ngIf="!last"></span>
+    </ng-container>
+</div>
+

@@ -1,0 +1,275 @@
+<div class="tf_panel marB16">
+  <!-- shows loader when data is not loaded -->
+  <div style="height: 65vh; overflow-x: hidden; display: flex;" *ngIf="!model.isDataLoaded">
+    <div class="loading-dots">
+      <div class="loading-dots--dot"></div>
+      <div class="loading-dots--dot"></div>
+      <div class="loading-dots--dot"></div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="model.isDataLoaded">
+    <ng-container *ngIf="model.apiError===''; else errorTemplate">
+      <div class="tf_panelBody padTB8 padLR24">
+        <!-- this section is for the header of the panel -->
+        <div class="row">
+          <div class="col-md-12 marL16">
+            <div class="marB16">
+              <div class="tf_wb_h3Header ">
+                {{model.modelDetails['metadata'].modelDetails.displayName}}&nbsp;
+
+                <span class="float-right" *ngIf="model.modelDetails['status']">
+                  <span class="tf_wb_chipStyle marLR4" [ngClass]="getClass(model.modelDetails['status'])"
+                    matTooltipClass="tf_tooltip" matTooltip="Status" matTooltipPosition="below">
+                    {{ model.modelDetails["status"] }}
+                  </span>
+                  <br />
+                </span>
+                <span class="float-right" *ngIf="model.modelDetails['metadata'].modelParameters.modelArchitecture">
+                  <span class="tf_wb_chipStyle tf_wb_greychip  marLR4" matTooltipClass="tf_tooltip"
+                    matTooltip="Model Architecture" matTooltipPosition="below">
+                    {{model.modelDetails['metadata'].modelParameters.modelArchitecture}}
+                  </span>
+                  <br />
+                </span>
+                <span class="float-right" *ngIf="model.modelDetails['metadata'].modelDetails.licenses[0]['identifier']">
+                  <span class="tf_wb_chipStyle tf_wb_greychip  marLR4" matTooltipClass="tf_tooltip"
+                    matTooltip="License" matTooltipPosition="below">
+                    {{model.modelDetails['metadata'].modelDetails.licenses[0]['identifier']}}
+                  </span>
+                  <br />
+                </span>
+                <span class="float-right" *ngIf="model.modelDetails['metadata'].modelDetails.tasktype">
+                  <span class="tf_wb_chipStyle tf_wb_greychip  marLR4" matTooltipClass="tf_tooltip"
+                    matTooltip="Task Type" matTooltipPosition="below">
+                    {{model.modelDetails['metadata'].modelDetails.tasktype}}
+                  </span>
+                  <br />
+                </span>
+              </div>
+            </div>
+            <div class="tf_wb_mainBodyTxt2">
+              <div>{{ model.modelDetails["description"]}}</div><br />
+              <div>{{"Version: " + model.modelDetails["version"]}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <mat-card class="tf_wb_card-widget.mat-card" style="padding: 5px 16px 5px 16px;">
+          <div class="tf_wb_customTab tf_navTabWhite tf_wb_Secondary" style="margin-bottom: 7px">
+            <mat-tab-group>
+
+              <!-- Metadata tab -->
+              <mat-tab label="Metadata" class="mat-tab-sm">
+                <div style="overflow-x: hidden; overflow-y: scroll;" class="container-fluid"
+                  [style.height.px]="model.metaDataHeight">
+                  <!-- Model Details Section -->
+                  <div class="row">
+                    <div class="col-md-12">
+                      <h5 class="sectionHeader tf_h5Inner mar1" (click)="toggleShowSection('modelDetails')"> Model
+                        Details<span [class.icon.x-16]="true" [class.up-arw-icon]="showSection['modelDetails']"
+                          [class.down-arw-icon]="!showSection['modelDetails']"></span></h5>
+                      <div class="tab-data" *ngIf="showSection['modelDetails']">
+                        <div class="table-responsive">
+                          <table aria-hidden="true" class="tf_wb_custom-table marT4">
+                            <tbody>
+                              <tr>
+                                <td class="tdAI">
+                                  <strong>Source</strong>
+                                  <div class="tf_wb_mainBodyTxtXS">
+                                    {{model.modelDetails['metadata'].modelDetails.documentation}}
+                                  </div>
+                                </td>
+                              </tr>
+                              <tr>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Model Parameters Section -->
+                  <div class="row">
+                    <div class="col-md-12">
+                      <h5 class="sectionHeader tf_h5Inner mar1" (click)="toggleShowSection('modelParameters')">
+                        Model Parameters<span [class.icon.x-16]="true"
+                          [class.up-arw-icon]="showSection['modelParameters']"
+                          [class.down-arw-icon]="!showSection['modelParameters']"></span></h5>
+                      <div class=" tab-data" *ngIf="showSection['modelParameters']">
+                        <div class="table-responsive">
+                          <table aria-hidden="true" class="tf_wb_custom-table marT4">
+                            <tbody>
+                              <tr>
+                              </tr>
+                              <tr>
+                                <td class="tdAI">
+                                  <strong>Input Format</strong>
+                                  <div class="tf_wb_mainBodyTxtXS">
+                                    {{model.modelDetails['metadata'].modelParameters.inputFormat}}
+                                  </div>
+                                </td>
+                                <td class="tdAI">
+                                  <strong>Output Format</strong>
+                                  <div class="tf_wb_mainBodyTxtXS">
+                                    {{model.modelDetails['metadata'].modelParameters.outputFormat}}
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Quantitative Analysis Section -->
+                  <div class="row">
+                    <div class="col-md-12">
+                      <h5 class="sectionHeader tf_h5Inner mar1" (click)="toggleShowSection('quantitativeAnalysis')">
+                        Quantitative Analysis<span [class.icon.x-16]="true"
+                          [class.up-arw-icon]="showSection['quantitativeAnalysis']"
+                          [class.down-arw-icon]="!showSection['quantitativeAnalysis']"></span></h5>
+                      <div class="tab-data" *ngIf="showSection['quantitativeAnalysis']">
+                        <ng-container [ngTemplateOutlet]="customTableTemplate"
+                          [ngTemplateOutletContext]="{tableContent:model.modelDetails['metadata'].quantitativeAnalysis.performanceMetrics}"></ng-container>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Considerations Section -->
+                  <div class="row">
+                    <div class="col-md-12">
+                      <h5 class="sectionHeader tf_h5Inner mar1" (click)="toggleShowSection('considerations')">
+                        Considerations<span [class.icon.x-16]="true" [class.up-arw-icon]="showSection['considerations']"
+                          [class.down-arw-icon]="!showSection['considerations']"></span></h5>
+                      <div class="tab-data" *ngIf="showSection['considerations']">
+                        <div class="table-responsive">
+                          <table aria-hidden="true" class="tf_wb_custom-table marT4">
+                            <tbody>
+                              <tr>
+                                <td class="tdAI">
+                                  <strong>Users</strong>
+                                  <ng-container [ngTemplateOutlet]="description"
+                                    [ngTemplateOutletContext]="{fieldName:'users'}"></ng-container>
+                                </td>
+                                <td class="tdAI">
+                                  <strong>Use Cases</strong>
+                                  <ng-container [ngTemplateOutlet]="description"
+                                    [ngTemplateOutletContext]="{fieldName:'useCases'}"></ng-container>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td class="tdAI">
+                                  <strong>Limitations</strong>
+                                  <ng-container [ngTemplateOutlet]="description"
+                                    [ngTemplateOutletContext]="{fieldName:'limitations'}"></ng-container>
+                                </td>
+                                <td class="tdAI">
+                                  <strong>Tradeoffs</strong>
+                                  <ng-container [ngTemplateOutlet]="description"
+                                    [ngTemplateOutletContext]="{fieldName:'tradeoffs'}"></ng-container>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td class="tdAI" colspan="2">
+                                  <strong>Environmental Considerations</strong>
+                                  <ng-container [ngTemplateOutlet]="customTableTemplate"
+                                    [ngTemplateOutletContext]="{tableContent:model.modelDetails['metadata'].considerations.environmentalConsiderations}">
+                                  </ng-container>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </mat-tab>
+
+              <!-- Leaderboard list tab -->
+              <mat-tab label="Benchmarks" class="mat-tab-sm">
+                <app-model-leader-board [ParentHeight]="model.metaDataHeight" [ParentWidth]="model.metaDataWidth"
+                  [modelFlag]="true" [leaderData]="model.benchMarkData" [modelName]="model.modelName" [leaderDataCount]="model.benchmarkCount" [modality]="model.modality" [exeModelName]="model.exeModelName"></app-model-leader-board>
+              </mat-tab>
+            </mat-tab-group>
+          </div>
+        </mat-card>
+      </div>
+    </ng-container>
+    <ng-template #errorTemplate>
+      <div class="tf_contentLeftCol" style="height: 70vh;   width: 100%; display: flex; text-align: center;">
+        {{model.apiError}}
+      </div>
+    </ng-template>
+  </ng-container>
+
+</div>
+
+<ng-template #customTableTemplate let-tableContent="tableContent">
+  <table class="tf_wb_custom-table marT8">
+    <thead>
+      <tr>
+        <th class="tf_wb_overline" *ngFor="let tableItem of tableContent[0] | keyvalue: noSortCompareFn">
+          <strong>{{tableItem.key}}</strong>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of tableContent">
+        <td class="tdAI" *ngFor="let rowItem of item | keyvalue: noSortCompareFn">
+          <ng-container *ngIf="!isObject(rowItem.value) && !isArray(rowItem.value)">
+            <div class="tf_wb_mainBodyTxtXS inCustomTable">
+              {{ rowItem.value }}
+            </div>
+          </ng-container>
+          <ng-container *ngIf="isObject(rowItem.value)">
+            {{ rowItem.value["lowerBound"] +" - "+rowItem.value["upperBound"]}}
+          </ng-container>
+          <!-- check for isArray -->
+          <ng-container *ngIf="isArray(rowItem.value)">
+            <ng-container *ngFor="let arrItem of rowItem.value">
+              <ng-container [ngTemplateOutlet]="nestedTableTemplate"
+                [ngTemplateOutletContext]="{tableContent:arrItem}"></ng-container>
+            </ng-container>
+          </ng-container>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</ng-template>
+
+
+<ng-template #nestedTableTemplate let-tableContent="tableContent">
+  <table class="tf_wb_custom-table">
+    <tbody>
+      <ng-container *ngFor="let arrItem of tableContent">
+        <ng-container *ngFor="let item of arrItem | keyvalue: noSortCompareFn">
+          <ng-container *ngIf="!isArray(item.value)">
+            <tr>
+              <td class="tf_wb_overline"><b>{{item.key}}</b></td>
+              <td class="tf_wb_mainBodyTxtXS">{{item.value}}</td>
+            </tr>
+          </ng-container>
+          <ng-container *ngIf="isArray(item.value)">
+            <tr>
+              <td>
+                <strong>{{item.key}}</strong>
+              </td>
+              <td>
+                <ng-container [ngTemplateOutlet]="customTableTemplate"
+                  [ngTemplateOutletContext]="{tableContent: item.value}">
+                </ng-container>
+              </td>
+            </tr>
+          </ng-container>
+        </ng-container>
+      </ng-container>
+    </tbody>
+  </table>
+</ng-template>
+
+<ng-template #description let-fieldName="fieldName">
+  <div class="tf_wb_mainBodyTxtXS">{{model.modelDetails['metadata'].considerations[fieldName][0]["description"] ?
+    model.modelDetails['metadata'].considerations[fieldName][0]["description"] : '-' }}</div>
+</ng-template>

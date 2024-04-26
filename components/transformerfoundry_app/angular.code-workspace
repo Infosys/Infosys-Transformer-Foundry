@@ -1,0 +1,35 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"**/out" : true,
+			"**/node_modules": true,
+			"**/dist": true,
+			"**/React_app":true,
+			"**/target": true
+		}
+	},
+	"launch": {
+		"configurations": [
+			{
+				"type": "chrome",
+				"request": "launch",
+				"name": "Launch Chrome against localhost",
+				"url": "http://localhost:4200",
+				"webRoot": "${workspaceFolder}",
+				"userDataDir": "${workspaceRoot}/out/chrome",
+				"runtimeExecutable": "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"
+			}
+		],
+		"compounds": []
+	}
+}

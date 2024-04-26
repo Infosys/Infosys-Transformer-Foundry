@@ -1,0 +1,2 @@
+<app-mfe-tf-leaderboard [standaloneFlag]="model.standaloneFlag" [l1RowLeaderboardEnabled]="model.l1RowLeaderboardEnabled" [l1RowBenchmarkEnabled]="model.l1RowBenchmarkEnabled" [dynamicOffset]="model.dynamicOffset" (selectedBenchmarkData)="onSelectedBenchmarkData($event)" *axLazyElement="model.leaderboardMfeUrl; errorTemplate: error"></app-mfe-tf-leaderboard>
+<ng-template #error>Loading of MFE failed...</ng-template>

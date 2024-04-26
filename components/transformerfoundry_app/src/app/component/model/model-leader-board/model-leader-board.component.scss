@@ -1,0 +1,40 @@
+.tf_innerContentWrapper .tf_contentLeftCol {
+  padding: 0px;
+}
+.tf_wb_custom-table thead {
+  position: sticky;
+  top: 0;
+  background-color: white !important;
+}
+
+.CapitalText {
+  text-transform: capitalize;
+}
+
+.tf_baseLayout_center{
+  margin: auto;
+  width: 100%;
+}
+
+.total-records{
+  font-size:x-small;
+  color: #737373;
+}
+
+.err-msg-div {
+  font-size: 10px;
+  margin-top: -12px;
+}
+
+.filter_panel{
+  background: white;
+  font-family: "roboto", Arial, sans-serif !important;
+  font-size: 1.4rem;
+  font-weight: 500;
+  font-style: normal;
+  height: 100px;
+}
+
+.tf_Wb_custom-form-field.tf_form_nofloatLabel .mat-input-element {
+  height: 15px;
+}

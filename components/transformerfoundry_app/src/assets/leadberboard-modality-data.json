@@ -1,0 +1,48 @@
+{
+  "leaderboard":[
+  {
+    "modelName":"Codegen-2B-multi",
+    "modality":"code"
+  },
+  {
+    "modelName":"Codegen-2B-multi-FT",
+    "modality":"code"
+  },
+  {
+    "modelName":"StableDiffusion",
+    "modality":"NA"
+  },
+  {
+    "modelName":"Bloom7b1",
+    "modality":"text"
+  },
+  {
+    "modelName":"Flant5-xl",
+    "modality":"text"
+  },
+  {
+    "modelName":"Whisper-m",
+    "modality":"text"
+  },
+  {
+    "modelName":"Llama-2-7b-chat-hf ",
+    "modality":"text"
+  },
+  {
+    "modelName":"Starcoderbase",
+    "modality":"code"
+  },
+  {
+    "modelName":"Falcon-7B",
+    "modality":"text"
+  },
+  {
+    "modelName":"Fastchat",
+    "modality":"text"
+  },
+  {
+    "modelName":"Santacoder",
+    "modality":"code"
+  }
+]
+}

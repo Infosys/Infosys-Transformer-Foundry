@@ -1,0 +1,26 @@
+.web-GreyLight{
+    color: #737373;
+}
+.breadcrumb a span{
+    padding: 0 10px 0 0;
+}
+.btn{
+    font-weight: 500;
+}
+.small-size *{
+    font-size: inherit;
+    text-transform: capitalize;
+}
+.small-size{
+    font-size: x-small;
+    position:relative;
+    margin-left: 5px;
+    font-family: roboto,Arial!important;
+}
+breadcrumb a::after{
+    content: ">";
+    margin-top: -5px;
+    font-size: small;
+    font-weight: 500;
+}
+

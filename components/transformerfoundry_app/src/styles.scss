@@ -1,0 +1,105 @@
+/*plugin css*/
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+@import "~perfect-scrollbar/css/perfect-scrollbar.css";
+
+@import "@material/tab-bar/dist/mdc.tab-bar.css";
+@import "@material/tab-scroller/dist/mdc.tab-scroller.css";
+@import "@material/tab-indicator/dist/mdc.tab-indicator.css";
+@import "@material/tab/dist/mdc.tab.css";
+
+.mat-form-field-disabled.mat-form-field-appearance-legacy
+  .mat-form-field-label,
+.mat-form-field-disabled input.mat-input-element {
+  color: unset !important;
+}
+
+.loading-dots {
+  text-align: center;
+  width: 100%;
+
+  &--dot {
+    animation: dot-keyframes 1.5s infinite ease-in-out;
+    background-color: rgba(0, 0, 0, 0.774);
+    border-radius: 5px;
+    display: inline-block;
+    height: 10px;
+    width: 10px;
+
+    &:nth-child(2) {
+      animation-delay: 0.5s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 1s;
+    }
+  }
+}
+
+.MuiIconButton-colorPrimary {
+  color: #8626c3 !important;
+}
+
+.MuiSvgIcon-root {
+  width: 16px !important;
+  height: 16px !important;
+  font-size: unset !important;
+}
+// .MuiIconButton-root{
+//   width: 15px;
+//   height: 15px;
+//   padding: 8px!important;
+// }
+
+.table-wrapper {
+  // height: 280px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.DSA_wb_Icon-btn[disabled] {
+  background-color: inherit !important;
+}
+
+.bc-row-content {
+  font-size: x-small;
+}
+
+/* Padding to prevent breadcrumb from going under header*/
+#mainCtr {
+  padding-top: 80px !important;
+  padding-bottom: 0px !important;
+}
+@media screen and (max-width: 1199px) {
+  #mainCtr {
+    padding-top: 56px !important;
+    padding-bottom: 0px !important;
+  }
+  #mainrightCnt {
+    height: 500px;
+  }
+}
+// @media screen and (min-width: 1024px) {
+//   .DSA_footer {
+//     position: relative;
+//     width: 100%;
+//     bottom: 0;
+//     z-index: 9;
+//   }
+// }
+
+.DSA_footer {
+  height: 25px;
+  line-height: 25px;
+  font-size: 12px;
+}
+.web-SecondaryPink {
+  color: #ff0263;
+  background-color: #fcb2ce;
+}
+.web-SecondaryOrange {
+  color: #ff8400;
+  background-color: #ffdcb8;
+}
+.mat-tab-sm {
+  height: 25px !important;
+  font-size: 17px !important;
+}
