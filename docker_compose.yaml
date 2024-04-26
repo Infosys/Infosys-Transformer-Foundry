@@ -1,0 +1,31 @@
+# ===============================================================================================================#
+# Copyright 2024 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+version: '1.0'
+services:
+  transformerfoundry_app:
+    container_name: transformer-foundry-service
+    image: ${DOCKER_REPO}/transfounder-foundry-app:v1.0
+
+  leaderboard_app:
+    container_name: leaderboard-app
+    image: ${DOCKER_REPO}/leaderboard-app:v1.0
+
+  model:
+    container_name: model-management-service
+    image: ${DOCKER_REPO}/model-management-service:v1.0
+ 
+  benchmark:
+    container_name: benchmark-service
+    image: ${DOCKER_REPO}/benchmark-management-service:v1.0
+
+  utility:
+    container_name: utility-service
+    image: ${DOCKER_REPO}/utility-service:v1.0
+  
+
+ 
+  
