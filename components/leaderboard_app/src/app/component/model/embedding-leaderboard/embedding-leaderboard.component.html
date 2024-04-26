@@ -1,0 +1,571 @@
+<div class="tf_contentLeftCol tf_baseLayout_center padTB8" [style.width.px]="leaderboardWidth">
+    <div class="tf_panel padLR16">
+        <div class="filter_panel padT8 padLR16" style="background: white;">
+            <div class="row" style="line-height: 95px; display: flex;">
+                <div class="col-md-2">
+                    <mat-form-field class="tf_Wb_custom-form-field tf_form_nofloatLabel" floatLabel="never"
+                        panelClass="tf_wb-custom-select-panel">
+                        <mat-label>Benchmark Name</mat-label>
+                        <input matInput placeholder="First Name" [(ngModel)]="model.leaderDataFilter.benchmarkName"/>
+                    </mat-form-field>
+                </div>
+                <div class="col-md-2">
+                    <mat-form-field class="tf_Wb_custom-form-field tf_form_nofloatLabel" floatLabel="never"
+                        panelClass="tf_wb-custom-select-panel">
+                        <mat-label>Model Name</mat-label>
+                        <input matInput placeholder="First Name" [(ngModel)]="model.leaderDataFilter.modelName"
+                            [disabled]="exeModelName"/>
+                    </mat-form-field>
+                </div>
+                <div class="col-md-2">
+                    <mat-form-field class="tf_Wb_custom-form-field tf_form_nofloatLabel" floatLabel="never"
+                        panelClass="tf_wb-custom-select-panel">
+                        <mat-label>Dataset</mat-label>
+                        <input matInput placeholder="First Name" [(ngModel)]="model.leaderDataFilter.datasetName" />
+                    </mat-form-field>
+                </div>
+                <div class="col-md-2">
+                    <mat-form-field class="tf_Wb_custom-form-field tf_form_nofloatLabel" floatLabel="never"
+                        panelClass="tf_wb-custom-select-panel">
+                        <mat-label>From Date</mat-label>
+                        <input matInput placeholder="First Name" type="date"
+                            [(ngModel)]="model.leaderDataFilter.fromDate" />
+                    </mat-form-field>
+                    <!-- <div *ngIf="model.leaderDataFilter.fromDate === '' " class="err-msg-div">
+                        <mat-error>Mandatory field</mat-error>
+                    </div>
+                    <div *ngIf="model.leaderDataFilter.fromDate>model.leaderDataFilter.toDate" class="err-msg-div">
+                        <mat-error>Provide a valid from date.</mat-error>
+                    </div> -->
+                </div>
+                <div class="col-md-2">
+                    <mat-form-field class="tf_Wb_custom-form-field tf_form_nofloatLabel" floatLabel="never"
+                        panelClass="tf_wb-custom-select-panel">
+                        <mat-label>To Date</mat-label>
+                        <input matInput placeholder="First Name" type="date"
+                            [(ngModel)]="model.leaderDataFilter.toDate" />
+                    </mat-form-field>
+                    <!-- <div *ngIf="model.leaderDataFilter.toDate === ''" class="err-msg-div">
+                        <mat-error>Mandatory field</mat-error>
+                    </div>
+                    <div *ngIf="model.leaderDataFilter.fromDate>model.leaderDataFilter.toDate" class="err-msg-div">
+                        <mat-error>Provide a valid to date.</mat-error>
+                    </div> -->
+                </div>
+                <div class="col-md-1 filter-icons">
+                    <button class="tf_wb_miniPrimary-btn marR24" mat-flat-button (click)="onSearchClick()" [disabled]="
+                            model.leaderDataFilter.fromDate>model.leaderDataFilter.toDate" style="bottom: 8px; background: none; display: inline-flex; justify-content: center;"><span
+                            class="icon_btnCont"><i class="icon x-16 purple search-icon"></i></span>
+                    </button>
+                </div>
+                <div class="col-md-1 filter-icons">
+                    <button class="tf_wb_miniPrimary-btn marR24" mat-flat-button (click)="resetFilter()" [disabled]="
+                            model.leaderDataFilter.fromDate>model.leaderDataFilter.toDate" style="bottom: 8px; background: none; display: inline-flex; justify-content: center;"><span
+                            class="icon_btnCont"><i class="icon x-16 purple icon_Refresh"></i></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="table-wrapper" style="overflow-x: scroll; overflow-y: scroll;" [style.height.px]="leaderboardHeight" >
+            <table class="tf_wb_custom-table" style="table-layout: fixed;" [style.width.px]="leaderboardWidth+model.tableWidthOffset">
+                <thead>
+                    <tr>
+                        <th width="4%">#</th>
+                        <th width="23%">Benchmark Name</th>
+                        <th width="24%" *ngIf="!modelFlag">Model Name</th>
+                        <th width="10%">Data Type</th>
+                        <th width="16%">Task</th>
+                        <th width="17%">Dataset</th>
+                        <th width="9%">Language</th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Ndcg@10<i class="icon x-16 icon_sort" (click)="updateMetricName('ndcg_at_10')" matTooltip="{{ model.sortedColumn === 'ndcg_at_10' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'ndcg_at_10'">Ndcg@10
+                            <ng-container *ngIf="model.sortedColumn === 'ndcg_at_10'">
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('ndcg_at_10',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_10' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('ndcg_at_10',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_10' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'ndcg_at_10'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('ndcg_at_10',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_10' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Ndcg@1<i class="icon x-16 icon_sort" (click)="updateMetricName('ndcg_at_1')" matTooltip="{{ model.sortedColumn === 'ndcg_at_1' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'ndcg_at_1'">Ndcg@1
+                            <ng-container *ngIf="model.sortedColumn === 'ndcg_at_1'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('ndcg_at_1',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_1' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('ndcg_at_1',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_1' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'ndcg_at_1'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('ndcg_at_1',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_1' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Ndcg@3<i class="icon x-16 icon_sort" (click)="updateMetricName('ndcg_at_3')" matTooltip="{{ model.sortedColumn === 'ndcg_at_3' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'ndcg_at_3'">Ndcg@3
+                            <ng-container *ngIf="model.sortedColumn === 'ndcg_at_3'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('ndcg_at_3',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_3' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('ndcg_at_3',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_3' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'ndcg_at_3'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('ndcg_at_3',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_3' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Ndcg@5<i class="icon x-16 icon_sort" (click)="updateMetricName('ndcg_at_5')" matTooltip="{{ model.sortedColumn === 'ndcg_at_5' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'ndcg_at_5'">Ndcg@5
+                            <ng-container *ngIf="model.sortedColumn === 'ndcg_at_5'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('ndcg_at_5',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_5' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('ndcg_at_5',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_5' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'ndcg_at_5'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('ndcg_at_5',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_5' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="11%" style="word-wrap: break-word;">Ndcg@100<i class="icon x-16 icon_sort" (click)="updateMetricName('ndcg_at_100')" matTooltip="{{ model.sortedColumn === 'ndcg_at_100' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="11%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'ndcg_at_100'">Ndcg@100
+                            <ng-container *ngIf="model.sortedColumn === 'ndcg_at_100'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('ndcg_at_100',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_100' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('ndcg_at_100',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_100' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'ndcg_at_100'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('ndcg_at_100',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_100' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="12%" style="word-wrap: break-word;">Ndcg@1000<i class="icon x-16 icon_sort" (click)="updateMetricName('ndcg_at_1000')" matTooltip="{{ model.sortedColumn === 'ndcg_at_1000' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="12%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'ndcg_at_1000'">Ndcg@1000
+                            <ng-container *ngIf="model.sortedColumn === 'ndcg_at_1000'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('ndcg_at_1000',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_1000' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('ndcg_at_1000',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_1000' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'ndcg_at_1000'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('ndcg_at_1000',true)" matTooltip="{{ model.sortedColumn === 'ndcg_at_1000' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+
+
+                        <!-- <th width="10%" style="word-wrap: break-word;">Map@1<i class="icon x-16 icon_sort" (click)="updateMetricName('map_at_1')" matTooltip="{{ model.sortedColumn === 'map_at_1' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'map_at_1'">Map@1
+                            <ng-container *ngIf="model.sortedColumn === 'map_at_1'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('map_at_1',true)" matTooltip="{{ model.sortedColumn === 'map_at_1' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('map_at_1',true)" matTooltip="{{ model.sortedColumn === 'map_at_1' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'map_at_1'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('map_at_1',true)" matTooltip="{{ model.sortedColumn === 'map_at_1' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Map@3<i class="icon x-16 icon_sort" (click)="updateMetricName('map_at_3')" matTooltip="{{ model.sortedColumn === 'map_at_3' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'map_at_3'">Map@3
+                            <ng-container *ngIf="model.sortedColumn === 'map_at_3'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('map_at_3',true)" matTooltip="{{ model.sortedColumn === 'map_at_3' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('map_at_3',true)" matTooltip="{{ model.sortedColumn === 'map_at_3' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'map_at_3'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('map_at_3',true)" matTooltip="{{ model.sortedColumn === 'map_at_3' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Map@5<i class="icon x-16 icon_sort" (click)="updateMetricName('map_at_5')" matTooltip="{{ model.sortedColumn === 'map_at_5' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'map_at_5'">Map@5
+                            <ng-container *ngIf="model.sortedColumn === 'map_at_5'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('map_at_5',true)" matTooltip="{{ model.sortedColumn === 'map_at_5' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('map_at_5',true)" matTooltip="{{ model.sortedColumn === 'map_at_5' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'map_at_5'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('map_at_5',true)" matTooltip="{{ model.sortedColumn === 'map_at_5' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Map@10<i class="icon x-16 icon_sort" (click)="updateMetricName('map_at_10')" matTooltip="{{ model.sortedColumn === 'map_at_10' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'map_at_10'">Map@10
+                            <ng-container *ngIf="model.sortedColumn === 'map_at_10'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('map_at_10',true)" matTooltip="{{ model.sortedColumn === 'map_at_10' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('map_at_10',true)" matTooltip="{{ model.sortedColumn === 'map_at_10' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'map_at_10'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('map_at_10',true)" matTooltip="{{ model.sortedColumn === 'map_at_10' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+
+                        <!-- <th width="11%" style="word-wrap: break-word;">Map@100<i class="icon x-16 icon_sort" (click)="updateMetricName('map_at_100')" matTooltip="{{ model.sortedColumn === 'map_at_100' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="11%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'map_at_100'">Map@100
+                            <ng-container *ngIf="model.sortedColumn === 'map_at_100'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('map_at_100',true)" matTooltip="{{ model.sortedColumn === 'map_at_100' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('map_at_100',true)" matTooltip="{{ model.sortedColumn === 'map_at_100' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'map_at_100'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('map_at_100',true)" matTooltip="{{ model.sortedColumn === 'map_at_100' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="12%" style="word-wrap: break-word;">Map@1000<i class="icon x-16 icon_sort" (click)="updateMetricName('map_at_1000')" matTooltip="{{ model.sortedColumn === 'map_at_1000' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="12%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'map_at_1000'">Map@1000
+                            <ng-container *ngIf="model.sortedColumn === 'map_at_1000'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('map_at_1000',true)" matTooltip="{{ model.sortedColumn === 'map_at_1000' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('map_at_1000',true)" matTooltip="{{ model.sortedColumn === 'map_at_1000' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'map_at_1000'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('map_at_1000',true)" matTooltip="{{ model.sortedColumn === 'map_at_1000' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+
+                        <!-- <th width="10%" style="word-wrap: break-word;">Recall@1<i class="icon x-16 icon_sort" (click)="updateMetricName('recall_at_1')" matTooltip="{{ model.sortedColumn === 'recall_at_1' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'recall_at_1'">Recall@1
+                            <ng-container *ngIf="model.sortedColumn === 'recall_at_1'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('recall_at_1',true)" matTooltip="{{ model.sortedColumn === 'recall_at_1' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('recall_at_1',true)" matTooltip="{{ model.sortedColumn === 'recall_at_1' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'recall_at_1'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('recall_at_1',true)" matTooltip="{{ model.sortedColumn === 'recall_at_1' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Recall@3<i class="icon x-16 icon_sort" (click)="updateMetricName('recall_at_3')" matTooltip="{{ model.sortedColumn === 'recall_at_3' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'recall_at_3'">Recall@3
+                            <ng-container *ngIf="model.sortedColumn === 'recall_at_3'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('recall_at_3',true)" matTooltip="{{ model.sortedColumn === 'recall_at_3' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('recall_at_3',true)" matTooltip="{{ model.sortedColumn === 'recall_at_3' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'recall_at_3'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('recall_at_3',true)" matTooltip="{{ model.sortedColumn === 'recall_at_3' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Recall@5<i class="icon x-16 icon_sort" (click)="updateMetricName('recall_at_5')" matTooltip="{{ model.sortedColumn === 'recall_at_5' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'recall_at_5'">Recall@5
+                            <ng-container *ngIf="model.sortedColumn === 'recall_at_5'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('recall_at_5',true)" matTooltip="{{ model.sortedColumn === 'recall_at_5' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('recall_at_5',true)" matTooltip="{{ model.sortedColumn === 'recall_at_5' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'recall_at_5'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('recall_at_5',true)" matTooltip="{{ model.sortedColumn === 'recall_at_5' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Recall@10<i class="icon x-16 icon_sort" (click)="updateMetricName('recall_at_10')" matTooltip="{{ model.sortedColumn === 'recall_at_10' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'recall_at_10'">Recall@10
+                            <ng-container *ngIf="model.sortedColumn === 'recall_at_10'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('recall_at_10',true)" matTooltip="{{ model.sortedColumn === 'recall_at_10' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('recall_at_10',true)" matTooltip="{{ model.sortedColumn === 'recall_at_10' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'recall_at_10'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('recall_at_10',true)" matTooltip="{{ model.sortedColumn === 'recall_at_10' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="11%" style="word-wrap: break-word;">Recall@100<i class="icon x-16 icon_sort" (click)="updateMetricName('recall_at_100')" matTooltip="{{ model.sortedColumn === 'recall_at_100' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="11%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'recall_at_100'">Recall@100
+                            <ng-container *ngIf="model.sortedColumn === 'recall_at_100'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('recall_at_100',true)" matTooltip="{{ model.sortedColumn === 'recall_at_100' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('recall_at_100',true)" matTooltip="{{ model.sortedColumn === 'recall_at_100' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'recall_at_100'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('recall_at_100',true)" matTooltip="{{ model.sortedColumn === 'recall_at_100' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="12%" style="word-wrap: break-word;">Recall@1000<i class="icon x-16 icon_sort" (click)="updateMetricName('recall_at_1000')" matTooltip="{{ model.sortedColumn === 'recall_at_1000' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="12%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'recall_at_1000'">Recall@1000
+                            <ng-container *ngIf="model.sortedColumn === 'recall_at_1000'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('recall_at_1000',true)" matTooltip="{{ model.sortedColumn === 'recall_at_1000' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('recall_at_1000',true)" matTooltip="{{ model.sortedColumn === 'recall_at_1000' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'recall_at_1000'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('recall_at_1000',true)" matTooltip="{{ model.sortedColumn === 'recall_at_1000' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+
+                        <!-- <th width="12%" style="word-wrap: break-word;">Precision@1<i class="icon x-16 icon_sort" (click)="updateMetricName('precision_at_1')" matTooltip="{{ model.sortedColumn === 'precision_at_1' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="12%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'precision_at_1'">Precision@1
+                            <ng-container *ngIf="model.sortedColumn === 'precision_at_1'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('precision_at_1',true)" matTooltip="{{ model.sortedColumn === 'precision_at_1' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('precision_at_1',true)" matTooltip="{{ model.sortedColumn === 'precision_at_1' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'precision_at_1'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('precision_at_1',true)" matTooltip="{{ model.sortedColumn === 'precision_at_1' ? model.sortOrder : '' }}"></i>
+                            </ng-container>   
+                        </th>
+                        
+                        <!-- <th width="12%" style="word-wrap: break-word;">Precision@3<i class="icon x-16 icon_sort" (click)="updateMetricName('precision_at_3')" matTooltip="{{ model.sortedColumn === 'precision_at_3' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="12%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'precision_at_3'">Precision@3
+                            <ng-container *ngIf="model.sortedColumn === 'precision_at_3'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('precision_at_3',true)" matTooltip="{{ model.sortedColumn === 'precision_at_3' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('precision_at_3',true)" matTooltip="{{ model.sortedColumn === 'precision_at_3' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'precision_at_3'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('precision_at_3',true)" matTooltip="{{ model.sortedColumn === 'precision_at_3' ? model.sortOrder : '' }}"></i>
+                            </ng-container>   
+                        </th>
+                        
+                        <!-- <th width="12%" style="word-wrap: break-word;">Precision@5<i class="icon x-16 icon_sort" (click)="updateMetricName('precision_at_5')" matTooltip="{{ model.sortedColumn === 'precision_at_5' ? model.sortOrder : '' }}"></i></th>                        -->
+                        <th width="12%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'precision_at_5'">Precision@5
+                            <ng-container *ngIf="model.sortedColumn === 'precision_at_5'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('precision_at_5',true)" matTooltip="{{ model.sortedColumn === 'precision_at_5' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('precision_at_5',true)" matTooltip="{{ model.sortedColumn === 'precision_at_5' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'precision_at_5'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('precision_at_5',true)" matTooltip="{{ model.sortedColumn === 'precision_at_5' ? model.sortOrder : '' }}"></i>
+                            </ng-container>   
+                        </th>
+                        
+                        <!-- <th width="12%" style="word-wrap: break-word;">Precision@10<i class="icon x-16 icon_sort" (click)="updateMetricName('precision_at_10')" matTooltip="{{ model.sortedColumn === 'precision_at_10' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="12%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'precision_at_10'">Precision@10
+                            <ng-container *ngIf="model.sortedColumn === 'precision_at_10'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('precision_at_10',true)" matTooltip="{{ model.sortedColumn === 'precision_at_10' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('precision_at_10',true)" matTooltip="{{ model.sortedColumn === 'precision_at_10' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'precision_at_10'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('precision_at_10',true)" matTooltip="{{ model.sortedColumn === 'precision_at_10' ? model.sortOrder : '' }}"></i>
+                            </ng-container>   
+                        </th>
+                        
+                        <!-- <th width="13%" style="word-wrap: break-word;">Precision@100<i class="icon x-16 icon_sort" (click)="updateMetricName('precision_at_100')" matTooltip="{{ model.sortedColumn === 'precision_at_100' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="13%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'precision_at_100'">Precision@100
+                            <ng-container *ngIf="model.sortedColumn === 'precision_at_100'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('precision_at_100',true)" matTooltip="{{ model.sortedColumn === 'precision_at_100' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('precision_at_100',true)" matTooltip="{{ model.sortedColumn === 'precision_at_100' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'precision_at_100'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('precision_at_100',true)" matTooltip="{{ model.sortedColumn === 'precision_at_100' ? model.sortOrder : '' }}"></i>
+                            </ng-container>   
+                        </th>
+                        
+                        <!-- <th width="14%" style="word-wrap: break-word;">Precision@1000<i class="icon x-16 icon_sort" (click)="updateMetricName('precision_at_1000')" matTooltip="{{ model.sortedColumn === 'precision_at_1000' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="14%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'precision_at_1000'">Precision@1000
+                            <ng-container *ngIf="model.sortedColumn === 'precision_at_1000'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('precision_at_1000',true)" matTooltip="{{ model.sortedColumn === 'precision_at_1000' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('precision_at_1000',true)" matTooltip="{{ model.sortedColumn === 'precision_at_1000' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'precision_at_1000'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('precision_at_1000',true)" matTooltip="{{ model.sortedColumn === 'precision_at_1000' ? model.sortOrder : '' }}"></i>
+                            </ng-container>   
+                        </th>
+
+                        <!-- <th width="10%" style="word-wrap: break-word;">Mrr@1<i class="icon x-16 icon_sort" (click)="updateMetricName('mrr_at_1')" matTooltip="{{ model.sortedColumn === 'mrr_at_1' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'mrr_at_1'">Mrr@1
+                            <ng-container *ngIf="model.sortedColumn === 'mrr_at_1'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('mrr_at_1',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_1' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr_at_1',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_1' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'mrr_at_1'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr_at_1',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_1' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Mrr@3<i class="icon x-16 icon_sort" (click)="updateMetricName('mrr_at_3')" matTooltip="{{ model.sortedColumn === 'mrr_at_3' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'mrr_at_3'">Mrr@3
+                            <ng-container *ngIf="model.sortedColumn === 'mrr_at_3'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('mrr_at_3',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_3' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr_at_3',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_3' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'mrr_at_3'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr_at_3',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_3' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Mrr@5<i class="icon x-16 icon_sort" (click)="updateMetricName('mrr_at_5')" matTooltip="{{ model.sortedColumn === 'mrr_at_5' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'mrr_at_5'">Mrr@5
+                            <ng-container *ngIf="model.sortedColumn === 'mrr_at_5'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('mrr_at_5',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_5' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr_at_5',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_5' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'mrr_at_5'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr_at_5',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_5' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="10%" style="word-wrap: break-word;">Mrr@10<i class="icon x-16 icon_sort" (click)="updateMetricName('mrr_at_10')" matTooltip="{{ model.sortedColumn === 'mrr_at_10' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="10%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'mrr_at_10'">Mrr@10
+                            <ng-container *ngIf="model.sortedColumn === 'mrr_at_10'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('mrr_at_10',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_10' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr_at_10',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_10' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'mrr_at_10'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr_at_10',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_10' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="11%" style="word-wrap: break-word;">Mrr@100<i class="icon x-16 icon_sort" (click)="updateMetricName('mrr_at_100')" matTooltip="{{ model.sortedColumn === 'mrr_at_100' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="11%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'mrr_at_100'">Mrr@100
+                            <ng-container *ngIf="model.sortedColumn === 'mrr_at_100'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('mrr_at_100',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_100' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr_at_100',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_100' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'mrr_at_100'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr_at_100',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_100' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+                        
+                        <!-- <th width="12%" style="word-wrap: break-word;">Mrr@1000<i class="icon x-16 icon_sort" (click)="updateMetricName('mrr_at_1000')" matTooltip="{{ model.sortedColumn === 'mrr_at_1000' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="12%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'mrr_at_1000'">Mrr@1000
+                            <ng-container *ngIf="model.sortedColumn === 'mrr_at_1000'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('mrr_at_1000',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_1000' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr_at_1000',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_1000' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'mrr_at_1000'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr_at_1000',true)" matTooltip="{{ model.sortedColumn === 'mrr_at_1000' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+
+                        <!-- <th width="7%" style="word-wrap: break-word;">Map<i class="icon x-16 icon_sort" (click)="updateMetricName('map')" matTooltip="{{ model.sortedColumn === 'map' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="7%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'map'">Map
+                            <ng-container *ngIf="model.sortedColumn === 'map'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('map',true)" matTooltip="{{ model.sortedColumn === 'map' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('map',true)" matTooltip="{{ model.sortedColumn === 'map' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'map'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('map',true)" matTooltip="{{ model.sortedColumn === 'map' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+
+                        <!-- <th width="7%" style="word-wrap: break-word;">Mrr<i class="icon x-16 icon_sort" (click)="updateMetricName('mrr')" matTooltip="{{ model.sortedColumn === 'mrr' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="7%" style="word-wrap: break-word;" [class.sorted-column]="model.sortedColumn === 'mrr'">Mrr
+                            <ng-container *ngIf="model.sortedColumn === 'mrr'">
+                                <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon" (click)="updateMetricName('mrr',true)" matTooltip="{{ model.sortedColumn === 'mrr' ? model.sortOrder : '' }}"></i>
+                                <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr',true)" matTooltip="{{ model.sortedColumn === 'mrr' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                            <ng-container *ngIf="model.sortedColumn !== 'mrr'">
+                                <i  class="icon x-16 down-arw-icon" (click)="updateMetricName('mrr',true)" matTooltip="{{ model.sortedColumn === 'mrr' ? model.sortOrder : '' }}"></i>
+                            </ng-container>
+                        </th>
+
+                        <th width="7%" matTooltip="Quantization">Quantn.</th>
+                        <th width="16%">Benchmark Date</th>
+                    </tr>
+                </thead>
+                <tbody *ngIf="model.isDataLoaded; else loading">
+                    <ng-container *ngIf="model.leaderData?.length>0;else apiError">
+                        <tr *ngFor="let item of model.currentPageData; let i = index">
+                            <td width="4%" style="word-wrap: break-word;">{{model.startIndex+i+1}}</td>
+                            <td width="23%" style="word-wrap: break-word;">{{item["_source"]["run_name"]}}</td>
+                            <td *ngIf="!modelFlag" width="24%" style="word-wrap: break-word;">
+                                {{item["_source"]["model"]}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]["datatype"]}}</td>
+                            <td width="16%" style="word-wrap: break-word;">{{item["_source"]["task"]}}</td>
+                            <td width="17%" style="word-wrap: break-word;">{{item["_source"]["dataset"]}}</td>
+                            <td width="9%" style="word-wrap: break-word;">{{item["_source"]["language"]}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["ndcg_at_10"]?
+                                item["_source"]["ndcg_at_10"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["ndcg_at_1"]?
+                                item["_source"]["ndcg_at_1"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["ndcg_at_3"]?
+                                item["_source"]["ndcg_at_3"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["ndcg_at_5"]?
+                                item["_source"]["ndcg_at_5"]: ''}}</td>
+                            <td width="11%" style="word-wrap: break-word;">{{item["_source"]?.["ndcg_at_100"]?
+                                item["_source"]["ndcg_at_100"]: ''}}</td>
+                            <td width="12%" style="word-wrap: break-word;">{{item["_source"]?.["ndcg_at_1000"]?
+                                item["_source"]["ndcg_at_1000"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["map_at_1"]?
+                                item["_source"]["map_at_1"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["map_at_3"]?
+                                item["_source"]["map_at_3"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["map_at_5"]?
+                                item["_source"]["map_at_5"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["map_at_10"]?
+                                item["_source"]["map_at_10"]: ''}}</td>
+                            <td width="11%" style="word-wrap: break-word;">{{item["_source"]?.["map_at_100"]?
+                                item["_source"]["map_at_100"]: ''}}</td>
+                            <td width="12%" style="word-wrap: break-word;">{{item["_source"]?.["map_at_1000"]?
+                                item["_source"]["map_at_1000"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["recall_at_1"]?
+                                item["_source"]["recall_at_1"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["recall_at_3"]?
+                                item["_source"]["recall_at_3"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["recall_at_5"]?
+                                item["_source"]["recall_at_5"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["recall_at_10"]?
+                                item["_source"]["recall_at_10"]: ''}}</td>
+                            <td width="11%" style="word-wrap: break-word;">{{item["_source"]?.["recall_at_100"]?
+                                item["_source"]["recall_at_100"]: ''}}</td>
+                            <td width="12%" style="word-wrap: break-word;">{{item["_source"]?.["recall_at_1000"]?
+                                item["_source"]["recall_at_1000"]: ''}}</td>
+                            <td width="12%" style="word-wrap: break-word;">{{item["_source"]?.["precision_at_1"]?
+                                item["_source"]["precision_at_1"]: ''}}</td>
+                            <td width="12%" style="word-wrap: break-word;">{{item["_source"]?.["precision_at_3"]?
+                                item["_source"]["precision_at_3"]: ''}}</td>
+                            <td width="12%" style="word-wrap: break-word;">{{item["_source"]?.["precision_at_5"]?
+                                item["_source"]["precision_at_5"]: ''}}</td>
+                            <td width="12%" style="word-wrap: break-word;">{{item["_source"]?.["precision_at_10"]?
+                                item["_source"]["precision_at_10"]: ''}}</td>
+                            <td width="13%" style="word-wrap: break-word;">{{item["_source"]?.["precision_at_100"]?
+                                item["_source"]["precision_at_100"]: ''}}</td>
+                            <td width="14%" style="word-wrap: break-word;">{{item["_source"]?.["precision_at_1000"]?
+                                item["_source"]["precision_at_1000"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["mrr_at_1"]?
+                                item["_source"]["mrr_at_1"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["mrr_at_3"]?
+                                item["_source"]["mrr_at_3"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["mrr_at_5"]?
+                                item["_source"]["mrr_at_5"]: ''}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]?.["mrr_at_10"]?
+                                item["_source"]["mrr_at_10"]: ''}}</td>
+                            <td width="11%" style="word-wrap: break-word;">{{item["_source"]?.["mrr_at_100"]?
+                                item["_source"]["mrr_at_100"]: ''}}</td>
+                            <td width="12%" style="word-wrap: break-word;">{{item["_source"]?.["mrr_at_1000"]?
+                                item["_source"]["mrr_at_1000"]: ''}}</td>
+                            <td width="7%" style="word-wrap: break-word;">{{item["_source"]?.["map"]? item["_source"]["map"]: ''}}</td>
+                            <td width="7%" style="word-wrap: break-word;">{{item["_source"]?.["mrr"]? item["_source"]["mrr"]: ''}}</td>
+                            <td width="7%">{{item["_source"]["quantization_techniques"]}}
+                            </td>
+                            <td width="16%">{{item["_source"]["@timestamp"]| utcToLocal}}
+                            </td>
+                        </tr>
+                    </ng-container>
+                    <ng-template #apiError>
+                        <ng-container *ngIf="model.apiError==='apiError'; else noData">
+                                <tr>
+                                    <td colspan="41" class="text-center" style="text-align: center; padding: 0;">
+                                        {{getMessage(103)}}
+                                    </td>
+                                </tr>
+                        </ng-container>
+                        <ng-template #noData>
+                            <tr>
+                                <td colspan="41" class="text-center" style="text-align: center; padding: 0;">
+                                    {{getMessage(104)}}
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </ng-template>
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination-container"
+            style="display: flex; justify-content: space-between;align-items: center;border-top: 1px solid #ccc;">
+            <div class="pagination"
+                style="display: flex; justify-content: center; flex: 1;margin-top: 5px; margin-bottom: 5px;">
+                <mat-form-field class="tf_Wb_custom-form-field custom-form-pagination marR16">
+                    <label class="label-inline">Go to:</label>
+                    <input matInput [(ngModel)]="model.pageDefault" class="pagination_input">
+                </mat-form-field>
+                <ngb-pagination [collectionSize]="model.totalItems" [(page)]="model.pageDefault" [maxSize]="3"
+                    [pageSize]="model.pageSize" class="tf_wb_custom-pagination d-inline-block marT4"
+                    (pageChange)="onPageChange($event)">
+                    <ng-template ngbPaginationPrevious><i class="icon x-24 previous-icon"
+                            style="display: inline-block;"></i></ng-template>
+                    <ng-template ngbPaginationNext><i class="icon x-24 next-icon"
+                            style="display: inline-block;"></i></ng-template>
+                    <ng-template ngbPaginationNumber let-q>{{ q }}</ng-template>
+                </ngb-pagination>
+            </div>
+            <div class="total-records" style="margin-top: 15px;">
+                Total Records: {{ model.totalItems }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #loading>
+    <tr>
+        <td colspan="41">
+            <div class="loading-dots">
+                <div class="loading-dots--dot"></div>
+                <div class="loading-dots--dot"></div>
+                <div class="loading-dots--dot"></div>
+            </div>
+        </td>
+    </tr>
+</ng-template>

@@ -1,0 +1,101 @@
+<div class="tf_contentLeftCol tf_baseLayout_center padT32" [style.width.px]="listWidth">
+    <ng-container>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="tf_panel padTB16 padLR24" id="element" flag="true" style="overflow-y: auto;">
+                    <div class="table-wrapper" [style.height.px]="model.jobHeight">
+                        <table class="tf_wb_custom-table">
+                            <thead>
+                                <tr>
+                                    <th width="25%">Benchmark Name</th>
+                                    <th width="20%">Modality</th>
+                                    <th width="20%">Submitted On
+                                            <i *ngIf="!model.isAscendingOrder" class="icon x-16 up-arw-icon"
+                                                (click)="sortJobs('asc')" matTooltip="Ascending Order"  style="display: inline;"></i>
+                                            <i *ngIf="model.isAscendingOrder" class="icon x-16 down-arw-icon"
+                                                (click)="sortJobs('desc')" matTooltip="Descending Order"  style="display: inline;"></i>
+                                    </th>
+                                    <th width="20%">Status
+                                    </th>
+                                    <th width="15%">Detail</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <ng-container *ngIf="!model.isDataLoaded">
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="loading-dots">
+                                                <div class="loading-dots--dot"></div>
+                                                <div class="loading-dots--dot"></div>
+                                                <div class="loading-dots--dot"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                                <ng-container *ngIf="model.isDataLoaded && model.message !== ''">
+                                    <tr>
+                                        <td colspan="5" class="text-center">
+                                            {{model.message}}
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                                <ng-container *ngIf="model.isDataLoaded && model.message === ''">
+                                    <tr *ngFor="let item of getDataForCurrentPage(); let i = index">
+                                        <td>{{ item.name }}</td>
+                                        <td>{{ item.type }}</td>
+                                        <td>{{ item.createdOn | utcToLocal}}</td>
+                                        <td [style.color]="getStatusColor(item.status)" matTooltipClass="tf_tooltip"
+                                            [matTooltip]="item?.reason" matTooltipPosition="above" class="status-cls">
+                                            <ng-container *ngIf="model.refreshRowId==i">
+                                                <span class="loading-dots">
+                                                    <span class="loading-dots--dot"></span>
+                                                    <span class="loading-dots--dot"></span>
+                                                    <span class="loading-dots--dot"></span>
+                                                </span>
+                                            </ng-container>
+                                            <ng-container *ngIf="model.refreshRowId!=i">
+                                                {{ item.status }}
+                                            </ng-container>
+                                            <ng-container *ngIf="item.status !== model.success">
+                                                <button mat-flat-button class="tf_wb_Icon-btn"
+                                                    matTooltipClass="tf_tooltip" matTooltip="Refresh status"
+                                                    matTooltipPosition="above"
+                                                    (click)="refreshExecutionIDStatus(item, i)">
+                                                    <span class="icon_btnCont"><i
+                                                            class="icon x-16 purple icon_Refresh"></i></span>
+                                                </button>
+                                            </ng-container>
+                                        </td>
+                                        <td class="link-button" (click)="onViewClick(item.name,item.type,item.createdOn,item.createdOn)">View</td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-container"
+                        style="display: flex; justify-content: space-between;align-items: center;border-top: 1px solid #ccc;">
+                        <div class="pagination"
+                            style="display: flex; justify-content: center; flex: 1;margin-top: 5px; margin-bottom: -15px;">
+                            <mat-form-field class="tf_Wb_custom-form-field custom-form-pagination marR16"
+                                style="margin-bottom: 5px;">
+                                <label class="label-inline">Go to:</label>
+                                <input matInput [(ngModel)]="model.pageDefault" class="pagination_input">
+                            </mat-form-field>
+                            <ngb-pagination [collectionSize]="model.totalItems" [(page)]="model.pageDefault"
+                                [maxSize]="3" class="tf_wb_custom-pagination d-inline-block marT4"
+                                (pageChange)="onPageChange($event)">
+                                <ng-template ngbPaginationPrevious><i class="icon x-24 previous-icon"></i></ng-template>
+                                <ng-template ngbPaginationNext><i class="icon x-24 next-icon"></i></ng-template>
+                                <ng-template ngbPaginationNumber let-q>{{ q }}</ng-template>
+                            </ngb-pagination>
+                        </div>
+                        <div class="total-records" style="margin-top: 15px;">
+                            Total Records: {{ model.totalItems }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>
