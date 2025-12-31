@@ -1,0 +1,51 @@
+.CapitalText {
+    text-transform: capitalize;
+}
+
+.err-msg-div {
+    font-size: 10px;
+    margin-top: -12px;
+}
+
+::ng-deep.mat-tab-body-content{
+    overflow: hidden !important;
+}
+.icon{
+    display: inline-flex;
+    // padding-left: 5px;
+    align-items: center;
+    
+}
+.sorted-column {
+    text-decoration: underline;
+}
+.filter-icons{
+    padding: 0px !important;
+    max-width: 4% !important;
+}
+.date{
+    position: relative;
+    height: 60px;
+}
+
+/* Custom arrow icons */
+.mat-icon {
+    font-size: 24px; /* Adjust as needed */
+    color: blue;
+    background: none;
+  }
+  
+  /* Page styling */
+  .page-item.active .page-link {
+    background-color: blue;
+    color: white;
+  }
+  
+  .page-link:not(.disabled):not(.active):hover {
+    background-color: lightblue;
+    color: white;
+  }
+  ::ng-deep .mat-paginator-navigation-next.mat-icon-button:not([disabled]),
+::ng-deep .mat-paginator-navigation-previous.mat-icon-button:not([disabled]) {
+  color: #0b50db !important;
+}

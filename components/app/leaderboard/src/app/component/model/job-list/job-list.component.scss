@@ -1,0 +1,24 @@
+.runName_style{
+    font-size: small;
+    margin-left: 25px;
+    margin-top: 6px;
+}
+.link-button{
+    border:none;
+    color: #8626C3;
+    text-decoration: underline;
+}
+.link-button:hover{
+    text-decoration: none;
+}
+::ng-deep .mat-paginator-navigation-next.mat-icon-button:not([disabled]),
+::ng-deep .mat-paginator-navigation-previous.mat-icon-button:not([disabled]) {
+  color: #0b50db !important;
+}
+
+.app_tables thead{
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #fff; // or any color that matches your design
+  }

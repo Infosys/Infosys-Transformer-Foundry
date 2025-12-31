@@ -1,0 +1,311 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="tf-content content-left" [style.width.px]="leaderboardWidth">
+    <div class="tf_panel">
+        <div class="filter_panel">
+            <form>
+                <div class="row" style="padding: 24px;">
+                    <div class="col-md-2">
+                        <mat-form-field appearance="standard" floatLabel="always">
+                            <mat-label>Benchmark Name</mat-label>
+                            <input matInput name="benchmark" [(ngModel)]="model.leaderDataFilter.benchmarkName" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-2" style="display: flex">
+                        <mat-form-field appearance="standard" floatLabel="always">
+                            <mat-label>
+                                Model Name
+                            </mat-label>
+                            <input matInput name="model" [(ngModel)]="model.leaderDataFilter.modelName"
+                                [disabled]="exeModelName" />
+                        </mat-form-field>
+                        <span style="margin-top: -16px; margin-left: -108px;">
+                            <mat-icon style="font-size: medium;" matTooltip="embedding/generation" class="float-left sort-icons">info</mat-icon>
+                        </span>
+                    </div>
+                    <div class="col-md-2">
+                        <mat-form-field appearance="standard" floatLabel="always">
+                            <mat-label>Dataset</mat-label>
+                            <input matInput name="dataset" [(ngModel)]="model.leaderDataFilter.datasetName" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-2 dateField">
+                        <mat-form-field appearance="standard" floatLabel="always">
+                            <mat-label>From Date</mat-label>
+                            <input matInput [matDatepicker]="fromDatePicker" name="fromDate"
+                                [(ngModel)]="model.leaderDataFilter.fromDate" />
+                            <mat-datepicker-toggle matSuffix [for]="fromDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #fromDatePicker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-2 dateField">
+                        <mat-form-field appearance="standard" floatLabel="always">
+                            <mat-label>To Date</mat-label>
+                            <input matInput [matDatepicker]="toDatePicker" name="toDate"
+                                [(ngModel)]="model.leaderDataFilter.toDate" />
+                            <mat-datepicker-toggle matSuffix [for]="toDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #toDatePicker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-1 filter-icons">
+                        <button class="marR24 search-button" mat-flat-button (click)="onSearchClick()" [disabled]="
+                                model.leaderDataFilter.fromDate>model.leaderDataFilter.toDate"
+                            style="bottom: -8px; background: none; display: inline-flex; justify-content: center;">
+                            <span style="line-height: 50px;">
+                                <mat-icon class="action-icons">search</mat-icon>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="col-md-1 filter-icons">
+                        <button class="marR24" mat-flat-button (click)="resetFilter()"
+                            style="bottom: -8px; background: none; display: inline-flex; justify-content: center;">
+                            <span style="line-height: 50px;">
+                                <mat-icon class="action-icons">refresh</mat-icon>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="table-wrapper" style="overflow-x: auto; overflow-y: scroll; padding-left: 24px;"
+            [style.height.px]="leaderboardHeight">
+            <table class="app_tables" style="table-layout: fixed;"
+                [style.width.px]="leaderboardWidth+model.tableWidthOffset">
+                <thead>
+                    <tr>
+                        <th width="2%">#</th>
+                        <th width="10%">Benchmark Name</th>
+                        <th width="15%">Model Name</th>
+                        <th width="6%">Data Type</th>
+                        <!-- <th width="15%">Task</th> -->
+                        <th width="15%">Dataset</th>
+                        <th width="5%">Language</th>
+                        <th width="11%">
+                            <span style="float: left;"
+                                [class.sorted-column]="model.sortedColumn === 'context_relevancy'">
+                                Context Relevancy
+                                <ng-container *ngIf="model.sortedColumn === 'context_relevancy'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'context_relevancy' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('context_relevancy',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'context_relevancy' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'context_relevancy' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('context_relevancy',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+                        <th width="11%">
+                            <span style="float: left;"
+                                [class.sorted-column]="model.sortedColumn === 'answer_relevancy'">
+                                Answer Relevancy
+                                <ng-container *ngIf="model.sortedColumn === 'answer_relevancy'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'answer_relevancy' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('answer_relevancy',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'answer_relevancy' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'answer_relevancy' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('answer_relevancy',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+                        <th width="9%">
+                            <span style="float: left;" [class.sorted-column]="model.sortedColumn === 'faithfulness'">
+                                Faithfulness
+                                <ng-container *ngIf="model.sortedColumn === 'faithfulness'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'faithfulness' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('faithfulness',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'faithfulness' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'faithfulness' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('faithfulness',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+                        <th width="11%">
+                            <span style="float: left;" [class.sorted-column]="model.sortedColumn === 'context_recall'">
+                                Context Recall
+                                <ng-container *ngIf="model.sortedColumn === 'context_recall'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'context_recall' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('context_recall',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'context_recall' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'context_recall' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('context_recall',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+                        <th width="11%">
+                            <span style="float: left;"
+                                [class.sorted-column]="model.sortedColumn === 'context_precision'">
+                                Context Precision
+                                <ng-container *ngIf="model.sortedColumn === 'context_precision'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'context_precision' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('context_precision',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'context_precision' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'context_precision' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('context_precision',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+                        <th width="13%">
+                            <span style="float: left;"
+                                [class.sorted-column]="model.sortedColumn === 'answer_correctness'">
+                                Answer Correctness
+                                <ng-container *ngIf="model.sortedColumn === 'answer_correctness'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'answer_correctness' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('answer_correctness',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'answer_correctness' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'answer_correctness' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('answer_correctness',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+                        <th width="11%">
+                            <span style="float: left;"
+                                [class.sorted-column]="model.sortedColumn === 'context_utilization'">
+                                Context Utilization
+                                <ng-container *ngIf="model.sortedColumn === 'context_utilization'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'context_utilization' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('context_utilization',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'context_utilization' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'context_utilization' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('context_utilization',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+                        <!-- <th width="7%" matTooltip="Quantization">Quantn.</th> -->
+                        <th width="12%">Benchmark Date</th>
+                    </tr>
+                </thead>
+                <tbody *ngIf="model.isDataLoaded; else loading">
+                    <ng-container *ngIf="model.ragLeaderData?.length>0;else apiError">
+                        <tr *ngFor="let item of model.currentPageData; let i = index">
+                            <td width="2%">{{model.startIndex+i+1}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]["run_name"]}}</td>
+                            <td *ngIf="!modelFlag" width="10%" style="word-wrap: break-word;">
+                                {{item["_source"]["model"]}}</td>
+                            <td width="6%" style="word-wrap: break-word;">{{item["_source"]["datatype"]}}</td>
+                            <!-- <td width="15%" style="word-wrap: break-word;">{{item["_source"]["task"]}}</td> -->
+                            <td width="13%" style="word-wrap: break-word;">{{item["_source"]["dataset"]}}</td>
+                            <td width="5%" style="word-wrap: break-word;">{{item["_source"]["language"]}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]["context_relevancy"]}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]["answer_relevancy"]}}</td>
+                            <td width="8%" style="word-wrap: break-word;">{{item["_source"]["faithfulness"]}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]["context_recall"]}}</td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]["context_precision"]}}</td>
+                            <td width="12%" style="word-wrap: break-word;">{{item["_source"]["answer_correctness"]}}
+                            </td>
+                            <td width="10%" style="word-wrap: break-word;">{{item["_source"]["context_utilization"]}}
+                            </td>
+                            <!-- <td width="7%">{{item["_source"]["quantization_techniques"]}}
+                            </td> -->
+                            <td width="12%">{{item["_source"]["@timestamp"]| utcToLocal}}
+                            </td>
+                        </tr>
+                    </ng-container>
+                    <ng-template #apiError>
+                        <ng-container *ngIf="model.apiError==='apiError'; else noData">
+                            <tr>
+                                <td colspan="14" class="text-center" style="text-align: center; padding: 0;">
+                                    {{getMessage(103)}}
+                                </td>
+                            </tr>
+                        </ng-container>
+                        <ng-template #noData>
+                            <tr>
+                                <td colspan="14" class="text-center" style="text-align: center; padding: 0;">
+                                    {{getMessage(104)}}
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </ng-template>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex-container pagination">
+            <mat-paginator [length]="model.totalItems" [pageSize]="model.pageSize" [hidePageSize]="true"
+                (page)="onPageChange($event)">
+            </mat-paginator>
+        </div>
+    </div>
+</div>
+
+<ng-template #loading>
+    <tr>
+        <td colspan="16">
+            <div class="loading-dots">
+                <div class="loading-dots--dot"></div>
+                <div class="loading-dots--dot"></div>
+                <div class="loading-dots--dot"></div>
+            </div>
+        </td>
+    </tr>
+</ng-template>

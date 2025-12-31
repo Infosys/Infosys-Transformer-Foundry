@@ -1,0 +1,407 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="tf-content content-left" [style.width.px]="leaderboardWidth">
+    <div class="tf_panel">
+        <div class="filter_panel" style="background: white; justify-content: center;">
+            <form>
+                <div class="row" style="padding: 24px;">
+                    <div class="col-md-2">
+                        <mat-form-field appearance="standard" floatLabel="always">
+                            <mat-label>Benchmark Name</mat-label>
+                            <input matInput name="benchmark" [(ngModel)]="model.leaderDataFilter.benchmarkName" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-2">
+                        <mat-form-field appearance="standard" floatLabel="always">
+                            <mat-label>Model Name</mat-label>
+                            <input matInput name="model" [(ngModel)]="model.leaderDataFilter.modelName" [disabled]="exeModelName" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-2">
+                        <mat-form-field appearance="standard" floatLabel="always">
+                            <mat-label>Dataset</mat-label>
+                            <input matInput name="dataset" [(ngModel)]="model.leaderDataFilter.datasetName" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-2 dateField">
+                        <mat-form-field appearance="standard" floatLabel="always">
+                            <mat-label>From Date</mat-label>
+                            <input matInput [matDatepicker]="fromDatePicker" name="fromDate"
+                                [(ngModel)]="model.leaderDataFilter.fromDate" />
+                            <mat-datepicker-toggle matSuffix [for]="fromDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #fromDatePicker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-2 dateField">
+                        <mat-form-field appearance="standard" floatLabel="always">
+                            <mat-label>To Date</mat-label>
+                            <input matInput [matDatepicker]="toDatePicker" name="toDate"
+                                [(ngModel)]="model.leaderDataFilter.toDate" />
+                            <mat-datepicker-toggle matSuffix [for]="toDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #toDatePicker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-1 filter-icons" style="margin-top: 16px;">
+                        <button class="marR24" mat-flat-button (click)="onSearchClick()" [disabled]="
+                                model.leaderDataFilter.fromDate>model.leaderDataFilter.toDate"
+                            style="bottom: 8px; background: none; display: inline-flex; justify-content: center;">
+                            <span style="line-height: 50px;">
+                                <mat-icon class="action-icons">search</mat-icon>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="col-md-1 filter-icons">
+                        <button class="marR24" mat-flat-button (click)="resetFilter()" [disabled]="
+                                model.leaderDataFilter.fromDate>model.leaderDataFilter.toDate"
+                            style="bottom: -8px; background: none; display: inline-flex; justify-content: center;">
+                            <span style="line-height: 50px;">
+                                <mat-icon class="action-icons">refresh</mat-icon>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="table-wrapper" style="overflow-x: auto; overflow-y: scroll;" [style.height.px]="leaderboardHeight">
+            <table class="app_tables" style="table-layout: fixed;"
+                [style.width.px]="leaderboardWidth+model.tableWidthOffset">
+                <thead>
+                    <tr>
+                        <th width="3%">#</th>
+                        <th width="13%">Benchmark Name</th>
+                        <th width="16%" *ngIf="!modelFlag">Model Name</th>
+                        <th width="7%">Data Type</th>
+                        <th width="13%" style="word-wrap: break-word;">Task</th>
+                        <th width="14%" style="word-wrap: break-word;">Dataset</th>
+                        <th width="7%" style="word-wrap: break-word;">Language</th>
+
+                        <!-- <th width="6%" style="word-wrap: break-word;">Rouge<i class="icon x-16 icon_sort" (click)="updateMetricName('rouge')" matTooltip="{{ model.sortedColumn === 'rouge' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="6%" style="word-wrap: break-word;">
+                            <span [class.sorted-column]="model.sortedColumn === 'rouge'" style="float: left;">Rouge
+                                <ng-container *ngIf="model.sortedColumn === 'rouge'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'rouge' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('rouge',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'rouge' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'rouge' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('rouge',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+
+                        <!-- <th width="5%" style="word-wrap: break-word;">Bleu<i class="icon x-16 icon_sort" (click)="updateMetricName('bleu')" matTooltip="{{ model.sortedColumn === 'bleu' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="5%" style="word-wrap: break-word;">
+                            <span [class.sorted-column]="model.sortedColumn === 'bleu'" style="float: left;">
+                                Bleu
+                                <ng-container *ngIf="model.sortedColumn === 'bleu'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'bleu' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('bleu',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'bleu' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'bleu' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('bleu',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+
+                        <!-- <th width="9%" style="word-wrap: break-word;">Exact Match<i class="icon x-16 icon_sort" (click)="updateMetricName('exact_match')" matTooltip="{{ model.sortedColumn === 'exact_match' ? model.sortOrder : '' }}"></i></th> -->
+                        <th width="9%" style="word-wrap: break-word;">
+                            <span [class.sorted-column]="model.sortedColumn === 'exact_match'" style="float: left;">
+                                Exact Match
+                                <ng-container *ngIf="model.sortedColumn === 'exact_match'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'exact_match' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('exact_match',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'exact_match' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'exact_match' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('exact_match',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+
+                        <th width="4%" style="word-wrap: break-word;">
+                            <span [class.sorted-column]="model.sortedColumn === 'F1'" style="float: left;">
+                                F1
+                                <ng-container *ngIf="model.sortedColumn === 'F1'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'F1' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('F1',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'F1' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'F1' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('F1',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+
+                        <th width="7%" style="word-wrap: break-word;">
+                            <span [class.sorted-column]="model.sortedColumn === 'accuracy'"
+                                style="float: left;">Accuracy
+                                <ng-container *ngIf="model.sortedColumn === 'accuracy'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'accuracy' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('accuracy',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'accuracy' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'accuracy' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('accuracy',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+
+                        <th width="13%" style="word-wrap: break-word;">
+                            <span [class.sorted-column]="model.sortedColumn === 'multiple_choice_grade'"
+                                style="float: left;">
+                                Multiple Choice Grade
+                                <ng-container *ngIf="model.sortedColumn === 'multiple_choice_grade'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'multiple_choice_grade' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('multiple_choice_grade',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'multiple_choice_grade' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'multiple_choice_grade' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('multiple_choice_grade',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+
+                        <th width="9%" style="word-wrap: break-word;">
+                            <span [class.sorted-column]="model.sortedColumn === 'google_bleu'" style="float: left;">
+                                Google Bleu
+                                <ng-container *ngIf="model.sortedColumn === 'google_bleu'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'google_bleu' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('google_bleu',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'google_bleu' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'google_bleu' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('google_bleu',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+
+                        <th width="11%" style="word-wrap: break-word;">
+                            <span style="float: left;"
+                                [class.sorted-column]="model.sortedColumn === 'semantic_similarity'">
+                                Semantic Similarity
+                                <ng-container *ngIf="model.sortedColumn === 'semantic_similarity'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'semantic_similarity' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('semantic_similarity',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'semantic_similarity' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'semantic_similarity' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('semantic_similarity',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+                        <th width="6%" style="word-wrap: break-word;">
+                            <span style="float: left;" [class.sorted-column]="model.sortedColumn === 'rouge2'">
+                                Rouge2
+                                <ng-container *ngIf="model.sortedColumn === 'rouge2'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'rouge2' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('rouge2',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'rouge2' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'rouge2' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('rouge2',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+                        <th width="6%" style="word-wrap: break-word;">
+                            <span style="float: left;" [class.sorted-column]="model.sortedColumn === 'rougeL'">
+                                RougeL
+                                <ng-container *ngIf="model.sortedColumn === 'rougeL'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'rougeL' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('rougeL',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'rougeL' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'rougeL' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('rougeL',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+                        <th width="8%" style="word-wrap: break-word;">
+                            <span style="float: left;" [class.sorted-column]="model.sortedColumn === 'rougeLsum'">
+                                RougeLsum
+                                <ng-container *ngIf="model.sortedColumn === 'rougeLsum'">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'rougeLsum' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('rougeLsum',true)">
+                                        {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                                <ng-container *ngIf="model.sortedColumn !== 'rougeLsum' ">
+                                    <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                        [ngClass]="'arrow_drop_down'"
+                                        matTooltip="{{ model.sortedColumn === 'rougeLsum' ? model.sortOrder : '' }}"
+                                        (click)="updateMetricName('rougeLsum',true)">
+                                        {{'arrow_drop_down'}}
+                                    </mat-icon>
+                                </ng-container>
+                            </span>
+                        </th>
+                        <th width="5%" matTooltip="Quantization">Quantn.</th>
+                        <th width="14%">Benchmark Date</th>
+                    </tr>
+                </thead>
+                <tbody *ngIf="model.isDataLoaded; else loading">
+                    <ng-container *ngIf="model.textLeaderData?.length>0;else apiError">
+                        <tr *ngFor="let item of model.currentPageData; let i = index">
+                            <td width="3%">{{model.startIndex+i+1}}</td>
+                            <td width="13%">{{item["_source"]["run_name"]}}</td>
+                            <td *ngIf="!modelFlag" width="16%">{{item["_source"]["model"]}}</td>
+                            <td width="7%">{{item["_source"]["datatype"]}}</td>
+                            <td width="13%" style="word-wrap: break-word;">{{item["_source"]["task"]}}</td>
+                            <td width="14%" style="word-wrap: break-word;">{{item["_source"]["dataset"]}}</td>
+                            <td width="7%" style="word-wrap: break-word;">{{item["_source"]["language"]}}</td>
+                            <td width="6%" style="word-wrap: break-word;">
+                                {{ item["_source"]?.["rouge"] }}
+                            </td>
+                            <td width="5%" style="word-wrap: break-word;">{{item["_source"]["bleu"]}}</td>
+                            <td width="9%" style="word-wrap: break-word;">{{item["_source"]["exact_match"]}}</td>
+                            <td width="4%" style="word-wrap: break-word;">{{item["_source"]["F1"]}}</td>
+                            <td width="7%" style="word-wrap: break-word;">{{item["_source"]["accuracy"]}}</td>
+                            <td width="13%" style="word-wrap: break-word;">{{item["_source"]["multiple_choice_grade"]}}
+                            </td>
+                            <td width="9%" style="word-wrap: break-word;">{{item["_source"]["google_bleu"]}}</td>
+                            <td width="11%" style="word-wrap: break-word;">{{item["_source"]["semantic_similarity"]}}
+                            </td>
+                            <!-- <td width="10%" style="word-wrap: break-word;">{{item["_source"]["exact_str_match"]}}</td> -->
+                            <!-- <td width="13%" style="word-wrap: break-word;">{{item["_source"]["exact_str_match_stderr"]}}</td> -->
+                            <!-- <td width="8%" style="word-wrap: break-word;">{{item["_source"]["bleu_stderr"]}}</td> -->
+                            <!-- <td width="6%" style="word-wrap: break-word;">{{item["_source"]["rouge1"]}}</td> -->
+                            <!-- <td width="9%" style="word-wrap: break-word;">{{item["_source"]["rouge1_stderr"]}}</td> -->
+                            <td width="6%" style="word-wrap: break-word;">{{item["_source"]["rouge2"]}}</td>
+                            <!-- <td width="9%" style="word-wrap: break-word;">{{item["_source"]["rouge2_stderr"]}}</td> -->
+                            <td width="6%" style="word-wrap: break-word;">{{item["_source"]["rougeL"]}}</td>
+                            <!-- <td width="9%" style="word-wrap: break-word;">{{item["_source"]["rougeL_stderr"]}}</td> -->
+                            <td width="8%" style="word-wrap: break-word;">{{item["_source"]["rougeLsum"]}}</td>
+                            <!-- <td width="11%" style="word-wrap: break-word;">{{item["_source"]["rougeLsum_stderr"]}}</td> -->
+                            <!-- <td width="11%" style="word-wrap: break-word;">{{item["_source"]["google_bleu_stderr"]}}</td> -->
+                            <td width="5%">{{item["_source"]["quantization_techniques"]}}</td>
+                            <td width="14%">{{item["_source"]["@timestamp"]| utcToLocal}}</td>
+                        </tr>
+                    </ng-container>
+                    <ng-template #apiError>
+                        <ng-container *ngIf="model.apiError==='apiError'; else noData">
+                            <tr>
+                                <td colspan="17" class="text-center" style="text-align: center; padding: 0;">
+                                    {{getMessage(103)}}
+                                </td>
+                            </tr>
+                        </ng-container>
+                        <ng-template #noData>
+                            <tr>
+                                <td colspan="29" class="text-center" style="text-align: center; padding: 0;">
+                                    {{getMessage(104)}}
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </ng-template>
+                </tbody>
+            </table>
+        </div>
+        <div class="flex-container pagination">
+            <mat-paginator [length]="model.totalItems" [pageSize]="model.pageSize" [hidePageSize]="true"
+              (page)="onPageChange($event)">
+            </mat-paginator>
+        </div>
+    </div>
+</div>
+
+<ng-template #loading>
+    <tr>
+        <td colspan="29">
+            <div class="loading-dots">
+                <div class="loading-dots--dot"></div>
+                <div class="loading-dots--dot"></div>
+                <div class="loading-dots--dot"></div>
+            </div>
+        </td>
+    </tr>
+</ng-template>

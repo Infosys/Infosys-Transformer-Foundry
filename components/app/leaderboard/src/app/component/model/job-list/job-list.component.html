@@ -1,0 +1,128 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="tf-content content-left padTB8" [style.width.px]="listWidth">
+    <ng-container>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="tf_panel" id="element" flag="true" style="overflow-y: auto; padding-top: 16px;">
+                    <div class="table-wrapper" [style.height.px]="model.jobHeight" style="padding:0px 24px 0px 24px">
+                        <table class="app_tables">
+                            <thead>
+                                <tr>
+                                    <th width="25%">Benchmark Name</th>
+                                    <th width="20%">Modality</th>
+                                    <!-- <th width="20%">Task</th> -->
+                                    <th width="20%">
+                                        <span style="float: left;">
+                                            Submitted On
+                                            <mat-icon class="float-right sort-icons" style="font-size: large;float: right"
+                                                [ngClass]="model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'"
+                                                matTooltip="{{ model.isAscendingOrder ? 'Ascending Order' : 'Descending Order' }}"
+                                                (click)="sortJobs('desc')">
+                                                {{model.isAscendingOrder ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                            </mat-icon>
+                                        </span>
+                                    </th>
+                                    <th width="20%">Status
+                                    </th>
+                                    <th width="15%">Detail</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <ng-container *ngIf="!model.isDataLoaded">
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="loading-dots">
+                                                <div class="loading-dots--dot"></div>
+                                                <div class="loading-dots--dot"></div>
+                                                <div class="loading-dots--dot"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                                <ng-container *ngIf="model.isDataLoaded && model.message !== ''">
+                                    <tr>
+                                        <td colspan="5" class="text-center">
+                                            {{model.message}}
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                                <ng-container *ngIf="model.isDataLoaded && model.message === ''">
+                                    <tr *ngFor="let item of getDataForCurrentPage(); let i = index">
+                                        <td>{{ item.name }}</td>
+                                        <td>{{ item.type }}</td>
+                                        <td>{{ item.createdOn | utcToLocal}}</td>
+                                        <td [style.color]="getStatusColor(item.status)" [matTooltip]="item?.reason"
+                                            matTooltipPosition="above" class="status-cls">
+                                            <ng-container *ngIf="model.refreshRowId==i">
+                                                <span class="loading-dots">
+                                                    <span class="loading-dots--dot"></span>
+                                                    <span class="loading-dots--dot"></span>
+                                                    <span class="loading-dots--dot"></span>
+                                                </span>
+                                            </ng-container>
+                                            <ng-container *ngIf="model.refreshRowId!=i">
+                                                {{ item.status }}
+                                            </ng-container>
+                                            <ng-container *ngIf="item.status !== model.success">
+                                                <button mat-flat-button
+                                                    matTooltip="Refresh status" matTooltipPosition="above"
+                                                    (click)="refreshExecutionIDStatus(item, i)">
+                                                    <span class="icon_btnCont" style="line-height: 50px;">
+                                                        <mat-icon class="action-icons">refresh</mat-icon>
+                                                    </span>
+                                                </button>
+                                            </ng-container>
+                                        </td>
+                                        <td class="link-button"
+                                            (click)="onViewClick(item.name,item.type,item.createdOn,item.createdOn)">
+                                            View</td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- <div class="flex-container" style="align-items: center;border-top: 1px solid #ccc;">
+                        <div class="pagination flex-item-80"
+                            style="display:flex; float:left; justify-content: center; margin-top: 5px; margin-bottom: 5px;">
+                            <span class="marR24 goToPage">
+                                <label class="pagination-label">Go to:</label>
+                                <mat-form-field standard="appearance" style="width:20px !important; margin-top:-5px">
+                                    <input matInput [(ngModel)]="model.pageDefault">
+                                </mat-form-field>
+                            </span>
+                            <ngb-pagination [collectionSize]="model.totalItems" [(page)]="model.pageDefault"
+                                [maxSize]="3" [pageSize]="model.pageSize" class=" d-inline-block marT4"
+                                (pageChange)="onPageChange($event)">
+                                <ng-template ngbPaginationPrevious>
+                                    <mat-icon>keyboard_arrow_left</mat-icon>
+                                </ng-template>
+                                <ng-template ngbPaginationNext>
+                                    <mat-icon style="padding-top: inherit;">keyboard_arrow_right</mat-icon>
+                                </ng-template>
+                                <ng-template ngbPaginationNumber let-q>{{ q }}</ng-template>
+                            </ngb-pagination>
+                        </div>
+                        <div class="total-records float-right" style="margin-top: -15px; justify-content: center;">
+                            Total Records: {{ model.totalItems }}
+                        </div>
+                    </div> -->
+                    <div class="flex-container pagination">
+                        <mat-paginator [length]="model.totalItems" [pageSize]="model.pageSize" [hidePageSize]="true"
+                          (page)="onPageChange($event)">
+                        </mat-paginator>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>

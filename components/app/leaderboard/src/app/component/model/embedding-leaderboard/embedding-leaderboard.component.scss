@@ -1,0 +1,36 @@
+.CapitalText {
+    text-transform: capitalize;
+}
+
+.err-msg-div {
+    font-size: 10px;
+    margin-top: -12px;
+}
+
+.filter_panel {
+    background: white;
+    font-family: "roboto", Arial, sans-serif !important;
+    font-size: 1.4rem;
+    font-weight: 500;
+    font-style: normal;
+    height: 85px;
+}
+
+::ng-deep.mat-tab-body-content{
+    overflow: hidden !important;
+}
+.icon{
+    display: inline-flex;
+    // padding-left: 5px;
+}
+.sorted-column {
+    text-decoration: underline;
+}
+.filter-icons{
+    padding: 0px !important;
+    max-width: 4% !important;
+}
+::ng-deep .mat-paginator-navigation-next.mat-icon-button:not([disabled]),
+::ng-deep .mat-paginator-navigation-previous.mat-icon-button:not([disabled]) {
+  color: #0b50db !important;
+}

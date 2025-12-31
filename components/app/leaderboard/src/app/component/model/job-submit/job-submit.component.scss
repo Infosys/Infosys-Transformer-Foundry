@@ -1,0 +1,17 @@
+.createBtn{
+    display: flex;
+    justify-content: right;
+}
+
+.mat-prefix{
+    display: inline-flex; 
+    align-items: center;
+}
+
+:host ::ng-deep div.mat-form-field-infix{
+    border-top-width: 0.75px !important;
+  }
+
+  .large-icons {
+    font-size: 30px !important;
+}
