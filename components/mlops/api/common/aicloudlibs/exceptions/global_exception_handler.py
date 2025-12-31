@@ -5,14 +5,10 @@
 # ===============================================================================================================#
 
 import os,sys
-
 from fastapi.responses import JSONResponse
-
 from aicloudlibs.constants.http_status_codes import HTTP_STATUS_OK,HTTP_STATUS_NOT_FOUND,HTTP_STATUS_BAD_REQUEST,HTTP_422_UNPROCESSABLE_ENTITY
 from aicloudlibs.constants.error_constants import INTEGER_DATATYPE_ERROR,STRING_DATATYPE_ERROR,LIST_DATATYPE_ERROR,\
     BOOLEAN_DATATYPE_ERROR,FLOAT_DATATYPE_ERROR,JSON_DECODE_ERROR,ENUM_VALUE_ERROR
-
-#from fastapi.exceptions import RequestValidationError
 from fastapi.encoders import jsonable_encoder
 
 STATUS="FAILURE"
@@ -74,32 +70,17 @@ def validation_error_handler(exc):
     print("************")
     errResp['details']=errdetails
     print(errResp)
-    return JSONResponse(
-                status_code = HTTP_422_UNPROCESSABLE_ENTITY,
-                content = jsonable_encoder(errResp),
-            )
+    return JSONResponse(status_code = HTTP_422_UNPROCESSABLE_ENTITY,
+                content = jsonable_encoder(errResp),)
     
 
 def  http_exception_handler(exc):
     print(exc)
     return JSONResponse(
         status_code=exc.status_code,
-        content=jsonable_encoder(exc.detail),
-
-    )
+        content=jsonable_encoder(exc.detail),)
 
 def unsupported_mediatype_error_handler(exc):
     return JSONResponse(
         status_code=exc.status_code,
-        content=jsonable_encoder(exc.detail),
-
-    )
-
-
-
-
-#def my_except_hook(exctype, value, traceback):
-    #sys.__excepthook__(exctype, value, traceback)
-
-
-#sys.excepthook = my_except_hook
+        content=jsonable_encoder(exc.detail),)

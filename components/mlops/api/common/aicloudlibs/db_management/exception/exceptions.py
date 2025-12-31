@@ -6,7 +6,6 @@
 
 import sys, traceback
 
-
 class AicloudDBException(Exception):
     """
     Abstract base class of all Aicloud DB exceptions.

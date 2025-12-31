@@ -19,18 +19,15 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pymongo import MongoClient
-
 from aicloudlibs.db_management.core.db_utils import get_db,connect_mongodb
 from aicloudlibs.exceptions import global_exception_handler
 from utilities.config.logger import CustomLogger
 from utilities.routing import utility_router
 
-
 log = CustomLogger()
 
 ## initialize the app with openapi and docs url
 app = FastAPI(openapi_url="/api/v1/utilities/openapi.json", docs_url="/api/v1/utilities/docs")
-
 
 @app.on_event("startup")
 def startup_db_client():
@@ -39,11 +36,9 @@ def startup_db_client():
     log.info("Connected to the MongoDB database!")
     app.logger=log
 
-
 @app.on_event("shutdown")
 def shutdown_db_client():
     app.mongodb_client.close()
-
 
 """
     Adding the CORS Middleware wh/ich handles the requests from different origins
@@ -70,7 +65,6 @@ A global exception handler function to handle the requests which contains the in
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return  global_exception_handler.validation_error_handler(exc)
 
-
 """
 A global exception handler function to handle the http exception
 """
@@ -78,12 +72,10 @@ A global exception handler function to handle the http exception
 async def http_exception_handler(request, exc):
     return  global_exception_handler.http_exception_handler(exc)
 
-
 """
 incude the routing details of model service
 """
 app.include_router(utility_router.router, prefix='/api/v1', tags=['Utility Services'])
-
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8089)

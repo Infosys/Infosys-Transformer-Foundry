@@ -1,9 +1,7 @@
 from fastapi.testclient import TestClient
 from main import app
 
-
 client = TestClient(app)
-
 
 # GET Method to call search api in elastic search associated with modelity
 def test_search_elasticsearch():

@@ -28,8 +28,6 @@ class Compute(BaseModel):
     memory:str = Field(default="10GB")
     minQty:Optional[int] = Field(default=1)
     
-    
-
 class ResourceConfig(BaseModel):
      computes: List[Compute] = None
      volumeSizeinGB:int = None
@@ -71,7 +69,6 @@ class ApiErrorResponseModel(BaseModel):
     status: str
     message: Optional[str]
 
-
 class OperatorEnum(str,Enum):
     KUBEFLOW="kubeflow"
     AIRFLOW="airflow"
@@ -87,7 +84,6 @@ class RuntimeEnum(str,Enum):
 class ResourceConfigV2(BaseModel):
      computes: List[Compute] = None
      
-
 class ValidationError(PydanticValueError):
     def __init__(self, error_detail, **ctx: any ) -> None:
           super().__init__(**ctx)

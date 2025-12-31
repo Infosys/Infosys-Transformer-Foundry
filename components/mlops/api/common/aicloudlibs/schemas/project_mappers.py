@@ -36,7 +36,6 @@ class Tenant(AuditableColumns):
     name: str = None
     quotaConfig: ResourceConfig = None
     userLists: List[TenantUserList]=None
-    #permission: TenantPermissions = None
     class Config:
         @staticmethod
         def schema_extra(schema: dict, _):
@@ -45,7 +44,6 @@ class Tenant(AuditableColumns):
                 if not v.get("hidden", False):
                     props[k] = v
             schema["properties"] = props
-
 
     @root_validator(pre=True)
     def validateTenant(cls,values):
@@ -73,8 +71,7 @@ class Tenant(AuditableColumns):
                   error= ValidationError(ErrorCode.VOLUME_EMPTY_ERROR)
                   print(error)
                   errors.append(error)
-
-                 
+      
              if(resourceConfig.get('computes') is None or (resourceConfig.get('computes') is not None and len(resourceConfig.get('computes'))==0)):
                   error= ValidationError(ErrorCode.COMPUTE_LIST_EMPTY_ERROR)
                   print(error)
@@ -99,8 +96,7 @@ class Tenant(AuditableColumns):
                              error= ValidationError(ErrorCode.GPU_MEMORY_NOT_EMPTY)
                              print(error)
                              errors.append(error)
-                             gpumemryEmptyErr=True
-                             
+                             gpumemryEmptyErr=True                     
                        if(not computeTypeEmptyErr and not gpumemryEmptyErr and compute.get('type').lower() =='gpu' and  compute.get('memory').lower() not in GPU_MEMORY_VALUES):
                              error= ValidationError(ErrorCode.GPU_MEMORY_VALUE_ERROR)
                              print(error)
@@ -109,15 +105,13 @@ class Tenant(AuditableColumns):
                              error= ValidationError(ErrorCode.RESOURCE_QTY_INSTANCE_ERROR)
                              print(error)
                              errors.append(error)
-                             computeTypeInstanceErr=True
-                             
+                             computeTypeInstanceErr=True                
                        if(not computeTypeEmptyErr and not computeTypeInstanceErr  and compute.get('maxQty') < compute.get('minQty')):
                              error= ValidationError(ErrorCode.RESOURCE_QTY_ERROR)
                              print(error)
                              errors.append(error) 
         
         userlst=values.get("userLists")
-
         if (not re.fullmatch(name_regex,name)):
             error= ValidationError(ErrorCode.SPECIAL_CHARS_ERROR)
             errors.append(error) 
@@ -137,18 +131,6 @@ class Tenant(AuditableColumns):
         
         if len(errors)>0:
             print(errors)
-            # errorList=[]
-            # for err in errors:
-                
-            #     errorList.append( ErrorWrapper(
-            #     err,
-            #     loc=('body', 'root')
-            # ))
-            # print(errorList)
-            # print("********Sequence**********")
-            # #print(Sequence[errorList])
-            # print("**************")
-            #raise RequestValidationError(errors=errorList)
             raise RequestValidationError(errors=[
             ErrorWrapper(
                 error,
@@ -161,7 +143,6 @@ class Tenant(AuditableColumns):
 class TenantStatusEnum(str,Enum):
     Created="Created"
     Deleted="Deleted"
-
 
 class TenantResponseData(Tenant):
     id: str = None
@@ -181,12 +162,10 @@ class TenantResponseData(Tenant):
 class TenantResponse(ApiResponse):
     data: Optional[TenantResponseData] = None
 
-
 class Permission(BaseModel):
       createPipeline : bool=Field(default=False)
       executePipeline: bool=Field(default=False)
       deployModel: bool=Field(default=False)
-      #uploadDataset:bool=Field(default=False)
       view:bool=Field(default=True)
       workspaceAdmin:bool=Field(default=False)
 
@@ -240,9 +219,7 @@ class Project(AuditableColumns):
                     error= ValidationError(ErrorCode.USER_EMAIL_INVALID)
                     print(error)
                     errors.append(error)
-                
-             
-        
+    
         if len(errors)>0:
             print(errors)
             raise RequestValidationError(errors=[
@@ -253,7 +230,6 @@ class Project(AuditableColumns):
         ])
         else:
             return values
-
 
 class UpdateProject(Project):
     id: str = None
@@ -292,15 +268,12 @@ class GetProjectResponseData(BaseModel):
 class GetPipelineResponse(ApiResponse):
     data: Optional[GetProjectResponseData] = None
 
-
 class ListProjectResponseData(BaseModel):
      projects: Optional[List[ProjectResponseData]] = None
 
 class ListProjectResponse(ApiResponse):
     data: Optional[ListProjectResponseData] = None
 
-
 def ResponseModel(data):
-    api_response=ApiResponse(code=200, status="SUCCESS",
-                data=data)
+    api_response=ApiResponse(code=200, status="SUCCESS", data=data)
     return api_response  

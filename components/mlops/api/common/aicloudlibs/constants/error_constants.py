@@ -27,15 +27,12 @@ FLOAT_DATATYPE_ERROR=934
 JSON_DECODE_ERROR=935
 ENUM_VALUE_ERROR=936
 
-
-
 #benchmark
 BENCHMARK_TYPE_VALUES ="('code','text','embedding')"
 BENCHMARK_DATA_TYPE_VALUES ="('fp4','fp8','fp16','fp32')"
 QUANTIZEMETHOD_VALUES ="('static','dynamic','na')"
 BENCHMARK_PIPLN_NAME_MAX_LENGTH=40
 BENCHMARK_PIPLN_NAME_MAX_LENGTH_ERROR="name field should not exceed 40 chars"
-
 
 USE_CASE_NOT_FOUND="Use case not found"
 PROJECT_NOT_FOUND="Project not found"

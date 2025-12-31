@@ -4,11 +4,7 @@
 # http://www.apache.org/licenses/                                                                                #
 # ===============================================================================================================#
 
-
 from configparser import ConfigParser
-
-
-
 
 def readConfig(section,filename):
     # create a parser

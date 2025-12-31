@@ -16,7 +16,6 @@ import pydantic
 from datetime import datetime
 from aicloudlibs.exceptions.global_exception import DiskQuotaException,InvalidComputeTypeException,GpuQuotaException,CpuQuotaException,MemoryQuotaException,QuotaExceedException,NotFoundException,BusinessException
 
-
 class GlobalValidations(object):  
 
     @staticmethod
@@ -24,8 +23,7 @@ class GlobalValidations(object):
        
         projectDet=APIDBUtils.findOneById("project",projectId)
         haveAccess= False
-        if len(serviceName)>0 and serviceName in MLOPS_SERVICES:
-            
+        if len(serviceName)>0 and serviceName in MLOPS_SERVICES:  
             if projectDet['createdBy'] == userId:
                     haveAccess = True
             else:
@@ -34,30 +32,19 @@ class GlobalValidations(object):
                     for user in accessLists:
                         if userId == user['userEmail']:
                             userPerm = user['permissions']
-                            if userPerm and (
-                                    userPerm.get(serviceName, False) == True or userPerm.get('workspaceAdmin',
-                                                                                                False) == True):
+                            if userPerm and (userPerm.get(serviceName, False) == True or userPerm.get('workspaceAdmin', False) == True):
                                 haveAccess = True
-
                                 print("User have access to the trial ID")
                                 break
-    
         return haveAccess
     
-    
-    
-
     @staticmethod
     def isQuotaExceeded(userId,projectId,resourceQuotaReq):
         projectDet=APIDBUtils.findOneById("project",projectId)
-        #print(projectDet)
         tenantId=projectDet['tenantId']
-        #print(tenantId)
         tenantDetails=APIDBUtils.findOneById("tenant",tenantId)
-        #print(tenantDetails)
         currentResourceUsage=tenantDetails['currentResourceUsage']
-        resourceConfig=tenantDetails['quotaConfig']
-        
+        resourceConfig=tenantDetails['quotaConfig']  
         requestedDiskSpace=resourceQuotaReq['volumeSizeinGB']
         totalDiskSpace=resourceConfig['volumeSizeinGB']
         currentDiskSpace=currentResourceUsage['volumeSizeinGB']
@@ -84,9 +71,7 @@ class GlobalValidations(object):
                   reqMaxQty= int(compute['maxQty'])
                   reqGPUMemory=compute['memory']
                   currentMinVal,currentMaxVal=getGPUQuotaDetails(reqGPUMemory,currentResourceUsage['computes'],"gpu")
-                  #print(currentMinVal,currentMaxVal)
                   totalMinVal,totalMaxVal=getGPUQuotaDetails(reqGPUMemory,resourceConfig['computes'],"gpu")
-                  #print(totalMinVal,totalMaxVal)
                   is_gpu_available=checkForQuota(totalMaxVal,currentMaxVal,reqMaxQty)  
                   totalGpu=totalMaxVal
                   currentGpu=currentMaxVal
@@ -103,9 +88,7 @@ class GlobalValidations(object):
                    reqCPUMemory=compute['memory']
                    
                    currentMinVal,currentMaxVal,currentMemory=getCPUQuotaDetails(currentResourceUsage['computes'])
-                   #print(currentMinVal,currentMaxVal,currentMemory)
                    totalMinVal,totalMaxVal,totalMemory=getCPUQuotaDetails(resourceConfig['computes'])
-                #    print(totalMinVal,totalMaxVal,totalMemory)
                    is_cpu_available=checkForQuota(totalMaxVal,currentMaxVal,reqMaxQty)
                    totalCpu=totalMaxVal
                    currentCpu=currentMaxVal
@@ -123,12 +106,10 @@ class GlobalValidations(object):
                    totalMem=totalMemory
                    currentMem=currentMemory
                else:
-                   raise InvalidComputeTypeException()
-               
+                   raise InvalidComputeTypeException()           
         else:
             raise DiskQuotaException(totalDiskSpace,currentDiskSpace)
         
-
         if is_diskspace_available and is_gpu_available and resType == "1":
             return True
         elif is_diskspace_available and is_gpu_available and is_cpu_available and is_memory_available and resType == "2":
@@ -144,34 +125,22 @@ class GlobalValidations(object):
                  raise CpuQuotaException(totalCpu,currentCpu)
             elif reqType=="cpu"and not is_memory_available and resType == "1":
                  raise MemoryQuotaException(totalMem,currentMem)
-            # elif  (resType == "2" and (is_gpu_available and not is_cpu_available)):
-            #      raise CpuQuotaException(totalCpu,currentCpu)
-            # elif ( resType == "2" and (not is_gpu_available and is_cpu_available)):
-            #      raise GpuQuotaException(totalGpu,currentGpu)
             elif (resType == "2" and is_gpu_available and is_cpu_available and not is_memory_available ):
                  raise MemoryQuotaException(totalMem,currentMem)
             elif(resType == "2" and ((is_gpu_available and not is_cpu_available and is_memory_available))):
                 raise CpuQuotaException(totalCpu,currentCpu)
             elif(resType == "2" and (not is_gpu_available and  is_cpu_available and is_memory_available)):
                 raise GpuQuotaException(totalGpu,currentGpu)
-            
-        
             else:
                 raise QuotaExceedException()
-            
-    
-    
-            
-    
+
     @staticmethod
     def updateResourceUsage(userId,projectId,resourceQuotaReq,flag):
         projectDet=APIDBUtils.findOneById("project",projectId)
-        #print(projectDet)
         if projectDet is None:
             error_detail=ErrorCode.PROJECT_NOT_FOUND
             raise NotFoundException(error_detail.value.code,error_detail.value.message)
         tenantId=projectDet['tenantId']
-        #print(tenantId)
         if tenantId is None or tenantId=="":
             error_detail=ErrorCode.TENANT_ID_NOT_EMPTY_ERROR
             raise NotFoundException(error_detail.value.code,error_detail.value.message)
@@ -181,7 +150,6 @@ class GlobalValidations(object):
             error_detail=ErrorCode.TENANT_DET_NOT_FOUND_ERROR
             raise NotFoundException(error_detail.value.code,error_detail.value.message)
 
-        #print(tenantDetails)
         currentResourceUsage=tenantDetails['currentResourceUsage']
         print(currentResourceUsage)
         quotaConfig=tenantDetails['quotaConfig']
@@ -195,7 +163,6 @@ class GlobalValidations(object):
             raise QuotaExceedException()
         elif newCurrentResUsage == "CPUQuotaExceed":
             raise QuotaExceedException()
-
         elif newCurrentResUsage == "MemoryQuotaExceed":
             raise QuotaExceedException()
         else:
@@ -204,28 +171,3 @@ class GlobalValidations(object):
             newValues={'$set': {'currentResourceUsage': newCurrentResUsage,'modifiedOn': last_modified_at, 'updatedBy': userId}}
             tenant_update_obj = APIDBUtils.updateEntity("tenant",filter,newValues)
             return "Success"
-        
-        
-    
-    
-
-# if __name__ == "__main__":
-#      #resourceQuotaReq={"computes": [{"type": "CPU", "maxQty": 2,"memory": "5GB", "minQty": 1 }], "volumeSizeinGB": 2}
-#      resourceQuotaReq={"computes": [{"type": "GPU", "maxQty": 4,"memory": "40GB", "minQty": 1 }], "volumeSizeinGB": 3}
-     
-# #    computes=resourceQuotaReq['computes']
-# #    for compute in computes:
-# #          minQty=0
-# #          maxQty=0
-# #          memoryVal=0
-# #          if compute['type'].lower() == 'cpu':
-# #            minQty=minQty+compute['minQty']
-# #            maxQty=maxQty+compute['maxQty']
-# #            memory=compute['memory']
-# #            print(memory)
-# #            memory=memory.lower().replace("gb","")
-# #            memoryVal=memoryVal+int(memory)
-# #            print(memoryVal)
-# #    flag=GlobalValidations.isQuotaExceeded("testuser@example.com",'35323354',resourceQuotaReq)
-# #    print(flag)
-#      status=GlobalValidations.updateResourceUsage("testuser@example.com",'46363463463',resourceQuotaReq,"deallocate")

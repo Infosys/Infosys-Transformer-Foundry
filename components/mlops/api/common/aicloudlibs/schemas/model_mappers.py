@@ -33,7 +33,6 @@ class ModelUris(BaseModel):
     explainUri: Optional[str]= None
     feedbackUri: Optional[str] = None
 
-
 class ModelContainerSpec(ContainerSpec):
      healthProbeUri: str = None
 
@@ -78,7 +77,6 @@ class Sensitive(BaseModel):
 
 class GraphicsCollection(BaseModel):
     name: Optional[str] = None
-    #image: Optional[str] = None
     contentEncoding: Optional[str] = None
     contentMediaType: Optional[str] = None
 
@@ -94,7 +92,6 @@ class Data(BaseModel):
     name:  Optional[str] = None
     link:  Optional[str] = None
     sensitive:  Optional[List[Sensitive]] = None
-    #graphics:  Optional[List[Graphics]] = None
     classification: Optional[ClassificationEnum] = None
 
 class FormatMap(BaseModel):
@@ -121,7 +118,6 @@ class PerformanceMetrics(BaseModel):
 
 class QuantitativeAnalysis(BaseModel):
     performanceMetrics: Optional[List[PerformanceMetrics]] = None
-    #graphics: Optional[List[Graphics]] = None
 
 class Description(BaseModel):
     description: Optional[str] = None
@@ -150,7 +146,6 @@ class ModelMetaData(BaseModel):
      modelParameters: Optional [ModelParameters] = None
      quantitativeAnalysis: Optional[QuantitativeAnalysis] = None
      considerations:Optional[MetadataConsiderations]= None
-
 
 class ModelMetaDataStatusEnum(str,Enum):
     Created="Created"
@@ -197,7 +192,6 @@ class ModelDetails(AuditableColumns):
             error= ValidationError(ErrorCode.MODEL_NAME_MAX_LENGTH_ERROR)
             errors.append(error) 
 
-        
         version=values.get("version")
         if (version is None ):
             error= ValidationError(ErrorCode.MODEL_VERSION_NOT_EMPTY_ERROR)
@@ -274,18 +268,7 @@ class ModelDetails(AuditableColumns):
                     errors.append(error)
                 if labelspecialcharErr:
                    error= ValidationError(ErrorCode.LABEL_NAME_SPECIAL_CHAR_ERROR)
-                   errors.append(error) 
-               
-        #    if(containerDet.get('command') is None or (containerDet.get('command') is not None and len(containerDet.get('command'))==0) ):
-        #         error=ValidationError(ErrorCode.CONTAINER_COMMAND_LIST_EMPTY)
-        #         errors.append(error)
-        #    if(containerDet.get('args') is None or (containerDet.get('args')is not None and len(containerDet.get('args'))==0) ):
-        #         error=ValidationError(ErrorCode.CONTAINER_ARG_LIST_EMPTY)
-        #         errors.append(error)
-            
-        #    if(containerDet.get('healthProbeUri') is None or (containerDet.get('healthProbeUri') is not None and len(containerDet.get('healthProbeUri'))==0)):
-        #         error=ValidationError(ErrorCode.CONTAINER_HEALTHPROBEURI_EMPTY)
-        #         errors.append(error)
+                   errors.append(error)
            
            artifactsDet=values.get("artifacts")
            if(artifactsDet is not None and len(artifactsDet)>0):
@@ -308,8 +291,6 @@ class ModelDetails(AuditableColumns):
                         error=ValidationError(ErrorCode.ARTIFACTS_URI_VALUE_ERROR)
                         errors.append(error)
 
-        
-        
         if len(errors)>0:
             print(errors)
             raise RequestValidationError(errors=[
@@ -347,7 +328,6 @@ class ModelResponse(ApiResponse):
     data: Optional[ModelResponseData] = None
 
 class TritonServingConfig(BaseModel):
-    #logLevel:str=None
     dependencyFileRepo: Optional[Artifacts] = None
 
 class ModelConfig(BaseModel):
@@ -375,7 +355,6 @@ class InferenceConfig(BaseModel):
     servingFramework: ServingFrameworkEnum
     inferenceSpec: InferenceSpec = None
     servingSpec: Optional[ServingSpec]
-
 
 class Deployment(AuditableColumns):
     endpointId: str = None
@@ -453,9 +432,6 @@ class Deployment(AuditableColumns):
                            if (modelUris.get('predictUri')is None or (modelUris.get('predictUri') is not None and len(modelUris.get('predictUri'))==0 )):
                               error=ValidationError(ErrorCode.PREDICT_URI_EMPTY_ERROR)
                               errors.append(error)
-                    #    if (tritonserveConfig is not None and (tritonserveConfig.get('logLevel') is None or (tritonserveConfig.get('logLevel') is not None and len(tritonserveConfig.get('logLevel'))==0 ))):
-                    #           error=ValidationError(ErrorCode.LOG_LEVEL_EMPTY_ERROR)
-                    #           errors.append(error)
                            
                if(inferenceSpecDet.get('containerResourceConfig') is None or (inferenceSpecDet.get('containerResourceConfig') is not None and len(inferenceSpecDet.get('containerResourceConfig'))==0 )):
                    error=ValidationError(ErrorCode.RESOURCECONFIG_EMPTY_ERROR)
@@ -510,12 +486,7 @@ class Deployment(AuditableColumns):
                                         error= ValidationError(ErrorCode.RESOURCE_QTY_ERROR)
                                         print(error)
                                         errors.append(error)
-               
-           
-           
-
-        
-        
+   
         if len(errors)>0:
             print(errors)
             raise RequestValidationError(errors=[
@@ -535,7 +506,6 @@ class DeploymentStatusEnum(str,Enum):
     Deployed="Deployed"
     Failed="Failed"
     DeleteInProgress="DeleteInProgress"
-
 
 class DeploymentResponseData(Deployment):
     id: str = None
@@ -612,12 +582,10 @@ class ModelEndpointConfig(BaseModel):
     modelId: str = None
     version: Optional[int] = None
     
-
 class Endpoint(AuditableColumns):
     name: str =None
     contextUri: str= None
     projectId: str = None
-    #models: List[ModelEndpointConfig]=None
     class Config:
         @staticmethod
         def schema_extra(schema: dict, _):
@@ -653,33 +621,6 @@ class Endpoint(AuditableColumns):
             print(error)
             errors.append(error) 
 
-        
-        # models=values.get("models")
-        # modelEmptyErr=False
-        # if (models is None or (models is not None and len(models) == 0)):
-        #     error= ValidationError(ErrorCode.MODEL_NOT_EMPTY_ERROR)
-        #     print(error)
-        #     errors.append(error) 
-        #     modelEmptyErr=True
-        # if not modelEmptyErr:
-            
-        #     modelEndpointCfgEmptyErr=False
-        #     for modelEndpointCfg in models :
-
-        #         if (modelEndpointCfg is None or (modelEndpointCfg is not None and len(modelEndpointCfg)==0)):
-        #             error= ValidationError(ErrorCode.MODEL_ENDPOINT_CONFIG_EMPTY_ERROR)
-        #             print(error)
-        #             errors.append(error) 
-        #             modelEndpointCfgEmptyErr=True
-        #         if not modelEndpointCfgEmptyErr:
-        #             if (modelEndpointCfg.get('baseURI') is None or (modelEndpointCfg.get('baseURI') is not None and len(modelEndpointCfg.get('baseURI'))==0)):
-        #                 error= ValidationError(ErrorCode.MODEL_ENDPOINT_BASEURI_EMPTY_ERROR)
-        #                 print(error)
-        #                 errors.append(error) 
-        #             if (modelEndpointCfg.get('modelId') is None or (modelEndpointCfg.get('modelId') is not None and len(modelEndpointCfg.get('modelId'))==0)):
-        #                 error= ValidationError(ErrorCode.MODEL_ENDPOINT_MODELID_EMPTY_ERROR)
-        #                 print(error)
-        #                 errors.append(error) 
         if len(errors)>0:
             print(errors)
             raise RequestValidationError(errors=[
@@ -693,7 +634,6 @@ class Endpoint(AuditableColumns):
 
 class EndpointStatuseEnum(str,Enum):
     Created="Created"
-    # Updated="Updated"
     Deleted="Deleted"
     Deployed="Deployed"
     DeleteInProgress="DeleteInProgress"
@@ -701,7 +641,6 @@ class EndpointStatuseEnum(str,Enum):
 class EndpointResponseData(Endpoint):
     id: str = None
     status: EndpointStatuseEnum = None
-    # endpointUri: str = None
     deployedModels:List[ModelEndpointConfig]=None
     class Config:
         allow_population_by_field_name = True
@@ -714,11 +653,8 @@ class EndpointResponseData(Endpoint):
                  props[k] = v
             schema["properties"] = props
 
-
 class EndpointResponse(ApiResponse):
     data:Optional[EndpointResponseData]= None
-
-
 
 class ModelMetaDataResponseData(ModelMetaData):
     id: str = None
@@ -733,7 +669,6 @@ class ModelMetaDataResponseData(ModelMetaData):
             for k, v in schema.get('properties', {}).items():
                  props[k] = v
             schema["properties"] = props
-
 
 class ModelMetaDataResponse(ApiResponse):
     data:Optional[ModelMetaDataResponseData]= None

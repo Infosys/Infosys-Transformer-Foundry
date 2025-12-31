@@ -1,0 +1,459 @@
+# ===============================================================================================================#
+# Copyright 2025 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+import kfp
+import kfp.components as comp
+import requests
+import kfp.dsl as dsl
+import datetime
+from kfp.dsl import ContainerOp, pipeline
+from kubernetes import client as k8s_client
+from kubernetes.client.models import V1PodDNSConfig
+import tarfile
+
+run_id=dsl.RUN_ID_PLACEHOLDER
+{# setting the global variables#}
+{% set env_var_list =[] %}
+{% set env_from_list =[] %}
+{% for gk,gv in globalvariables.items() %}
+{% set env_var_name = 'env_var_'+loop.index|string %}
+{% if gk == "BENCHMARK_CFG_MAP_REF" and gv == "code" %}
+code_config_ref=k8s_client.V1ConfigMapEnvSource(name='benchmark-code-config')
+{{env_var_name}}=k8s_client.V1EnvFromSource(config_map_ref=code_config_ref) 
+{%set _ = env_from_list.append(env_var_name) %}
+{% elif gk == "BENCHMARK_CFG_MAP_REF" and gv == "text" %}
+text_config_ref=k8s_client.V1ConfigMapEnvSource(name='benchmark-text-config')
+{{env_var_name}}=k8s_client.V1EnvFromSource(config_map_ref=text_config_ref) 
+{%set _ = env_from_list.append(env_var_name) %}
+{% elif gk == "BENCHMARK_CFG_MAP_REF" and gv == "embeddings" %}
+mteb_config_ref=k8s_client.V1ConfigMapEnvSource(name='benchmark-mteb-config')
+{{env_var_name}}=k8s_client.V1EnvFromSource(config_map_ref=mteb_config_ref) 
+{%set _ = env_from_list.append(env_var_name) %}
+{% else %}
+{%set _ = env_var_list.append(env_var_name) %}
+{{env_var_name}} = k8s_client.V1EnvVar(name='{{gk}}', value='{{gv}}')
+{% endif %}
+{% endfor %}
+
+{% set env_pipln_run_name = 'env_pipln_run_name'%}
+{%set _ = env_var_list.append(env_pipln_run_name) %}
+{{env_pipln_run_name}} = k8s_client.V1EnvVar(name='{{env_pipln_run_name}}', value='{{pipeline_run_name}}')
+
+{% set env_execution_id = 'env_execution_id'%}
+{%set _ = env_var_list.append(env_execution_id) %}
+{{env_execution_id}} = k8s_client.V1EnvVar(name='{{env_execution_id}}', value='{{execution_id}}')
+
+{% set env_pipeline_id = 'env_pipeline_id'%}
+{%set _ = env_var_list.append(env_pipeline_id) %}
+{{env_pipeline_id}} = k8s_client.V1EnvVar(name='{{env_pipeline_id}}', value='{{pipeline_id}}')
+
+{% set env_project_id = 'env_project_id'%}
+{%set _ = env_var_list.append(env_project_id) %}
+{{env_project_id}} = k8s_client.V1EnvVar(name='{{env_project_id}}', value='{{project_id}}')
+
+{% set ns = namespace (nutanix_storage_flag = False) %}
+
+{# setting the datastorage#}
+{% for data_storage in pipeline_data_storage %}
+{% set env_var_cfg_name = 'storage_env_var_cfg_'+loop.index|string %}
+{%set _ = env_from_list.append(env_var_cfg_name) %}
+{% set env_var_access_key = 'storage_env_var_accesskey_'+loop.index|string %}
+{%set _ = env_var_list.append(env_var_access_key) %}
+{% set env_var_secret_key = 'storage_env_var_secretkey_'+loop.index|string %}
+{%set _ = env_var_list.append(env_var_secret_key) %}
+{% set env_var_name = 'storage_env_var_name_'+loop.index|string %}
+{%set _ = env_var_list.append(env_var_name) %}
+
+{% if data_storage['storageType'] != None and data_storage['storageType']=="INFY_AICLD_NUTANIX"  %}
+{% set ns.nutanix_storage_flag = True %}
+config_ref=k8s_client.V1ConfigMapEnvSource(name='nutanix-configuration')
+{{env_var_cfg_name}}=k8s_client.V1EnvFromSource(config_map_ref=config_ref) 
+secret_ref1=k8s_client.V1SecretKeySelector(key='awsAccessKeyID',name='nutanix-secret-1')  
+value_from1=k8s_client.V1EnvVarSource(secret_key_ref=secret_ref1) 
+{{env_var_access_key}} = k8s_client.V1EnvVar(name='AWS_ACCESS_KEY_ID', value_from=value_from1)  
+secret_ref2=k8s_client.V1SecretKeySelector(key='awsSecretAccessKey',name='nutanix-secret-1')  
+value_from2=k8s_client.V1EnvVarSource(secret_key_ref=secret_ref2)  
+{{env_var_secret_key}} = k8s_client.V1EnvVar(name='AWS_SECRET_ACCESS_KEY', value_from=value_from2)
+{% endif %}
+{% if data_storage['storageType'] != None and data_storage['storageType']=="INFY_AICLD_MINIO"  %}
+config_ref=k8s_client.V1ConfigMapEnvSource(name='minio-configuration') 
+{{env_var_cfg_name}}=k8s_client.V1EnvFromSource(config_map_ref=config_ref)  
+secret_ref1=k8s_client.V1SecretKeySelector(key='awsAccessKeyID',name='minio-secret-1')  
+value_from1=k8s_client.V1EnvVarSource(secret_key_ref=secret_ref1)  
+{{env_var_access_key}} = k8s_client.V1EnvVar(name='AWS_ACCESS_KEY_ID', value_from=value_from1)  
+secret_ref2=k8s_client.V1SecretKeySelector(key='awsSecretAccessKey',name='minio-secret-1')  
+value_from2=k8s_client.V1EnvVarSource(secret_key_ref=secret_ref2)  
+{{env_var_secret_key}} = k8s_client.V1EnvVar(name='AWS_SECRET_ACCESS_KEY', value_from=value_from2)  
+{% endif %}
+{{env_var_name}} = k8s_client.V1EnvVar(name='{{data_storage['name']}}', value='{{data_storage['uri']}}')
+{% endfor %}
+
+pvolume={}
+volume_mount3 = k8s_client.V1VolumeMount(mount_path='/s3cert',name='s3-cert-vol')
+secretvol=k8s_client.V1SecretVolumeSource(default_mode=420,secret_name="s3-cert")
+vol4 = k8s_client.V1Volume(name='s3-cert-vol', secret=secretvol)
+pvolume['/s3cert']=vol4
+
+def new_command_formation(value,arg_list):
+    new_command = []
+    new_command.append("sh")
+    new_command.append("-c")
+    newstring = "chmod 777 /s3util/*.sh;/s3util/putil.sh;"
+    for cmd in value:
+        newstring = newstring + cmd +" "
+    i=0
+    for c in arg_list:
+        c=c.split(',')
+        if(len(c)==2):
+            newstring = newstring +"${"+str(i)+"} "+"${"+str(i+1)+"} "
+            i+=2
+        else:
+            newstring = newstring +"${"+str(i)+"} "
+            i+=1
+    newstring=newstring.strip()
+    new_command.append(newstring)
+    return new_command 
+
+{% if pip_volume != None %}
+
+{% if pip_volume['scope']  == 'platform'  %}
+{% set vol_mount_path = "{{pip_volume['mountPath']}}" %}
+volume_mount2 = k8s_client.V1VolumeMount(mount_path='{{pip_volume["mountPath"]}}',name='plat-models-vol')
+pvc = k8s_client.V1PersistentVolumeClaimVolumeSource(claim_name='{{pip_volume["name"]}}')
+vol_name = k8s_client.V1Volume(name='plat-models-vol',  persistent_volume_claim=pvc)
+pvolume['{{pip_volume['mountPath']}}']=vol_name
+{% endif %}
+{% endif %}
+
+{% for key,value in flow.items() %}
+    {%set p = [] %}
+    {% set arg_list = [] %}
+    {% for k,v in value['input'].items() %}
+        {% set _ = p.append(k) %}
+        {% set arg = '"--'+k+'",'+k %}
+        {% set _ = arg_list.append(arg) %}
+    {% endfor %}
+
+    {% for sa in value['stepConfig']['stepArguments'] %}
+        {# same as entry point .check the argument length #}
+        {#{% set saa = sa.split(' ') %}#}
+        {#{% set arg = '"'~saa[0]~'","'~saa[1]~'"' %}#}
+        {% set _ = arg_list.append('"'~sa~'"') %}
+    {% endfor %}
+    
+    {%set output = [] %}
+    {% for k,v in value['output'].items() %}
+        {% set _ = output.append(k) %}
+    {% endfor %}    
+
+    {% set entrypoint_list = [] %}
+    {% for sa in value['stepConfig']['entryPoint'] %}
+        {# same as entry point .check the argument length #}
+        {#{% set saa = sa.split(' ') %}#}
+        {#{% set arg = '"'~saa[0]~'","'~saa[1]~'"' %}#}
+        {% if value['inputArtifacts'] != None and value['inputArtifacts']['storageType'] != None %}
+            {% if ".py" in sa %}
+                {%set sa ="python /input/artifacts/"+sa%}
+            {% endif %}
+            {% if "python" in sa %}
+            {% set sa1 = 'sh -c chmod -R 777 /input/artifacts;[ -d "//input/artifacts/scripts/" ] && cp -r /input/artifacts/scripts/* ./ || cp -r /input/artifacts/* ./;ls -ltr ./;' %}
+            {% endif %}
+            {% set _ = entrypoint_list.append(sa1+sa) %}
+        {% else %}
+            {% set _ = entrypoint_list.append(sa) %}
+        {% endif %}
+    {% endfor %}
+
+{% set key= key|replace('-','_' ) %}
+
+def {{ 'f_'+key | safe }}({{ p | join(',') }}):
+    
+    {% if pip_volume['scope'] == 'pipeline' %}
+    {% set vol_mount_path = "{{pip_volume['mountPath']}}" %}
+    {% set size_in_mb = (pip_volume['sizeinGB']*123)|int %}
+    vop = dsl.VolumeOp(
+        name="{{key+'-vol-'+unique_id}}",
+        resource_name="{{key+'-vol-'+unique_id}}",
+        modes=["ReadWriteMany"],
+        size="{{size_in_mb|string+'Mi'}}"
+        )
+
+    pvolume['{{pip_volume['mountPath']}}']=vop.volume
+    {% endif %}
+    
+    {% if value['inputArtifacts'] != None and value['inputArtifacts']['storageType'] != None %}
+    {% if value['inputArtifacts']['storageType'] =="INFY_AICLD_NUTANIX" %}
+    config_ref=k8s_client.V1ConfigMapEnvSource(name='nutanix-configuration')
+    env_storage_config=k8s_client.V1EnvFromSource(config_map_ref=config_ref) 
+    secret_ref1=k8s_client.V1SecretKeySelector(key='awsAccessKeyID',name='nutanix-secret-1')  
+    value_from1=k8s_client.V1EnvVarSource(secret_key_ref=secret_ref1) 
+    env_storage_access_key = k8s_client.V1EnvVar(name='AWS_ACCESS_KEY_ID', value_from=value_from1)  
+    secret_ref2=k8s_client.V1SecretKeySelector(key='awsSecretAccessKey',name='nutanix-secret-1')  
+    value_from2=k8s_client.V1EnvVarSource(secret_key_ref=secret_ref2)  
+    env_storage_secret_key = k8s_client.V1EnvVar(name='AWS_SECRET_ACCESS_KEY', value_from=value_from2)  
+    {% set storage_image_uri = "${STORAGE_INITIALIZER_IMAGE}" %}
+    {% elif value['inputArtifacts']['storageType']=="INFY_AICLD_MINIO" %}
+    config_ref=k8s_client.V1ConfigMapEnvSource(name='minio-configuration') 
+    env_storage_config=k8s_client.V1EnvFromSource(config_map_ref=config_ref)  
+    secret_ref1=k8s_client.V1SecretKeySelector(key='awsAccessKeyID',name='minio-secret-1')  
+    value_from1=k8s_client.V1EnvVarSource(secret_key_ref=secret_ref1)  
+    env_storage_access_key = k8s_client.V1EnvVar(name='AWS_ACCESS_KEY_ID', value_from=value_from1)  
+    secret_ref2=k8s_client.V1SecretKeySelector(key='awsSecretAccessKey',name='minio-secret-1')  
+    value_from2=k8s_client.V1EnvVarSource(secret_key_ref=secret_ref2)  
+    env_storage_secret_key = k8s_client.V1EnvVar(name='AWS_SECRET_ACCESS_KEY', value_from=value_from2)  
+    {% set storage_image_uri = "${STORAGE_INITIALIZER_IMAGE}"" %}
+    {% endif %}
+    {{ key+'artifact_vol'}} = k8s_client.V1VolumeMount(mount_path='/input/artifacts/',name='input-artifacts-vol')
+    {{ key+'empty_dir_src4'}} =k8s_client.V1EmptyDirVolumeSource(medium='Memory')
+    vol1 = k8s_client.V1Volume(name='input-artifacts-vol',empty_dir={{ key+'empty_dir_src4'}})
+    pvolume['/input/artifacts/']=vol1
+    env_artifacts_path = k8s_client.V1EnvVar(name='AICLD_INPUT_ARTIFACTS_PATH', value='/input/artifacts/')
+
+    volume_mount1 = k8s_client.V1VolumeMount(mount_path='/s3util',name='s3-utility-vol')
+    empty_dir_src1=k8s_client.V1EmptyDirVolumeSource(medium='Memory')
+    vol2 = k8s_client.V1Volume(name='s3-utility-vol',empty_dir=empty_dir_src1)
+    pvolume['/s3util']=vol2
+
+    {{ key+'_storage_op'}} = dsl.Sidecar(
+                    name="download-from-s3",
+                    image="{{storage_image_uri}}",
+                    args=["{{ value['inputArtifacts']['uri']}}", "/input/artifacts"],
+                    mirror_volume_mounts=True
+            )
+    {{ key+'_storage_op'}}.add_env_from(env_storage_config)
+    {{ key+'_storage_op'}}.add_env_variable(env_storage_access_key)
+    {{ key+'_storage_op'}}.add_env_variable(env_storage_secret_key)
+
+
+    {{ key+'_util_storage_op'}} = dsl.Sidecar(
+				name="download-util-files-from-s3",
+				image="{{storage_image_uri}}",
+				args=["s3://${BUCKET_NAME}"/utility", "/s3util"],
+				mirror_volume_mounts=True
+          )
+    {{ key+'_util_storage_op'}}.add_env_from(env_storage_config)
+    {{ key+'_util_storage_op'}}.add_env_variable(env_storage_access_key)
+    {{ key+'_util_storage_op'}}.add_env_variable(env_storage_secret_key)
+
+
+    op = ContainerOp(
+        name='{{ key+'-task'}}',
+        image='{{ value['stepConfig']['imageUri'] }}',
+        command=new_command_formation({{value['stepConfig']['entryPoint']}},{{arg_list}}),
+        arguments=[
+            {{arg_list | join(',')}}
+        ],
+        file_outputs= {{value['output']}}
+       
+    )
+    
+    {% if pvolume != None and pvolume != {} %}
+    op.add_pvolumes(pvolume)
+    {% endif %}
+    {% for env_v in env_var_list%}
+    op.container.add_env_variable({{env_v}})
+    {% endfor %}
+    {% for env_f in env_from_list%}
+    op.container.add_env_from({{env_f}})
+    {% endfor %}
+    op.add_pod_label("pipeline/trialid","{{execution_id}}")
+    op.add_pod_label("pipeline/pipelineid","{{pipeline_id}}")
+    {% if value['inputArtifacts'] != None and value['inputArtifacts']['storageType'] != None %}
+    op.container.add_env_variable(env_artifacts_path)
+    op.add_init_container({{ key+'_storage_op'}})
+    op.add_init_container({{ key+'_util_storage_op'}})
+    {% endif %}
+    return op
+    
+    {% else %}
+
+    op = ContainerOp(
+        name='{{ key+'-task'}}',
+        image='{{ value['stepConfig']['imageUri'] }}',
+        command={{value['stepConfig']['entryPoint']}},
+        arguments=[
+            {{arg_list | join(',')}}
+        ],
+        file_outputs= {{value['output']}}
+       
+    )
+    
+    {% if pvolume != None and pvolume != {} %}
+    op.add_pvolumes(pvolume)
+    {% endif %}
+    {% for env_v in env_var_list%}
+    op.container.add_env_variable({{env_v}})
+    {% endfor %}
+    {% for env_f in env_from_list%}
+    op.container.add_env_from({{env_f}})
+    {% endfor %}
+    op.add_pod_label("pipeline/trialid","{{execution_id}}")
+    op.add_pod_label("pipeline/pipelineid","{{pipeline_id}}")
+    {% if value['inputArtifacts'] != None and value['inputArtifacts']['storageType'] != None %}
+    op.container.add_env_variable(env_artifacts_path)
+    op.add_init_container({{ key+'_storage_op'}})
+    {% endif %}
+    return op
+    {% endif %}
+{% endfor %}
+
+{%set pv_list = [] %}
+{% for k,v in pipeline_variables.items() %}
+    {% if v=='' %}
+    {% set v_n_v =  k+'= "''"'%}
+    {% set _ = pv_list.append(v_n_v) %}
+    {% else %}
+    {% set v_v =  k+'= "'~v~'"'%}
+    {% set _ = pv_list.append(v_v) %}
+    {%endif%}
+{% endfor %}
+
+{%set flow_list = [] %}
+{%set tasks_list = [] %}
+{% for pk,pv in flow.items() %}
+    {% set pk= pk|replace('-','_' ) %}
+    {% set replaced_task = 'task_'+pk %}
+    {% set _ = flow_list.append(pk) %}
+    {% set _ = tasks_list.append(replaced_task) %}
+{% endfor %} 
+
+@pipeline(name='{{ pipeline_name }}', description=' {{ description }}')
+def task_pipeline({{ pv_list | join(',') }}):
+    dsl.get_pipeline_conf().set_dns_config(dns_config=V1PodDNSConfig(nameservers=["192.168.200.56"],searches=["example.com"]))
+    exit_task = ContainerOp(
+        name="ExitTask",
+        image="${EXIT_TASK_IMAGE}"",
+        command=["python","runstatus_v2.py"],
+        arguments=[
+            "--run_id",run_id,"--status",'{{"{{workflow.status}}"}}',"--deployEnv","PRODUCTION" 
+        ]
+    )
+    exit_task.set_image_pull_policy('Always')
+    
+
+    {% set task_list = [] %}
+    {#{{ 'all_output = dict()' }}#}
+    with dsl.ExitHandler(exit_task):
+        {% for key,value in flow.items() %}
+            {% set idx = loop.index %}
+            {% if key == flow_list[0] %}
+            {% set fi_o_l = [] %}
+            {% for fsk,fsv in value['input'].items() %}
+                {% set fcomp = fsv[2:-2].split('.')%}
+                {% if fcomp[0]=='pipeline' and fsv[:2]=='{{' %}
+                    {#{% set fs_i_o = fsk+' = "'~pipeline_variables[fcomp[2]]~'"' %}#}
+                    {% set fs_i_o = fsk+' = '+fcomp[2] %}
+                    {% set _ = fi_o_l.append(fs_i_o) %}
+                {% else %}
+                    {% set fs_i_o = fsk+' = "'~fsv~'"' %}    
+                    {% set _ = fi_o_l.append(fs_i_o) %}
+                {% endif %}
+            {% endfor %}
+        {# creating first task of the pipeline#}               
+        {{ tasks_list[idx-1] | safe }} = {{ 'f_'+key | safe }}({{fi_o_l | join(',')}})
+            {% set computes_list = value["resourceConfig"]["computes"] %}
+            {% for computes_dict in computes_list%}
+                {% if computes_dict['type']=='CPU' %}
+                    {% if computes_dict["maxQty"] != '' %}
+        {{ tasks_list[idx-1]+'.set_cpu_limit('+'"'~computes_dict["maxQty"]|string~'"'+')' }}
+                    {% endif %}
+                    {% if computes_dict["minQty"] != '' %}
+        {{ tasks_list[idx-1]+'.set_cpu_request('+'"'~computes_dict["minQty"]|string~'"'+')' }}
+                    {% endif %}
+                    {% if computes_dict["memory"] != '' %}
+                    {% set memory_value = (computes_dict["memory"].split('GB')[0])|int %}
+                    {% set convert_to_GiB = (memory_value * (0.93132257461548))|round|int %}
+                    {% set new_val = (convert_to_GiB)|string+"Gi" %}
+        {{ tasks_list[idx-1]+'.set_memory_limit('+'"'~new_val~'"'+')' }}
+                    {% endif %}
+                {% endif %}
+                {% if computes_dict['type']=='GPU' %}
+                    {% if computes_dict["maxQty"] != '' %}
+        {{ tasks_list[idx-1]+'.set_gpu_limit('+'"'~computes_dict["maxQty"]|string~'"'+')' }}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        
+        {{ tasks_list[idx-1]+'.execution_options.caching_strategy.max_cache_staleness ="P0D"' }}
+            {% else %}
+
+            {% set res = [] %}
+            {% for tsk,tsv in value['input'].items() %}
+                {% if tsv[:2]== '{{' %}
+                    {% set tcomp = tsv[2:-2].split('.')%}
+                    {% if tcomp[0]=='pipeline' %}
+                        {% set in_ou = tsk+' = '+tcomp[2] %}
+                        {% set _ = res.append(in_ou) %}
+                    {% else %}
+                        {% set tcomp_rkey= tcomp[0]|replace('-','_' ) %}    
+                        {% set in_ou = tsk+'='+'task_'+tcomp_rkey+'.outputs["'~tcomp[2]~'"]'%}
+                        {% set _ = res.append(in_ou) %}
+                    {% endif %}
+                {%else%}
+                    {% set in_ou = tsk+' = "'~tsv~'"' %}
+                    {% set _ = res.append(in_ou) %}
+                {%endif%}        
+            {% endfor %}
+    
+        {{ tasks_list[idx-1] | safe }} = {{ 'f_'+flow_list[idx-1] }}({{ res | join(',') }})
+            {% set computes_list = value["resourceConfig"]["computes"] %}
+            {% for computes_dict in computes_list%}
+                {% if computes_dict['type']=='CPU' %}
+                    {% if computes_dict["maxQty"] != '' %}
+        {{ tasks_list[idx-1]+'.set_cpu_limit('+'"'~computes_dict["maxQty"]|string~'"'+')' }}
+                    {% endif %}
+                    {% if computes_dict["minQty"] != '' %}
+        {{ tasks_list[idx-1]+'.set_cpu_request('+'"'~computes_dict["minQty"]|string~'"'+')' }}
+                    {% endif %}
+                    {% if computes_dict["memory"] != '' %}
+                {% set memory_value = (computes_dict["memory"].split('GB')[0])|int %}
+                {% set convert_to_GiB = (memory_value * (0.93132257461548))|round|int %}
+                {% set new_val = (convert_to_GiB)|string+"Gi" %}
+        {{ tasks_list[idx-1]+'.set_memory_limit('+'"'~new_val~'"'+')' }}
+                    {% endif %}
+                {% endif %}
+                {% if computes_dict['type']=='GPU' %}
+                    {% if computes_dict["maxQty"] != '' %}
+        {{ tasks_list[idx-1]+'.set_gpu_limit('+'"'~computes_dict["maxQty"]|string~'"'+')' }}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        
+        {{ tasks_list[idx-1]+'.execution_options.caching_strategy.max_cache_staleness ="P0D"' }}
+            {% endif %}
+        {% endfor %}
+
+        {# Connect the tasks #}
+        {% for step,data in flow.items() %}
+        {% set step= step|replace('-','_' ) %}
+        {% for d in data['dependsOn'] if d!= '' %}
+        {% set d= d|replace('-','_' ) %}
+        {{'task_'+step}}.after({{'task_'+d}})
+        {% endfor %}
+        {% endfor %} 
+
+args = {{pipln_args}}
+
+if __name__ == '__main__':
+    kfp.compiler.Compiler().compile(task_pipeline,__file__ +'.tar.gz')
+    tfile = tarfile.open(__file__ +'.tar.gz')
+    tfile.extractall()
+    tfile.close()
+    file = open('pipeline.yaml', "r")
+    outfile=open(__file__ + '.yaml', "w")
+    word='nvidia.com/gpu'
+    replaceword='{{gpu_mig_slice}}'
+    for line in file:
+        if word in line:
+            new_line =line.replace(word,replaceword)
+            outfile.write(new_line)
+        else:
+            outfile.write(line)
+
+    outfile.close()
+    file.close()
+    pipelin_run = kfp.Client(host='{{pipeline_url}}',cookies='{{auth_token}}').create_run_from_pipeline_package('pipeline.yaml', arguments=args,run_name="{{pipeline_run_name}}",namespace="{{kfp_namespace}}",experiment_name="{{experiment_name}}")
+    print(pipelin_run)

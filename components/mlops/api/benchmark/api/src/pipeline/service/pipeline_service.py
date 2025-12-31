@@ -33,19 +33,13 @@ from pipeline.service.payload_generation import CodeGenerationKubeflow
 from fastapi import Request, Header, Response, Query
 from datetime import date, datetime, timedelta
 
-
-
 dotenv_path = find_dotenv()
 config = dotenv_values(dotenv_path)
 
-
 class BaseService:
-
     def __init__(self, app):
         self.log = app.logger
         self.app = app
-        # self.loggedUser = userId
-
 
 class PipelineService(BaseService):
 
@@ -79,8 +73,7 @@ class PipelineService(BaseService):
                 esImage=config['EMBEDDING_ES_IMAGE']
                 indexName=config['EMBEDDING_INDEX_VALUE']
                 metadataObj = list(self.app.database["benchmark_metadata_genargs"].find({"type": "embedding"},{'_id': 0,"createdBy":0,"createdOn":0,"isDeleted":0,"updatedBy":0,"modifiedOn":0,"type":0}))
-
-                
+            
         else:
             projectObj = self.app.database["project"].find_one({"id": payload['projectId'], "isDeleted": pydantic.parse_obj_as(bool, "false")})
         
@@ -106,7 +99,6 @@ class PipelineService(BaseService):
                 indexName=config['EMBEDDING_INDEX_VALUE']
                 metadataObj = list(self.app.database["benchmark_metadata_genargs"].find({"type": "embedding"},{'_id': 0,"createdBy":0,"createdOn":0,"isDeleted":0,"updatedBy":0,"modifiedOn":0,"type":0}))
        
-        
         has_access = globalValidations.hasAccess(userId, projectId, CREATE_PIPELINE) or globalValidations.hasAccess(userId, projectId, WORKSPACEADMIN)
 
         if not has_access:
@@ -131,7 +123,6 @@ class PipelineService(BaseService):
         
         dataset = payload['configuration']['data'][0]
         l= len(payload['configuration']['model'])
-        
         
         jobHeaders = {'userId':userId,'Content-Type': 'application/json' }
         
@@ -176,8 +167,7 @@ class PipelineService(BaseService):
                 
                 created_pipeline = self.app.database["benchmark"].find_one({"_id": pipelinedata.inserted_id},{"_id": 0})
                
-                return PipelineResponseData(**created_pipeline)
-                
+                return PipelineResponseData(**created_pipeline) 
             else:
                 raise JenkinsJobError("Error occured while executing pipeline")  
         else:
@@ -190,18 +180,16 @@ class PipelineService(BaseService):
         executionObj = request.app.database["pipeline_execution"].find_one({"id": benchmarkObj['executionId'], "isDeleted": pydantic.parse_obj_as(bool, "false")},{'_id': 0})
 
         if benchmarkObj is None:
-                raise InvalidValueError(local_errors.ErrorCode.BENCHMARK_NOT_FOUND_ERROR)
+            raise InvalidValueError(local_errors.ErrorCode.BENCHMARK_NOT_FOUND_ERROR)
         projectId = benchmarkObj['projectId']
         projectObj = self.app.database["project"].find_one({"id": projectId, "isDeleted": pydantic.parse_obj_as(bool, "false")})
         if projectObj is None:
             raise InvalidValueError(local_errors.ErrorCode.PROJECT_NOT_FOUND_ERROR)
         
-
         new_updated_benchmarkObj=request.app.database["benchmark"].update_one({"id": benchmarkId},{"$set": {"status" : executionObj['status']}})
         updated_benchmarkObj = request.app.database["benchmark"].find_one({"id": benchmarkId, "isDeleted": pydantic.parse_obj_as(bool, "false")},{'_id': 0})     
                                                        
         projectId = projectObj['id']
-
         has_access = globalValidations.hasAccess(userId, projectId, VIEW) or globalValidations.hasAccess(
             userId, projectId, WORKSPACEADMIN)
         if not has_access:
@@ -211,7 +199,6 @@ class PipelineService(BaseService):
     
     # To get the task/modelGenArgs for benchmark w.r.t benchmarkType and metadataType
     def list_benchmark_metadata(self, request: Request, benchmarkType: str, metadataType: str,userId: str):        
-        
         if metadataType=='modelGenArgs':
             metadataObj = list(request.app.database["benchmark_metadata_genargs"].find({"type": benchmarkType},{'_id': 0}).distinct('model gen args name'))
         else:
@@ -255,6 +242,5 @@ class PipelineService(BaseService):
                 benchmark_response = {}
                 benchmark_response['benchmarks']= benchmarkObj_sorted
                 return  benchmarkObj
-
             else:
                 raise ForbiddenException()

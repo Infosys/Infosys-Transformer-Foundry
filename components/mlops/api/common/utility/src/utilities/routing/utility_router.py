@@ -1,5 +1,5 @@
 # ===============================================================================================================#
-# Copyright 2024 Infosys Ltd.                                                                                    #
+# Copyright 2025 Infosys Ltd.                                                                                    #
 # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
 # http://www.apache.org/licenses/                                                                                #
 # ===============================================================================================================#
@@ -14,7 +14,7 @@ from fastapi import Depends, Request, Response,Body, APIRouter, Cookie, HTTPExce
 from typing import Union, List
 from fastapi.encoders import jsonable_encoder
 from utilities.config.logger import CustomLogger
-from utilities.mappers.idp_job_response import ESBulkData,ResponseData,OpenAIParams
+from utilities.mappers.idp_job_response import KnativeJobResponse,TritonJobResponse,PipelineJobResponse,DeleteDeploymentJobResponse,DeleteEndpointJobResponse,ESBulkData,ResponseData
 from utilities.service.utility_service import UtilityService
 from utilities.exception.util_exception import UtilityServiceException
 import requests
@@ -29,13 +29,156 @@ import calendar
 import time
 import os
 from requests.auth import HTTPBasicAuth
-
+from pprint import pprint
 
 router = APIRouter()
 
-from pprint import pprint
+# POST method to update the custom deployment status of the job in the database
+@router.post('/utilities/update/knativejobstatus', status_code=status.HTTP_200_OK)
+def updateKnativeJobStatus (request: Request, body: KnativeJobResponse):
+    
+    log=request.app.logger
+    try:
+        utilService = UtilityService(request.app)
+        idpmodel=utilService.updateKnativeJobStatus(body)
+        log.debug('request Payload:' + str(body))
+        if idpmodel is not None:
+           idpmdeldict=idpmodel.__dict__
+           apiResp = ApiResponse(code=status.HTTP_200_OK, status="SUCCESS",
+                data=idpmdeldict)
+           log.debug('response Payload:' + str(apiResp))
+           return apiResp
+    except (UtilityServiceException) as ue:
+           raise HTTPException(**ue.__dict__)
 
-# Method to push data to elastic search
+# POST method to update the triton deployment status of the job in the database
+@router.post('/utilities/update/tritonjobstatus', status_code=status.HTTP_200_OK)
+def updateTritonJobStatus (request: Request, body: TritonJobResponse):
+
+    log=request.app.logger
+    try:
+        utilService = UtilityService(request.app)
+        idpmodel=utilService.updateTritonJobStatus(body)
+        log.debug('request Payload:' + str(body))
+        if idpmodel is not None:
+           idpmdeldict=idpmodel.__dict__
+           apiResp = ApiResponse(code=status.HTTP_200_OK, status="SUCCESS",
+                data=idpmdeldict)
+           log.debug('response Payload:' + str(apiResp))
+           return apiResp
+    except (UtilityServiceException) as ue:
+        raise HTTPException(**ue.__dict__)
+
+# GET method to fetch the jobd etails from the database based on the job id
+@router.get('/utilities/fetch/jobdetails/{id}', status_code=status.HTTP_200_OK)
+def fetchJobDetails (request:Request,id: str, response: Response):
+    
+    log=request.app.logger
+    try:
+        utilService = UtilityService(request.app)
+        idpmodel=utilService.fetchDetails(id)
+        log.debug('request Payload:' + str(id))
+        if idpmodel is not None:
+           idpmdeldict=idpmodel
+           apiResp = ApiResponse(code=status.HTTP_200_OK, status="SUCCESS",
+                data=idpmdeldict)
+           response.status_code=status.HTTP_200_OK
+           log.debug('response Payload:' + str(apiResp))
+           return apiResp
+    except (UtilityServiceException) as ue:  
+        raise HTTPException(**ue.__dict__)
+
+# POST method to update the pipeline job status in the database
+@router.post('/utilities/update/pipelinejobstatus', status_code=status.HTTP_200_OK)
+def updatePipelineJobStatus(request: Request, response: Response,body: PipelineJobResponse):
+    
+    log=request.app.logger
+    try:
+        utilService = UtilityService(request.app)
+        idpmodel=utilService.updatePipelineJobStatus(body)
+        log.debug('request Payload:' + str(body))
+        if idpmodel is not None:
+           idpmdeldict=idpmodel.__dict__
+           apiResp = ApiResponse(code=status.HTTP_200_OK, status="SUCCESS",
+                data=idpmdeldict)
+           response.status_code=status.HTTP_200_OK
+           log.debug('response Payload:' + str(apiResp))
+           return apiResp
+    except (UtilityServiceException) as ue:
+        raise HTTPException(**ue.__dict__)
+
+# POST method to update the delete deployment job status in the database        
+@router.post('/utilities/update/deleteDeploymentjobstatus', status_code=status.HTTP_200_OK)
+def deleteDeploymentJobStatus (request: Request, response: Response,body: DeleteDeploymentJobResponse): 
+    log=request.app.logger
+    try:
+        utilService = UtilityService(request.app)
+        idpmodel=utilService.updateDeleteDeploymentJobStatus(body)
+        log.debug('request Payload:' + str(body))
+        if idpmodel is not None:
+           idpmdeldict=idpmodel.__dict__
+           apiResp = ApiResponse(code=status.HTTP_200_OK, status="SUCCESS",
+                data=idpmdeldict)
+           response.status_code=status.HTTP_200_OK
+           log.debug('response Payload:' + str(apiResp))
+           return apiResp
+    except (UtilityServiceException) as ue:
+        raise HTTPException(**ue.__dict__)
+        
+# GET method to get AuthSession Token
+@router.get('/utilities/getAuthSessionToken', status_code=status.HTTP_200_OK)
+def getAuthSessionToken(request: Request, response: Response) -> str:
+
+    log=request.app.logger
+    try:
+        utilService = UtilityService(request.app)
+        auth_session=utilService.get_auth_session_token()
+        if auth_session is not None:
+           log.debug('request Payload:' + str(auth_session["session_cookie"]))
+           token=auth_session["session_cookie"]
+           return token
+        else:
+            return "Error"
+    except (UtilityServiceException) as ue:
+        raise HTTPException(**ue.__dict__)
+
+# POST method to update the pipeline job status in the database
+@router.post('/utilities/update/pipelinestatus', status_code=status.HTTP_200_OK)
+def updatePipelineStatus(request: Request, response: Response,body: PipelineJobResponse):  
+    log=request.app.logger
+    try:
+        utilService = UtilityService(request.app)
+        idpmodel=utilService.updatePipelineStatus(body)
+        log.debug('request Payload:' + str(body))
+        if idpmodel is not None:
+           idpmdeldict=idpmodel.__dict__
+           apiResp = ApiResponse(code=status.HTTP_200_OK, status="SUCCESS",
+                data=idpmdeldict)
+           response.status_code=status.HTTP_200_OK
+           log.debug('response Payload:' + str(apiResp))
+           return apiResp
+    except (UtilityServiceException) as ue:
+        raise HTTPException(**ue.__dict__)
+        
+# POST method to update the delete endpoint job status in the database 
+@router.post('/utilities/update/deleteEndpointjobstatus', status_code=status.HTTP_200_OK)
+def deleteEndpointJobStatus (request: Request, response: Response,body: DeleteEndpointJobResponse):
+    log=request.app.logger
+    try:
+        utilService = UtilityService(request.app)
+        idpmodel=utilService.updateEndpointJobStatus(body)
+        log.debug('request Payload:' + str(body))
+        if idpmodel is not None:
+           idpmdeldict=idpmodel.__dict__
+           apiResp = ApiResponse(code=status.HTTP_200_OK, status="SUCCESS",
+                data=idpmdeldict)
+           response.status_code=status.HTTP_200_OK
+           log.debug('response Payload:' + str(apiResp))
+           return apiResp
+    except (UtilityServiceException) as ue:
+        raise HTTPException(**ue.__dict__)
+
+# POST method to pushData to ElasticSearch
 @router.post('/utilities/elasticsearch/push', status_code=status.HTTP_200_OK)
 def pushDatatoES(request: Request, response: Response,body: ESBulkData):
     log=request.app.logger
@@ -65,7 +208,6 @@ async def search_elasticsearch(request: Request, response: Response,modality: st
     date = datetime.datetime.utcnow()
     utc_time = calendar.timegm(date.utctimetuple())
     date_time_stamp = datetime.datetime.fromtimestamp(utc_time).strftime("%Y-%m-%d %I:%M:%S %p")
-
     try:
         utilService = UtilityService(request.app)
         body = await request.json()
@@ -75,7 +217,6 @@ async def search_elasticsearch(request: Request, response: Response,modality: st
             return ResponseData(response=res['data'], responseCde=API_RESPONSE_CDE_SUCCESS, responseMsg=API_RESPONSE_MSG_SUCCESS, timestamp=date_time_stamp, responseTimeInSecs=(elapsed_time))
         else:
             return ResponseData(response=None, responseCde=API_RESPONSE_CDE_FAILURE, responseMsg=API_RESPONSE_MSG_FAILURE, timestamp=date_time_stamp, responseTimeInSecs=(elapsed_time))
-
     except Exception as e:
         #logger.error(e)
         elapsed_time = round(time.time() - start_time, 3)
@@ -91,13 +232,11 @@ async def filter_elasticsearch(request: Request, modality:str):
 async def filter_elasticsearch(request: Request, modality:str):
     return await filter_elasticsearch(request, modality, "_count")
 
-
 async def filter_elasticsearch(request: Request, modality, reqType):
     start_time = time.time()
     date = datetime.datetime.utcnow()
     utc_time = calendar.timegm(date.utctimetuple())
     date_time_stamp = datetime.datetime.fromtimestamp(utc_time).strftime("%Y-%m-%d %I:%M:%S %p")
-
     try:
         utilService = UtilityService(request.app)
         body = await request.json()
@@ -107,7 +246,6 @@ async def filter_elasticsearch(request: Request, modality, reqType):
             return ResponseData(response=res['data'], responseCde=API_RESPONSE_CDE_SUCCESS, responseMsg=API_RESPONSE_MSG_SUCCESS, timestamp=date_time_stamp, responseTimeInSecs=(elapsed_time))
         else:
             return ResponseData(response=None, responseCde=API_RESPONSE_CDE_FAILURE, responseMsg=API_RESPONSE_MSG_FAILURE, timestamp=date_time_stamp, responseTimeInSecs=(elapsed_time))
-
     except Exception as e:
         elapsed_time = round(time.time() - start_time, 3)
         return ResponseData(response=None, responseCde=API_RESPONSE_CDE_FAILURE, responseMsg=API_RESPONSE_MSG_FAILURE, timestamp=date_time_stamp, responseTimeInSecs=(elapsed_time))

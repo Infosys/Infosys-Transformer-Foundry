@@ -1,0 +1,21 @@
+# ===============================================================================================================#
+# Copyright 2025 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+#[dev-packages]
+lib/aicloudlibs-0.1.0-py3-none-any.whl
+pytest==7.3.1
+pytest-cov==2.12.1
+autopep8==1.5.1
+pylint==2.4.4
+
+#[packages]
+uvicorn
+fastapi==0.83.0
+python-multipart==0.0.6
+aiofiles==23.1.0
+pymongo==3.13.0
+regex
+python-dotenv==1.0.0

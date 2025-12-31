@@ -64,7 +64,6 @@ CODE_METRIC_ERROR = "metric name is not applicable for code modality"
 TEXT_METRIC_ERROR = "metric name is not applicable for text modality"
 EMBEDDING_METRIC_ERROR = "metric name is not applicable for embedding modality"
 
-
 BENCHMARK_TYPE_REQUIRED = "Type should not be empty"
 BENCHMARK_TYPE_VALUE_ERROR="BenchmarkType should be either code, text or embedding"
 BENCHMARK_CONFIG_EMPTY_ERROR="Benchmarkconfig should not be empty"

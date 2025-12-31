@@ -22,8 +22,6 @@ class MLOpsException(Exception, ABC):
         super().__init__(message)
         super().__init__(code)
     
-
-
 class DbConnectionError(MLOpsException):
   pass
 

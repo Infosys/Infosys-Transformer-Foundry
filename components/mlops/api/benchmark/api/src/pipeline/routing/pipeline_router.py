@@ -29,7 +29,6 @@ from typing import List, Optional
 router = APIRouter()
 log_formatter = LogFormatter('Benchmark Management')
 
-
 def _get_encoded_response(data: dict):
     dumped_data = json_util.dumps(data, indent=4, default=json_util.default)
     page_sanitized = json.loads(dumped_data, object_hook=json_util.object_hook)
@@ -139,7 +138,6 @@ async def list_dataset(request: Request,benchmarkType: Benchmarktype , task: str
 @router.get("/benchmarks", response_model=dict, responses={HTTP_NOT_AUTHORIZED_ERROR: {"model": NotAuthorizedError}, HTTP_STATUS_INTERNAL_SERVER_ERROR: {"model": InternalServerError}})
 def list_benchmark(request: Request, projectId: str, userId: str = Header(convert_underscores=False)):
 
-    # projectId = "b1795b13a99d45278b5209fc96fc1135"
     log = request.app.logger
     log_formatter.set_prefixes('list benchmarkPipeline', userId, 'NA')
     try:
@@ -147,11 +145,7 @@ def list_benchmark(request: Request, projectId: str, userId: str = Header(conver
         service_obj = service(request.app)
         benchmark_list = service_obj.list_benchmark(request, projectId, userId)
         log.debug(log_formatter.get_msg("response : " + str(benchmark_list)))
-        response = {
-            "code" : 200,
-            "status": "Success",
-            "data" :benchmark_list
-        }
+        response = {"code" : 200, "status": "Success", "data" :benchmark_list}
         responseDict = jsonable_encoder(response)
         return responseDict
 

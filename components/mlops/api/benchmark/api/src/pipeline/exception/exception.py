@@ -8,71 +8,42 @@ fileName: exception.py
 description: handles usecase module specific exception
 """
 from fastapi.encoders import jsonable_encoder
-# import sys, traceback
-# from aicloudlibs.constants import errorCodes
-# from aicloudlibs.constants import error_constants
-# from aicloudlibs.constants.error_constants import ErrorCode
 from aicloudlibs.constants.http_status_codes import *
 from aicloudlibs.schemas.global_schema import ApiErrorResponseModel
-# from aicloudlibs.utils.apiUtils import ApiErrorResponseModel, ApiResponseModel
 from abc import ABC
 from pipeline.constants.local_constants import JENKINSJOBERRORCODE
 
-
 class PipelineException(Exception, ABC):
-
     def __init__(self, status_code: int, detail: str) -> None:
         super().__init__(status_code)
         super().__init__(detail)
 
-
 class InvalidValueError(PipelineException):
     def __init__(self, error_detail):
         self.status_code = HTTP_STATUS_BAD_REQUEST
-        api_err_resp = ApiErrorResponseModel(code=error_detail.value.code, status="FAILURE",
-                                             message=error_detail.value.message)
+        api_err_resp = ApiErrorResponseModel(code=error_detail.value.code, status="FAILURE", message=error_detail.value.message)
         self.detail = jsonable_encoder(api_err_resp)
-
 
 class PipelineAlreadyExistsError(PipelineException):
-
     def __init__(self, error_detail):
         self.status_code = HTTP_STATUS_BAD_REQUEST
-        api_err_resp = ApiErrorResponseModel(code=error_detail.value.code, status="FAILURE",
-                                             message=error_detail.value.message)
+        api_err_resp = ApiErrorResponseModel(code=error_detail.value.code, status="FAILURE", message=error_detail.value.message)
         self.detail = jsonable_encoder(api_err_resp)
-
 
 class RequiredFieldEmptyError(PipelineException):
-
     def __init__(self, error_detail):
         self.status_code = HTTP_STATUS_BAD_REQUEST
-        api_err_resp = ApiErrorResponseModel(code=error_detail.value.code, status="FAILURE",
-                                             message=error_detail.value.message)
+        api_err_resp = ApiErrorResponseModel(code=error_detail.value.code, status="FAILURE", message=error_detail.value.message)
         self.detail = jsonable_encoder(api_err_resp)
-
 
 class TrialAlreadyExistsError(PipelineException):
-
     def __init__(self, error_detail):
         self.status_code = HTTP_STATUS_BAD_REQUEST
-        api_err_resp = ApiErrorResponseModel(code=error_detail.value.code, status="FAILURE",
-                                             message=error_detail.value.message)
+        api_err_resp = ApiErrorResponseModel(code=error_detail.value.code, status="FAILURE", message=error_detail.value.message)
         self.detail = jsonable_encoder(api_err_resp)
-
 
 class JenkinsJobError(PipelineException):
-
     def __init__(self, error_detail):
         self.status_code = HTTP_STATUS_BAD_REQUEST
-        api_err_resp = ApiErrorResponseModel(code=JENKINSJOBERRORCODE, status="FAILURE",
-                                             message=error_detail)
+        api_err_resp = ApiErrorResponseModel(code=JENKINSJOBERRORCODE, status="FAILURE", message=error_detail)
         self.detail = jsonable_encoder(api_err_resp)
-
-
-# class UserPermissionError(PipelineException):
-#     def __init__(self, error_detail):
-#         self.status_code = HTTP_STATUS_BAD_REQUEST
-#         api_err_resp = ApiErrorResponseModel(code=error_detail.value.code, status="FAILURE",
-#                                              message=error_detail.value.message)
-#         self.detail = jsonable_encoder(api_err_resp)

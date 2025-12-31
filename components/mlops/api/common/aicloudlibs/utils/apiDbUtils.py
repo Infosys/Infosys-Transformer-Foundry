@@ -4,7 +4,6 @@
 # http://www.apache.org/licenses/                                                                                #
 # ===============================================================================================================#
 
-
 from pydantic import BaseModel, Field,ValidationError
 from datetime import datetime
 from typing import Optional
@@ -18,8 +17,6 @@ from pymongo import database
 from bson import ObjectId
 
 class APIDBUtils(object):
-    
-     
       @classmethod
       def findOneById(cls,entityName,id):
         mongodb_client=connect_mongodb()

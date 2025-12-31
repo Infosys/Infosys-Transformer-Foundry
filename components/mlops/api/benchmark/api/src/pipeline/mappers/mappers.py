@@ -26,18 +26,15 @@ arg_name_regex =  r'[a-zA-Z0-9_]+$'
 name_regex =  r'[a-zA-Z0-9-]+$'
 num_regex = r'[0-9]+$'
 
-
 class CreateUpdateSchema(BaseModel):
     createdOn: str = datetime
     createdBy: str = None
     modifiedOn: str = datetime
     updatedBy: str = None
 
-
 class StatusSchema(BaseModel):
     runId: str = None
     status: str = None
-
 
 #Benchmark
 class ArgsSchema(BaseModel):
@@ -46,7 +43,6 @@ class ArgsSchema(BaseModel):
 
 class ModelSchema(BaseModel):
     modelName : str
-    #modelId : str
     modelPathorId : Optional[str]
     datatype : str
     quantizeMethod : str
@@ -100,11 +96,6 @@ class BenchmarkPipeline(BaseModel):
     @root_validator(pre=True)
     def validateBenchmark(cls,values):
         errors=[]
-        # projectId=values.get("projectId")
-        # if (projectId is None or (projectId is not None and len(projectId) == 0)):
-        #     error= ValidationError(ErrorCode.PROJECT_ID_REQUIRED)
-        #     print(error)
-        #     errors.append(error)  
 
         name=values.get("name")
         piplnnameEmptyErr=False
@@ -133,7 +124,6 @@ class BenchmarkPipeline(BaseModel):
             errors.append(error)
         
         configuration=values.get("configuration")
-        # print("**************",configuration)
         
         configurationEmptyErr=False
         if (configuration is None or (configuration is not None and len(configuration) == 0)):
@@ -144,7 +134,6 @@ class BenchmarkPipeline(BaseModel):
         if not configurationEmptyErr:
             modelEmptyErr=False
             dataEmptyErr=False
-            # print("**********",configuration.get('model'))
             
             if(configuration.get('model') is None or len(configuration.get('model'))==0):
                 error= ValidationError(ErrorCode.MODEL_EMPTY_ERROR)
@@ -158,7 +147,6 @@ class BenchmarkPipeline(BaseModel):
                     modelPathorIdEmptyErr =False
                     datatypeEmptyErr = False
                     quantizeMethodEmptyErr = False
-                    # print("*********",item.get('modelPathorId'))
                     if (item.get('modelName') is None or (item.get('modelName') is not None and  len(item.get('modelName'))==0)):
                         error= ValidationError(ErrorCode.MODEL_NAME_EMPTY_ERROR)
                         print(error)
@@ -206,11 +194,6 @@ class BenchmarkPipeline(BaseModel):
                     args=item.get("args")
                     print("args:",args)
                     argsEmptyErr=False
-                    # if (args is None or (args is not None and len(args) == 0)):
-                    #     error= ValidationError(ErrorCode.ARGS_EMPTY_ERROR)
-                    #     print(error)
-                    #     errors.append(error)
-                    #     argsEmptyErr=True
                     if (not argsEmptyErr):
                         args=item.get("args")
 
@@ -222,14 +205,12 @@ class BenchmarkPipeline(BaseModel):
                                 error= ValidationError(ErrorCode.MODEL_ARGUMENT_NAME_ERROR)
                                 print(error)
                                 errors.append(error)
-                                nameEmptyErr=True
-                            # print("iiiiii",arg.get('value'))    
+                                nameEmptyErr=True    
                             if (arg.get('value') is None or (arg.get('value') is not None and  len(arg.get('value'))==0)):
                                 error= ValidationError(ErrorCode.MODEL_ARGUMENT_VALUE_ERROR)
                                 print(error)
                                 errors.append(error)
-                                valueEmptyErr=True
-            # print("data:",configuration.get('data'))                        
+                                valueEmptyErr=True                       
             if(configuration.get('data') is None or len(configuration.get('data')) == 0):
                 error= ValidationError(ErrorCode.DATA_EMPTY_ERROR)
                 print(error)
@@ -244,13 +225,11 @@ class BenchmarkPipeline(BaseModel):
                     languageEmptyErr =False
                     batchSizeEmptyErr =False
                     limitEmptyErr =False
-                    # print("name(((((()))))):",item.get('name'))
                     if (item.get('name') is None or (item.get('name') is not None and  len(item.get('name'))==0)):
                         error= ValidationError(ErrorCode.DATASET_NAME_NOT_EMPTY_ERROR)
                         print(error)
                         errors.append(error)
                         nameEmptyErr=True
-                    # print("scope(((((()))))):",item.get('scope'))
                     if (item.get('scope') is None or (item.get('scope') is not None and  len(item.get('scope'))==0)):
                         error= ValidationError(ErrorCode.SCOPE_EMPTY_ERROR)
                         print(error)
@@ -263,13 +242,11 @@ class BenchmarkPipeline(BaseModel):
                             errors.append(error)
                             scopeEmptyErr=True
 
-                    # print("language(((((()))))):",item.get('language'))
                     if (item.get('language') is None or (item.get('language') is not None and  len(item.get('language'))==0)):
                         error= ValidationError(ErrorCode.LANGUAGE_EMPTY_ERROR)
                         print(error)
                         errors.append(error)
                         languageEmptyErrEmptyErr=True
-                    # print("batch(((((()))))):",item.get('batchSize'))
                     if item.get('batchSize') is None:
                         error= ValidationError(ErrorCode.BATCHSIZE_EMPTY_ERROR)
                         print(error)
@@ -293,12 +270,10 @@ class BenchmarkPipeline(BaseModel):
                             print(error)
                             errors.append(error)
                             batchSizeEmptyErr=True
-            # print("((((((((((((()))))))))))))",configuration.get('task'))
             if(configuration.get('task') is None or len(configuration.get('task'))==0):
                 error= ValidationError(ErrorCode.TASK_EMPTY_ERROR)
                 print(error)
                 errors.append(error)
-            # print("!!!!!!!!!!!!",configuration['dataStorage'])
             if(configuration['dataStorage'] is not None and len(configuration['dataStorage'])>0):
                 dataStorage=configuration['dataStorage']
                 dataStorageError=False
@@ -325,7 +300,6 @@ class BenchmarkPipeline(BaseModel):
                 errors.append(error)
 
         resourceConfig=values.get("resourceConfig")
-        
         resourceConfigEmptyErr=False
         if (resourceConfig is None or (resourceConfig is not None and len(resourceConfig) == 0)):
             error= ValidationError(ErrorCode.RESOURCECONFIG_EMPTY_ERROR)
@@ -382,7 +356,6 @@ class BenchmarkPipeline(BaseModel):
                         batchSizeEmptyErr=True  
                     
         if len(errors)>0:
-            #print(len(errors))
             raise RequestValidationError(errors=[
             ErrorWrapper(
                 error,
@@ -390,11 +363,7 @@ class BenchmarkPipeline(BaseModel):
             ),
         ])
         else:
-            return values        
-                       
-                       
-
-
+            return values
 
 class ResponseMessage(BaseModel):
     code: int 
@@ -413,11 +382,9 @@ class PipelineJobStatusEnum(str,Enum):
     InProgress = "INPROGRESS"
     Success = "Succeeded"
     Failure = "Failure"
-    
 
 class PipelineResponseData(BenchmarkPipeline):
     id: str = None
-    #id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     status:PipelineJobStatusEnum=Field()
     class Config:
         allow_population_by_field_name = True
@@ -461,8 +428,6 @@ class ListBenchmarkResponseData(BaseModel):
 class ListBenchmarkResponse(ApiResponse):
     data: Optional[ListBenchmarkResponseData] = None
 
-
-
 class Benchmarktype(str, Enum):
     code = "code"
     text = "text" 
@@ -470,16 +435,10 @@ class Benchmarktype(str, Enum):
     
 class Metadatatype(str, Enum):
     task = "task"
-    #datasets = "datasets"
     modelGenArgs="modelGenArgs"
 
 def ResponseModel(data):
-    return {
-        "code": 200,
-        "status": "SUCCESS",
-        "data": data
-    }
-
+    return {"code": 200, "status": "SUCCESS", "data": data}
 
 def ErrorResponseModel(code, message):
     return {"code": code, "status": "FAILURE", "message": message}

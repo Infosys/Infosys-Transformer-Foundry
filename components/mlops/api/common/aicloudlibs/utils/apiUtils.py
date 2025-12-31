@@ -6,10 +6,8 @@
 
 from aicloudlibs.constants.error_constants import ErrorCode
 
-
 def checkForQuota(totalValue,currentValue, requestedValue):
         availableQuota=totalValue-currentValue
-        
         if requestedValue <= availableQuota:
            return True
         else:
@@ -19,11 +17,9 @@ def getGPUQuotaDetails(reqMemory,computes,reqType):
        minQty=0
        maxQty=0
        for compute in computes:
-         #print(compute)
          if compute['memory']== reqMemory and compute['type'].lower()==reqType.lower() :
            minQty=minQty+compute['minQty']
            maxQty=maxQty+compute['maxQty']
-           
        return minQty,maxQty
        
 def getCPUQuotaDetails(computes):

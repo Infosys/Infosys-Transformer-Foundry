@@ -14,7 +14,6 @@ from pydantic import BaseModel,Field,root_validator
 from bson import ObjectId
 from datetime import datetime
 from typing import Optional, List,Union
-
 from aicloudlibs.schemas.global_schema import AuditableColumns,Compute,ResourceConfig,\
     StorageTypeEnum,Artifacts, NameValuePair,ContainerSpec,PyObjectId,ApiResponse,ValidationError
 from enum import Enum
@@ -34,19 +33,10 @@ class Framework(BaseModel):
     name: str = None
     version: str = None
 
-# class TrainingContainerSpec(BaseModel):
-#     imageURI:str
-#     envVariables: Optional[NameValuePair]=None
-#     ports: Optional[NameValuePair]=None
-#     labels: Optional[NameValuePair]=None
-#     scriptRunCommand: List[str] = None
-    
-
 class JobArgument(BaseModel):
     name: str =None
     defaultVal: Optional[str] = None 
     dataType: str =None
-    #storageType: str = None
 
 class MetricDetails(BaseModel):
     goal: str = None
@@ -76,10 +66,8 @@ class TrainingStep(BaseModel):
     outputArtifactBaseUri:Optional[str]=None
     metricDetails:Optional[MetricDetails]=None
 
-
 class StepCollections(BaseModel):
     trainingStep: TrainingStep
-
 
 class PipelineJobDetails(AuditableColumns):
     projectId: str = None  # Project Object Id
@@ -122,8 +110,6 @@ class PipelineJobDetails(AuditableColumns):
             piplnnameEmptyErr=True
             errors.append(error) 
         
-        
-        
         if (not re.fullmatch(name_regex,name)):
             print("inside alphacheck")
             error= ValidationError(ErrorCode.SPECIAL_CHARS_ERROR)
@@ -132,7 +118,6 @@ class PipelineJobDetails(AuditableColumns):
         if(not piplnnameEmptyErr and len(name)>int(NAME_MAX_LENGTH)):
             error=ValidationError(ErrorCode.NAME_MAX_LENGTH_ERROR)
             errors.append(error)
-
 
         jobArguments=values.get("jobArguments")
         if (jobArguments is None or (jobArguments is not None and len(jobArguments) == 0)):
@@ -162,9 +147,6 @@ class PipelineJobDetails(AuditableColumns):
                        specialcharcheck=True
                 if(not nameEmptyErr and len(arg['name'])>int(NAME_MAX_LENGTH)):
                        maxLengthErr=True
-                # if( arg['storageType'] is not None and len(arg['storageType'])>0 and ( not hasattr(StorageTypeEnum,arg['storageType']))):
-                #         storageTypeErr=True
-                #or storageTypeErr
                 if nameEmptyErr or  dataTypeEmptyErr or dataTypeValueErr or specialcharcheck :
                        break
                 
@@ -183,9 +165,6 @@ class PipelineJobDetails(AuditableColumns):
             if specialcharcheck:
                   error=ValidationError(ErrorCode.JOB_ARGNAME_SPECIAL_CHARS_ERROR)
                   errors.append(error)
-            # if storageTypeErr:
-            #       error=ValidationError(ErrorCode.STORAGE_TYPE_OPTIONS_ERROR)
-            #       errors.append(error)
         
         steps=values.get("steps")
         stepsError=False
@@ -216,7 +195,6 @@ class PipelineJobDetails(AuditableColumns):
                             if(not inputArtifactError and ( not hasattr(StorageTypeEnum,inputArtifacts.get('storageType')))):
                                     error=ValidationError(ErrorCode.STORAGE_TYPE_OPTIONS_ERROR)
                                     errors.append(error)
-
                             if(not inputArtifactError and (inputArtifacts.get('uri') is None or (inputArtifacts.get('uri') is not None and len(inputArtifacts.get('uri'))==0))):
                                     error=ValidationError(ErrorCode.ARTIFACT_URI_EMPTY)
                                     errors.append(error)
@@ -225,21 +203,17 @@ class PipelineJobDetails(AuditableColumns):
                                     error=ValidationError(ErrorCode.ARTIFACTS_URI_VALUE_ERROR)
                                     errors.append(error)
 
-                        if(trainingStep['stepArguments'] is None or (trainingStep['stepArguments'] is not None and trainingStep['stepArguments']['jobArgNames'] is not None and len(trainingStep['stepArguments']['jobArgNames'])==0)):
-                                    
+                        if(trainingStep['stepArguments'] is None or (trainingStep['stepArguments'] is not None and trainingStep['stepArguments']['jobArgNames'] is not None and len(trainingStep['stepArguments']['jobArgNames'])==0)):    
                                     error=ValidationError(ErrorCode.STEPS_ARG_LIST_NOT_EMPTY_ERROR)
                                     errors.append(error)
                         
-                        if(trainingStep['container']is None or(trainingStep['container']is not None and len(trainingStep['container'])==0) ):
-                                    
+                        if(trainingStep['container']is None or(trainingStep['container']is not None and len(trainingStep['container'])==0) ):           
                                     error=ValidationError(ErrorCode.CONTAINER_SPEC_NOT_EMPTY)
                                     errors.append(error)
                                     containerEmptyerr=True
                             
-                        if(not containerEmptyerr ):
-                                  
-                                  containerDet=trainingStep['container']
-                                  
+                        if(not containerEmptyerr ):                                  
+                                  containerDet=trainingStep['container']      
                                   contImageUriEmptyErr=False
                                   if(containerDet.get('imageUri') is None or(containerDet.get('imageUri') is not None and len(containerDet.get('imageUri'))==0)):
                                      error=ValidationError(ErrorCode.CONTAINER_IMAGE_URI_EMPTY)
@@ -272,12 +246,10 @@ class PipelineJobDetails(AuditableColumns):
                                      if(preTrainedModelDet.get('version') is None or(preTrainedModelDet.get('version') is not None and len(preTrainedModelDet.get('version'))==0)):
                                           error=ValidationError(ErrorCode.PRETRAINED_MODEL_VERSION_EMPTY)
                                           errors.append(error)
-
                                      if(preTrainedModelDet.get('artifacts') is None or(preTrainedModelDet.get('artifacts') is not None and len(preTrainedModelDet.get('artifacts'))==0)):
                                           error=ValidationError(ErrorCode.PRETRAINED_ARTIFACTS_EMPTY_ERROR)
                                           errors.append(error)
                                           artifactsemptyError=True
-
                                      if not artifactsemptyError:
                                             pretraind_artifacts=preTrainedModelDet['artifacts']
                                             pretraind_artifactsErr=False
@@ -288,13 +260,11 @@ class PipelineJobDetails(AuditableColumns):
                                                     pretraind_artifactsErr=True
                                             if(not pretraind_artifactsErr and ( not hasattr(StorageTypeEnum,pretraind_artifacts.get('storageType')))):
                                                     error=ValidationError(ErrorCode.STORAGE_TYPE_OPTIONS_ERROR)
-                                                    errors.append(error)
-                                            
+                                                    errors.append(error)                                       
                                             if(not pretraind_artifactsErr and (pretraind_artifacts.get('uri') is None or (pretraind_artifacts.get('uri') is not None and len(pretraind_artifacts.get('uri'))==0))):
                                                     error=ValidationError(ErrorCode.ARTIFACT_URI_EMPTY)
                                                     errors.append(error)
                                                     pretrainedArtifactUriError=True
-
                                             if(not pretrainedArtifactUriError and (not pretraind_artifacts.get('uri').startswith("s3://"))):
                                                     error=ValidationError(ErrorCode.ARTIFACTS_URI_VALUE_ERROR)
                                                     errors.append(error)
@@ -312,14 +282,8 @@ class PipelineJobDetails(AuditableColumns):
                                     if(metrcdet.get('logFileUri') is None or (metrcdet.get('logFileUri') is not None and len(metrcdet.get('logFileUri'))==0 )):
                                          error=ValidationError(ErrorCode.METRICDETAILS_LOG_FILE_URI_EMPTY)
                                          errors.append(error)
-                        
 
-                                    
-                                    
-                                     
-        #print(errors)
         if len(errors)>0:
-            #print(len(errors))
             raise RequestValidationError(errors=[
             ErrorWrapper(
                 error,
@@ -328,11 +292,6 @@ class PipelineJobDetails(AuditableColumns):
         ])
         else:
             return values
-        
-
-
-    
-    
 
 class RunArguments(BaseModel):
     name: str = None
@@ -341,7 +300,6 @@ class RunArguments(BaseModel):
 class PipelineTrial(AuditableColumns):
     projectId:str=None
     pipelineId:str=None
-    #version:str=None
     name:str=None
     jobId: str=Field(None,hidden=True)
     kubeflowRunId: str=Field(None,hidden=True)
@@ -429,14 +387,11 @@ class PipelineTrial(AuditableColumns):
                     error= ValidationError(ErrorCode.RUN_ARG_NAME_EMPTY_ERROR)
                     errors.append(error)
                     runArgNameEmptyErr=True
-                    
-                
+
                 if (runArg.get("argValue") is None or (runArg.get("argValue") is not None and len(runArg.get("argValue"))==0)):
                     error= ValidationError(ErrorCode.RUN_ARG_VALUE_EMPTY_ERROR)
                     errors.append(error)
-                    
-                
-        
+
         resourceConfig=values.get("resourceConfig")
         
         resourceConfigEmptyErr=False
@@ -447,8 +402,7 @@ class PipelineTrial(AuditableColumns):
             resourceConfigEmptyErr=True
         if not resourceConfigEmptyErr:
              computeEmptyErr=False
-             
-             
+  
              if(resourceConfig.get('volumeSizeinGB') is None ):
                   error= ValidationError(ErrorCode.VOLUME_EMPTY_ERROR)
                   print(error)
@@ -494,15 +448,12 @@ class PipelineTrial(AuditableColumns):
                              print(error)
                              errors.append(error)
                              computeTypeInstanceErr=True
-                       
-                        
+                   
                        if(not computeTypeEmptyErr and not computeTypeInstanceErr and compute.get('maxQty') < compute.get('minQty')):
                              error= ValidationError(ErrorCode.RESOURCE_QTY_ERROR)
                              print(error)
                              errors.append(error)
 
-
-        
         if len(errors)>0:
             print(errors)
             raise RequestValidationError(errors=[
@@ -513,9 +464,6 @@ class PipelineTrial(AuditableColumns):
         ])
         else:
             return values
-        
-       
-    
 
 class TrialStatusEnum(str,Enum):
     Initiated="Initiated"
@@ -524,8 +472,6 @@ class TrialStatusEnum(str,Enum):
     Failed="Failed"
     Error="Error"
 
-
-
 class PipelineJobStatusEnum(str,Enum):
     Created="Created"
     Updated="Updated"
@@ -533,7 +479,6 @@ class PipelineJobStatusEnum(str,Enum):
 
 class PipelineResponseData(PipelineJobDetails):
     id: str = None
-    #id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     status:PipelineJobStatusEnum=Field(default=PipelineJobStatusEnum.Created)
     class Config:
         allow_population_by_field_name = True
@@ -544,10 +489,7 @@ class PipelineResponseData(PipelineJobDetails):
             props = {}
             for k, v in schema.get('properties', {}).items():
                  props[k] = v
-            schema["properties"] = props
-        
-        
-        
+            schema["properties"] = props   
 
 class PipelineResponse(ApiResponse):
     data: Optional[PipelineResponseData] = None
@@ -582,7 +524,6 @@ class TrialResponseData(PipelineTrial):
                  props[k] = v
             schema["properties"] = props
 
-
 class TrialResponse(ApiResponse):
     data: Optional[TrialResponseData] = None
 
@@ -593,6 +534,5 @@ class GetTrialResponse(ApiResponse):
     data: Optional[GetTrialResponseData] = None
 
 def ResponseModel(data):
-    api_response=ApiResponse(code=200, status="SUCCESS",
-                data=data)
+    api_response=ApiResponse(code=200, status="SUCCESS", data=data)
     return api_response    

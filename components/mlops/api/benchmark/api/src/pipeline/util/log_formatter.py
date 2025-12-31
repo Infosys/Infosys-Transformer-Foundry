@@ -38,33 +38,3 @@ class LogFormatter():
         convert the message into a standard format
         '''
         return LOG_FORMAT.format(self.prefix, message)
-
-    # def debug(self, msg: str):
-    #     '''
-    #     Call the log debug method with formatted message
-    #     '''
-    #     self.log.debug(self._format_msg(msg))
-
-    # def info(self, msg,):
-    #     '''
-    #     Call the log Info method with formatted message
-    #     '''
-    #     self.log.info(self._format_msg(msg))
-
-    # def warning(self, msg):
-    #     '''
-    #     Call the log warning method with formatted message
-    #     '''
-    #     self.log.warning(self._format_msg(msg))
-
-    # def error(self, msg):
-    #     '''
-    #     Call the log error method with formatted message
-    #     '''
-    #     self.log.warning(self._format_msg(msg))
-
-    # def critical(self, msg):
-    #     '''
-    #     Call the log critical method with formatted message
-    #     '''
-    #     self.log.critical(self._format_msg(msg))

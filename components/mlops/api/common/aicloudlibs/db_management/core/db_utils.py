@@ -29,28 +29,8 @@ database_name=os.getenv("DATABASE_NAME")
 max_conn=db_param['maximum_conn_count']
 min_conn=db_param['minimum_conn_count']
 
-
-# async def connect_to_mongo():
-#      log.info("Enters connect_to_mongo Method: ")
-#      log.debug("Connecting to Mongo DB: "+mongodb_url)
-     
-     
-#      db.client = AsyncIOMotorClient(mongodb_url,
-#                                    maxPoolSize=max_conn,
-#                                    minPoolSize=min_conn)
-     
-#      log.info("Connected DB Successfully ")
-
-# async def close_mongo_connection():
-#      log.info("Enters close_mongo_connection Method: ")
-#      db.client.close()
-#      log.info("Closed DB Connection Successfully ")
-
-
 def connect_mongodb():
      log.info("Enters connect_to_mongo Method: ")
-     #log.debug("Connecting to Mongo DB: "+mongodb_url)
-     #print("Connecting to Mongo DB: "+mongodb_url)
      
      dbclient =MongoClient(mongodb_url)
      log.info("Connected DB Successfully ")

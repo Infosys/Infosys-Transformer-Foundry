@@ -1,0 +1,251 @@
+# ===============================================================================================================#
+# Copyright 2025 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+import groovy.json.JsonOutput
+import groovy.json.*
+pipeline {
+    agent any
+
+environment{
+	props=load "/var/lib/jenkins_scripts/Prod/mlops_env.properties"
+	app =""
+	errMsg=""
+	errorInfo=""
+	runid=""
+	errorDescription=""            
+	}
+
+    parameters{
+		string(name: 'jobId', defaultValue: '', description: '')
+		string(name: 'deployEnv', defaultValue: '', description: '')
+    }
+stages{
+    stage('Loading Environment Variables') {
+            steps {
+                script {
+                try{
+            env.WORKSPACE_PATH="$WORKSPACE_PATH"
+            env.JENKINS_URL="$JENKINS_URL"
+            def props=load "/var/lib/jenkins_scripts/Prod/mlops_env.properties"
+            
+            switch(deployEnv){
+                case "PRODUCTION":
+                       env.GET_PIPELINE_INPUT_DET="$PROD_AICLD_GET_PIPELINE_INPUT_DET_URL"
+                       env.RETURN_URL="$PROD_AICLD_PIPELINE_RETURN_URL"
+                       env.MINIO_BUCKETNAME="$MINIO_PRODUCTION_BUCKETNAME"
+                       env.MINIO_CREDS="$MINIO_PRODUCTION_CREDS"
+                       env.MINIO_HOST="$MINIO_PRODUCTION_HOST"
+                       env.MINIO_TARGET="$MINIO_PRODUCTION_TARGET"
+                       env.COOKIE_URL="$PROD_PIPL_SESS_URL"
+                       env.KUBE_CONFIG="$KUBE_CONFIG_PROD"
+                       break;
+
+               case "CONTAINER":
+                        env.MINIO_BUCKETNAME="$MINIO_CONTAINER_BUCKETNAME"
+                        env.MINIO_CREDS="$MINIO_CONTAINER_CREDS"
+                        env.MINIO_HOST="$MINIO_CONTAINER_HOST"
+                        env.MINIO_TARGET="$MINIO_CONTAINER_TARGET"
+                        env.RETURN_URL="$RETURN_URL_CONTAINER"
+                        env.COOKIE_URL="$COOKIE_URL_CONTAINER"
+                        break;
+                case "DEVELOPMENT":
+                        env.GET_PIPELINE_INPUT_DET="$DEV_AICLD_GET_PIPELINE_INPUT_DET_URL"
+                        env.MINIO_BUCKETNAME="$MINIO_PRODUCTION_BUCKETNAME"
+                        env.MINIO_CREDS="$MINIO_PRODUCTION_CREDS"
+                        env.MINIO_HOST="$MINIO_PRODUCTION_HOST"
+                        env.MINIO_TARGET="$MINIO_PRODUCTION_TARGET"
+                        env.RETURN_URL="$DEV_AICLD_PIPELINE_RETURN_URL"
+                        env.COOKIE_URL="$DEV_PIPL_SESS_URL"
+                        env.KUBE_CONFIG="$KUBE_CONFIG_PROD"
+                        break;
+                default:
+                        env.MINIO_BUCKETNAME="$MINIO_DEVELOPMENT_BUCKETNAME"
+                        env.MINIO_CREDS="$MINIO_DEVELOPMENT_CREDS"
+                        env.MINIO_HOST="$MINIO_DEVELOPMENT_HOST"
+                        env.MINIO_TARGET="$MINIO_DEVELOPMENT_TARGET"
+                        env.RETURN_URL="$DEV_AICLD_PIPELINE_RETURN_URL"
+                }
+                
+                env.RETURN_URL = env.RETURN_URL.replace("pipelinejobstatus", "pipelinestatus")
+                echo "$RETURN_URL"
+                }catch(err){
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    errorInfo= "Run Trial Pipeline job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}."
+                    throw err
+                }       
+              }
+            }
+            }
+    stage('Get Input Details') {
+        steps{
+                script{
+                def errormsg = "Utility Service is Down, Please try again after sometime or contact administrator"
+                try {
+                    /* Invoke the yaml download api service */
+                    input=sh(returnStdout: true, script:'''curl --request GET --url $GET_PIPELINE_INPUT_DET/${jobId}''')
+                    def jsonSlurper = new JsonSlurper()
+                    def inputdata = jsonSlurper.parseText(input)
+                     if(inputdata.status == "FAILURE"){
+                         errormsg = inputdata.message
+                         throw new Exception(errormsg)
+                     }
+                    env.pipeline_run_name = inputdata.data.inputData.runName
+                    if (env.deployEnv == 'PRODUCTION'){
+                        env.namespace = "$PROD_NAMESPACE"
+                        env.pipelineUrl= "$PROD_PIPELINE_URL"                         
+                     }else if(env.deployEnv == 'DEVELOPMENT'){
+                        env.YAML_URL = "$DEV_PIPELINE_YAML_DOWNLOAD_URI"
+                        env.namespace = "$DEV_NAMESPACE"
+                        env.pipelineUrl= "$DEV_PIPELINE_URL"
+                     }
+                     def func_args =""
+                     run_arg_name = ""
+                     pipeline_args_json ="{"
+                     format_brackets = ""
+                     train_args = ""
+                     i = 0
+                     for(run_arg in inputdata.data.inputData.runArguments){
+                         i = i + 1
+                         format_brackets = format_brackets + "{} {} "
+                         run_arg_name = run_arg_name + run_arg.name +","
+                         train_args = train_args + "\\x27--" + run_arg.name + "\\x27, " + run_arg.name + ","
+                         pipeline_args_json = pipeline_args_json + "\"" + run_arg.name + "\": \"" + run_arg.argValue + "\","
+                     }  
+                     pipeline_args_json = pipeline_args_json[0..pipeline_args_json.size()-2]
+                     env.p_args = pipeline_args_json + "}"
+                     env.pipeline_name = inputdata.data.inputData.pipelineName
+                     env.yaml_id = inputdata.data.inputData.yamlId
+                    }
+                catch(err){
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    base_error_msg = "Run Trail Pipeline build job ${currentBuild.number} (correlationId= ${jobId})"
+                    errorInfo = base_error_msg + " failed in stage ${env.STAGE_NAME}."
+                    print(errorInfo + " -" + errormsg)
+                    errorInfo = "Error Occured while running the trail, Please contact Administrator for further assistance.Ref Id:${currentBuild.number} (correlationId= ${jobId}) "
+                    throw err
+                    }
+                    catch(Exception ex){
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    base_error_msg = "Run Trail Pipeline build job ${currentBuild.number} (correlationId= ${jobId})"
+                    errorInfo = base_error_msg + " failed in stage ${env.STAGE_NAME}."
+                    print(errorInfo + " -" + errormsg)
+                    errorInfo = "Error Occured while running the trail, Please contact Administrator for further assistance.Ref id :${currentBuild.number}(correlationId= ${jobId}) "
+                    throw ex
+                    }
+                }
+            }
+        }
+    stage('Create Temporary Path') {
+        steps{
+            script{
+            try {
+                sh'''
+                cd ${WORKSPACE_PATH}/input/RunPipeline
+                mkdir $jobId
+                cd $jobId
+                '''	
+                }
+            catch(err){
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    errorInfo= "Error Occured while running the trail, Please contact Administrator for further assistance.Ref id :${currentBuild.number}(correlationId= ${jobId}) "
+                    throw err
+                }
+            }
+        }
+    }
+    stage('Validate YAML') {
+        steps{
+                script{
+		def filePath= "${WORKSPACE_PATH}/input/RunPipeline/${params.jobId}/pipeline.yaml"
+                try {
+                      sh """
+               		cd ${WORKSPACE_PATH}/input/RunPipeline/$jobId
+                	cp ${WORKSPACE_PATH}/utils/prod/Validate_pipeline_template_v2.py ${WORKSPACE_PATH}/input/RunPipeline/$jobId
+                	cd ${WORKSPACE_PATH}/input/RunPipeline/$jobId
+                	python3 Validate_pipeline_template_v2.py $GET_PIPELINE_INPUT_DET/$jobId ${WORKSPACE_PATH}/input/RunPipeline/$jobId
+                	python3 ${WORKSPACE_PATH}/input/RunPipeline/$jobId/code_generation.py 
+                """
+		if (fileExists(filePath)) {
+		env.output = "Success"
+		print("Successflly yaml file generated")
+		}
+		else{
+		errormsg= "Yaml file not generated"
+                throw new Exception(errormsg)		
+		}
+		 }
+                catch(err){
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    print("inside err")
+                    base_error_msg = "Run Trail Pipeline build job ${currentBuild.number} (correlationId= ${jobId})"
+                    errorInfo = base_error_msg + " failed in stage ${env.STAGE_NAME}."
+                    print(errorInfo + " -" + errormsg)
+                    errorInfo = "Error Occured while running the trail, Please contact Administrator for further assistance.Ref Id:${currentBuild.number} (correlationId= ${jobId}) "
+                    throw err
+                    }
+                 catch(Exception ex){
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    base_error_msg = "Run Trail Pipeline build job ${currentBuild.number} (correlationId= ${jobId})"
+                    errorInfo = base_error_msg + " failed in stage ${env.STAGE_NAME}."
+                    print(errorInfo + " -" + errormsg)
+                    errorInfo = "Error Occured while running the trail, Please contact Administrator for further assistance.Ref id :${currentBuild.number}(correlationId= ${jobId}) "
+                    throw ex
+                    }
+
+                }
+           }
+        }
+}
+post {
+	always {
+		script {
+			sh"""
+			cd ${WORKSPACE_PATH}/input/RunPipeline
+			rm -rf $JOBID   
+			"""
+		}
+	}
+    	success {
+		script {
+			env.errorMsg= ''
+             if (env.deployEnv == 'PRODUCTION')
+			 {
+			COOKIE=sh(returnStdout: true, script:'''curl --request POST --url $COOKIE_URL''')
+			echo "$COOKIE"
+			 sh"""
+			 curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":"SUCCESS","runId":"","errorMsg":\"${errorMsg}\"}'			 """
+			 }
+			 else
+			 {
+			 sh"""
+			 curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":"SUCCESS","runId":"","errorMsg":\"${errorMsg}\"}'
+			 """
+			 }
+		}
+	}
+	failure {
+		script {
+			env.errorMsg="$errorInfo"
+			echo "$errorMsg"
+			echo "$deployEnv"
+            if (env.deployEnv == 'PRODUCTION')
+			{
+			COOKIE=sh(returnStdout: true, script:'''curl --request POST --url $COOKIE_URL''')
+			echo "$COOKIE"
+			sh"""
+			curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":"FAILURE","runId":"","errorMsg":\"${errorMsg}\"}'
+			 """
+			 }
+			 else
+			 {
+			 sh"""
+			 curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":"FAILURE","runId":"","errorMsg":\"${errorMsg}\"}'
+			 """
+			 }	
+		}
+	} 
+}
+}

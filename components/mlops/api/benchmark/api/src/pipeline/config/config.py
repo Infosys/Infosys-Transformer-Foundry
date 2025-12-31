@@ -6,7 +6,6 @@
 
 from configparser import ConfigParser
 
-
 # method to read the config file
 def readConfig(section,filename):
     # create a parser

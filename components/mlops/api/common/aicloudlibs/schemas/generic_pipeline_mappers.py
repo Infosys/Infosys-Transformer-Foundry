@@ -4,7 +4,6 @@
 # http://www.apache.org/licenses/                                                                                #
 # ===============================================================================================================#
 
-
 """
 fileName: pipeline_mappers.py
 description: A Pydantic model object for pipeline entity model 
@@ -31,7 +30,6 @@ arg_name_regex =  r'[a-zA-Z0-9_]+$'
 name_regex =  r'[a-z0-9-]+$'
 num_regex = r'[0-9]+$'
 
-
 class Storage(BaseModel):
     class Config:
         extra = Extra.forbid
@@ -50,15 +48,12 @@ class VolumeDetails(BaseModel):
 class KeyValuePair(BaseModel):
     __root__: Dict[str, str]
 
-
 class StepConfig(BaseModel):
     class Config:
         extra = Extra.forbid
     entryPoint: List[str]
     stepArguments: Optional[List[str]]
     imageUri: str
-
-
 
 class StepDetails(BaseModel):
     class Config:
@@ -74,8 +69,6 @@ class StepDetails(BaseModel):
 class Step(BaseModel):
     __root__: Dict[str, StepDetails]
 
-
-
 class MultiStepPipeline(BaseModel):
     class Config:
         extra = Extra.forbid
@@ -88,8 +81,6 @@ class MultiStepPipeline(BaseModel):
     flow: Step
     variables: KeyValuePair
     globalVariables: KeyValuePair
-
-    
 
 class Pipeline(BaseModel):
  
@@ -341,7 +332,6 @@ class Pipeline(BaseModel):
                                      error = ValidationError( ErrorCode.ENTRYPOINT_EMPTY_LIST_ERROR)
                                      errors.append(error)
                                      
-
                              imageUriData = stepConfigData.get('imageUri')
                              contImageUriEmptyErr=False
                              if imageUriData is None or (imageUriData is not None and len(imageUriData)==0):
