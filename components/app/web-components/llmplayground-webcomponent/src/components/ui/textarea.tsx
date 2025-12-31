@@ -1,0 +1,31 @@
+/** ================================================================================================================# *
+ * # ===============================================================================================================# *
+ * # Copyright 2025 Infosys Ltd.                                                                                    # *
+ * # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  # *
+ * # http://www.apache.org/licenses/                                                                                # *
+ * # ===============================================================================================================# *
+ **/
+import * as React from "react"
+
+import { cn } from "../../lib/utils"
+
+export interface TextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <textarea
+        className={cn(
+          "resize-none rounded-md border border-slate-300 bg-transparent py-2 px-3 text-base placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-50 dark:focus:ring-slate-400 dark:focus:ring-offset-slate-900",
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Textarea.displayName = "Textarea"
+
+export { Textarea }

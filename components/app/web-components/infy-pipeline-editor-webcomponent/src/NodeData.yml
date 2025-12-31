@@ -1,0 +1,51 @@
+nodePanelSchema:
+  - group: Generic
+    nodes:
+      - label: Node
+        propertyNamedRef: custom-1
+  - group: Info extraction
+    nodes:
+      - label: Key Value Extraction
+        propertyNamedRef: custom-1
+      - label: Table Detection
+        propertyNamedRef: custom-1
+      - label: Table Extraction
+        propertyNamedRef: custom-1
+  - group: HayStack
+    nodes:
+      - label: Document Classifier
+        propertyNamedRef: custom-1
+      - label: Pre-Processor
+        propertyNamedRef: custom-1
+
+namedNodePropertySchema:
+  - name: custom-1
+    input:
+      data_path: ""
+      request_id: ""
+    output:
+      new_model_path: ""
+      status: ""
+    stepConfig:
+      entryPoint: "python app.py"
+      stepArguments: "--debug=False"
+      imageUri: "test"
+    resourceConfig:
+      cpuLimit: ""
+      memoryLimit: ""
+      gpuLimit: ""
+  - name: custom-2
+    input:
+      data_path: ""
+      request_id: ""
+    output:
+      status: ""
+    stepConfig:
+      entryPoint: "python app.py"
+      stepArguments: "--debug=False"
+      imageUri: "test"
+    resourceConfig:
+      cpuLimit: ""
+      memoryLimit: ""
+      gpuLimit: ""
+

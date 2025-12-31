@@ -1,0 +1,12 @@
+nodeSetting:
+  deletable: true
+  sourcePosition: right
+  targetPosition: left
+  style:
+    fontSize: 6
+    width: auto
+    height: auto
+    padding: 5,
+    background: "#D6D5E6"
+    color: "#333"
+    border: "1px solid #222138"

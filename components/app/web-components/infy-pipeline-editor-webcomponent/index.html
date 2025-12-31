@@ -1,0 +1,260 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>React App</title>
+  </head>
+
+  <body>
+    This is HTML Parent component
+    <br />
+    <div style="border: solid red">
+      This is integrated child webcomponent (ReactFlow wrapper)
+      <pipeline-editor></pipeline-editor>
+    </div>
+    <script>
+      const NODE_DATA = { 
+        nodePanelSchema: [
+          {
+            group: "Generic",
+            nodes: [
+              {
+                label: "Python Node",
+                enabled: true,
+                nodeAttribute: {
+                  namedId: "PythonNode",
+                  uiNamedRef: "customUI",
+                  propertyNamedRef: "custom-1",
+                  parentNamedIds: [],
+                  backgroundColor: "rgb(255,212,128)",
+                },
+              },
+            ],
+          },
+        ],
+        namedNodePropertySchema: {
+          "custom-1": {
+            $ref: "#/definitions/main",
+            definitions: {
+              main: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  name: {
+                    type: "string",
+                    title: "Name",
+                  },
+                  type: {
+                    type: "string",
+                    title: "Type",
+                    default: "generic",
+                  },
+                  imageUri: {
+                    title: "Image URI",
+                    description: "Container image name",
+                    default: "",
+                    type: "string",
+                  },
+                  stepConfig: {
+                    $ref: "#/definitions/StepConfig",
+                  },
+                  resourceConfig: {
+                    $ref: "#/definitions/ResourceConfig",
+                  },
+                },
+                required: ["imageUri"],
+              },
+              Input: {
+                type: "object",
+                properties: {},
+                required: [],
+                title: "Input",
+                default: {},
+                additionalProperties: {
+                  type: "string",
+                  examples: [],
+                },
+              },
+              Output: {
+                type: "object",
+                properties: {},
+                required: [],
+                title: "Output",
+                default: {},
+                additionalProperties: {
+                  type: "string",
+                  examples: [],
+                },
+              },
+              ResourceConfig: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  computes: {
+                    title: "Computes",
+                    type: "array",
+                    minItems: 1,
+                    default: [
+                      {
+                        type: "CPU",
+                        memory: 1,
+                        maxQty: 5,
+                        minQty: 1,
+                      },
+                    ],
+                    items: {
+                      $ref: "#/definitions/Compute",
+                    },
+                  },
+                },
+                required: ["computes"],
+                title: "Resource Configuration",
+              },
+              StepConfig: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  input: {
+                    $ref: "#/definitions/Input",
+                  },
+                  output: {
+                    $ref: "#/definitions/Output",
+                  },
+                  entryPoint: {
+                    title: "Entry Point",
+                    type: "array",
+                    minItems: 1,
+                    items: {
+                      type: "string",
+                    },
+                  },
+                  stepArguments: {
+                    title: "Additional Arguments",
+                    type: "array",
+                    items: {
+                      type: "string",
+                    },
+                  },
+                },
+                required: ["entryPoint"],
+                title: "Configuration",
+              },
+              Compute: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  type: {
+                    title: "Type",
+                    examples: ["CPU", "GPU"],
+                    type: "string",
+                  },
+                  memory: {
+                    title: "Memory in GB",
+                    description: "RAM or GPU memory. e,g. 2GB",
+                    type: "integer",
+                    minimum: 1,
+                  },
+                  maxQty: {
+                    title: "Max Qty",
+                    description: "Max quantity of requested resource",
+                    type: "integer",
+                    minimum: 1,
+                  },
+                  minQty: {
+                    title: "Min Qty",
+                    description: "Min quantity of requested resource",
+                    type: "integer",
+                    minimum: 1,
+                  },
+                },
+                required: [],
+                title: "Compute",
+              },
+            },
+          },
+        },
+        namedNodeUiSchema: {
+          customUI: {
+            name: {
+              "ui:autofocus": true,
+            },
+            type: {
+              "ui:disabled": true,
+            },
+            stepConfig: {
+              input: {
+                additionalProperties: {
+                  "ui:title": "",
+                },
+              },
+              output: {
+                additionalProperties: {
+                  "ui:title": "",
+                },
+              },
+              entryPoint: {
+                items: {
+                  "ui:title": "",
+                },
+              },
+              stepArguments: {
+                items: {
+                  "ui:title": "",
+                },
+              },
+            },
+            resourceConfig: {
+              computes: {
+                "ui:field": "CustomArrayToTableField",
+              },
+            },
+          },
+        },
+        namedFormDefaultData: {
+          PythonNode: {
+            type: "generic",
+            stepConfig: {
+              entryPoint: ["python", ""],
+            },
+          },
+        },
+      };
+
+      const PIPELINE_DATA = {}
+
+      window.addEventListener("load", function () {
+        window.dispatchEvent(
+          new CustomEvent("receiveDataFromParent", {
+            detail: {
+              nodeData: NODE_DATA,
+              // pipeline: PIPELINE_DATA,
+              // isReadOnlyMode: true,
+              pipeline: {},
+              isReadOnlyMode: false,
+            },
+          })
+        );
+      });
+    </script>
+    <script>
+      window.addEventListener("onPipelineChange", function (event) {
+        const data = event.detail; // Access the data sent from the React web component
+        // console.log('onPipelineChange', data);
+      });
+
+      window.addEventListener("onNodeDoubleClick", function (event) {
+        const data = event.detail; // Access the data sent from the React web component
+        // console.log('onNodeDoubleClick', data);
+      });
+    </script>
+  </body>
+</html>

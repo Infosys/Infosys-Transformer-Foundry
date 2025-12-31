@@ -1,0 +1,230 @@
+.dndflow {
+  flex-direction: column;
+  display: flex;
+  flex-grow: 1;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+.dndflow aside .side-panel {
+  border-left: 1px solid #eee;
+  padding: 5px 5px;
+  /* font-size: 12px; */
+  /* background: #fcfcfc; */
+  overflow-y: scroll;
+}
+
+.dndflow aside.node-prop {
+  border-left: 1px solid #eee;
+  /* font-size: 12px; */
+  /* background: #fcfcfc; */
+  overflow-y: scroll;
+  margin-right: -2px;
+}
+
+.dndflow .dndnode {
+  height: 20px;
+  padding: 2px;
+  border: 1px solid black;
+  background-color: rgb(221, 221, 221);
+  border-radius: 2px;
+  margin-bottom: 10px;
+  display: flex;
+  /* font-family: sans-serif;
+  font-size: smaller; */
+  justify-content: center;
+  align-items: center;
+  cursor: move;
+  width: auto;
+  /* margin-left: 22%; */
+  /* font-weight: bold; */
+}
+
+.dndflow .dndnode.input {
+  border-color: #0041d0;
+}
+
+.dndflow .dndnode.output {
+  border-color: #ff0072;
+}
+
+.dndflow .reactflow-wrapper {
+  flex-grow: 1;
+  height: 100%;
+}
+
+.dndflow .selectall {
+  margin-top: 10px;
+}
+
+@media screen and (min-width: 768px) {
+  .dndflow {
+    flex-direction: row;
+  }
+
+  .dndflow aside {
+    width: 15%;
+    max-width: 200px;
+  }
+
+  .dndflow .node-prop {
+    width: 50% !important;
+    max-width: 1000px !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-left: 1px;
+    border-left-style: inset;
+    box-shadow: 0px 0px 10px 10px rgb(44 14 47 / 16%);
+  }
+}
+
+.panel-header {
+  cursor: pointer;
+  display: inline-block;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  font-size: 14px;
+  width: 100%;
+  font-family: "	Myriad Pro", "Roboto";
+  justify-content: center;
+}
+
+.panel-header:hover {
+  background-color: #efefef;
+}
+
+.MuiTypography-h5 {
+  font-size: unset;
+  font-family: unset;
+  font-weight: unset;
+  line-height: unset;
+  letter-spacing: unset;
+}
+
+/* 
+.form-label {
+  text-transform: capitalize;
+} */
+
+.MuiSvgIcon-root {
+  font-size: 1rem !important;
+}
+
+.MuiInputBase-input {
+  font-size: small !important;
+}
+
+.object-field-add-grid {
+  margin-top: -5px !important;
+  margin-left: 1.5rem !important;
+  margin-bottom: -5px !important;
+}
+
+/* hides the react flow logo from bottom right */
+.react-flow__attribution {
+  visibility: hidden;
+}
+
+.react-flow__controls {
+  background-color: #faf2ff;
+}
+
+.icon {
+  display: inline;
+  float: right;
+}
+
+.panel .hr {
+  margin: 0 0 0 0;
+}
+
+.node-prop .header {
+  background-color: rgb(221, 221, 221);
+}
+
+.node-prop .prop-content {
+  height: 80vh !important;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.rjsf {
+  font-size: small;
+  margin-left: 16px;
+}
+input[type="text"],
+input[type="number"] {
+  padding: 3px;
+  font-size: 16px;
+}
+
+button,
+span {
+  /* border: 2px solid #4f0202; */
+}
+
+.array-item-add,
+.object-property-expand {
+  /* float: right; */
+  /* margin-right: -12px;
+  display: inline-block; */
+}
+
+.uiSchema_addBtnRight {
+  float: right;
+}
+
+h6 {
+  margin-top: 0;
+}
+
+.MuiGrid-container {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  /* box-sizing: border-box; */
+  align-content: space-between;
+  justify-content: space-between;
+}
+
+.MuiInputBase-inputMarginDense {
+  padding-top: 5px;
+}
+
+.MuiBox-root-10 {
+  padding-right: 0;
+}
+
+table th,
+td {
+  padding: 5px;
+  text-align: left;
+  vertical-align: top;
+}
+
+table td {
+  align-content: center;
+  padding-bottom: 1px;
+  margin-left: 5px;
+}
+
+.errDiv p {
+  margin: 0px;
+  margin-left: 5px;
+  /* border: RED 1px DOTTED; */
+  padding: 0px;
+}
+
+.kvDiv {
+  justify-content: flex-start;
+  justify-items: flex-start;
+}
+
+.disabled {
+  fill: #9e9e9e;
+  cursor: pointer;
+}
+.disabled:hover {
+  background-color: transparent;
+}

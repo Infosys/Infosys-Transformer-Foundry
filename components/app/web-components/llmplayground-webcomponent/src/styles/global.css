@@ -1,0 +1,67 @@
+/** ================================================================================================================# *
+ * # ===============================================================================================================# *
+ * # Copyright 2025 Infosys Ltd.                                                                                    # *
+ * # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  # *
+ * # http://www.apache.org/licenses/                                                                                # *
+ * # ===============================================================================================================# *
+ **/
+/* Container Styling */
+.tf_container {
+    font-family: "roboto", Arial, sans-serif !important;
+    background: ghostwhite;
+    margin: 0px;
+    padding: 0px;
+  }
+  
+  /* Group Panel Styling */
+  .app_panel {
+    border-radius: 16px;
+    background: #ffffff;
+    min-height: 100px;
+    padding-top: 5px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.16) !important;
+    margin-bottom: 20px;
+  }
+  
+  /* Group Panel Body */
+  .app_panel_body {
+    min-height: 100px;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+    padding-top: 5px !important;
+  }
+  
+  /* Table Row and Column Styling */
+  .tf_table_row {
+    margin-bottom: 20px;
+  }
+  
+  .tf_table_col {
+    padding: 8px 24px;
+  }
+  
+  /* Table Styling */
+  .app_tables {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .app_tables th,
+  .app_tables td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .app_tables th {
+    background-color: #f1f1f1;
+    font-weight: bold;
+  }
+  
+  .app_tables tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .app_tables tr:hover {
+    background-color: #f1f1f1;
+  }
