@@ -15,17 +15,17 @@ Infosys Transformer Foundry solution provides buildings blocks for managing LLM 
 
 ![Features offered](docs/images/features.png)
 
-## Features v1.0
+## Features v1.1
 
-- Model Zoo: Curated list of open source models along with their metadata, lifecycle status and model tagging.
-- Leaderboard: LLM leaderboard for customer data (text, embedding and code) on public/private models for efficient selection of models.
-- Benchmark tool: Allows benchmarking of fine-tuned or open source models.
-
-## Roadmap
-
-- Data Pipelines: Allow users to create custom data processing workflows for their models. 
-- Fine Tuning: User can fine tune a model against custom datasets for tailored results.
-- Model Deployment: Facilitate deployment of curated or fine-tuned models and create access points.
+- [Model Zoo](docs/model_zoo.md): Curated list of open source models along with their metadata, lifecycle status and model tagging.
+- [Leaderboard](docs/leaderboard.md): LLM leaderboard for customer data (text, embedding and code) on public/private models for efficient selection of models.
+- [Benchmark tool](docs/benchmark.md): Allows benchmarking of fine-tuned or open source models.
+- [Data Pipelines](docs/data_pipelines.md): Allow users to create custom data processing workflows for their models. 
+- [Fine Tuning](docs/fine_tuning.md): User can fine tune a model against custom datasets for tailored results.
+- [Model Deployment](docs/model_deployment.md): Facilitate deployment of curated or fine-tuned models and create access points.
+- [Model Playground](docs/model_playground.md): Allows users to test the performance of different models available in the model zoo.
+- [RAG Playground](docs/rag_playground.md): User can ingest documents in real time and leverage RAG for inferencing from them.
+- Dataset Registration: Users have the ability to save datasets, they can then use them during finetuning or benchmarking jobs.
 
 ## Hardware & Software Requirements
 
