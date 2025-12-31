@@ -1,0 +1,529 @@
+# ===============================================================================================================#
+# Copyright 2025 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+{
+    "projectId": "0042088b75364b2db1e5672d2911676e", 
+    "description": "Hybrid indexing pipeline with Parallel segment generator techniques and yolox table layout detection",
+    "pipeline": {
+      "name": "dpp-indexing-pipeline",
+      "version": 1,
+      "operator": "kubeflow",
+      "runtime": "kubernetes",
+      "dataStorage": [
+          {
+        "storageType": "INFY_AICLD_MINIO",
+        "name": "minio",
+        "uri": "s3://"
+          }
+        ],
+      "flow" : {
+      "batchcreator1" : {
+                "type" : "generic",
+                "dependsOn" : [],
+                
+                "input" : {
+                    "processor_name" : "request_creator",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    "prev_proc_response_file_path" : "NULL"
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "metadataextractor1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "batchcreator1"
+                ],
+                
+                "input" : {
+                    "processor_name" : "metadata_extractor",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {%  set prev_proc_response_path = "{{"+"batchcreator1.output.response_file_path"+"}}"  %}
+                    "prev_proc_response_file_path" : "{{prev_proc_response_path}}"
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "contentextractor1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "metadataextractor1"
+                ],
+                
+                "input" : {
+                    "processor_name" : "content_extractor",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {% set  prev_proc_response_path = "{{"+"metadataextractor1.output.response_file_path"+"}}"  %}
+                    "prev_proc_response_file_path" : "metadataextractor1.output.response_file_path"
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "5",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "seggenpdfbox1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "contentextractor1"
+                ],
+                
+                "input" : {
+                    "processor_name" : "segment_generator_pdfbox",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {% set  prev_proc_response_path = "{{"+"contentextractor1.output.response_file_path"+"}}"  %}
+                    "prev_proc_response_file_path" : "contentextractor1.output.response_file_path"
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "seggenpdftableextract1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "contentextractor1"
+                ],
+                
+                "input" : {
+                    "processor_name" : "segment_generator_pdf_table_extract",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {% set prev_proc_response_path = "{{"+"contentextractor1.output.response_file_path"+"}}" %}
+                    "prev_proc_response_file_path" : "contentextractor1.output.response_file_path"
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "seggenpdfimgextract1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "contentextractor1"
+                ],
+               
+                "input" : {
+                    "processor_name" : "segment_generator_pdf_img_extract",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {% set prev_proc_response_path = "{{"+"contentextractor1.output.response_file_path"+"}}" %}
+                    "prev_proc_response_file_path" : "{{prev_proc_response_path}}"
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "segmentdeduplicator1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "seggenpdfbox1", 
+                    "seggenpdftableextract1", 
+                    "seggenpdfimgextract1"
+                ],
+                
+                "input" : {
+                    "processor_name" : "segment_consolidator",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {% set prev_proc_response_path = "{{"+"seggenpdfbox1.output.response_file_path"+"}}" %}
+                    "prev_proc_response_file_path" : "{{prev_proc_response_path}}",
+                    {% set prev_proc_response_path2 = "{{"+"seggenpdftableextract1.output.response_file_path"+"}}" %}
+                    "prev_proc_response_file_path_2" : "{{prev_proc_response_path2}}",
+                    {% set prev_proc_response_path3 = "{{"+"seggenpdfimgextract1.output.response_file_path"+"}}" %}
+                    "prev_proc_response_file_path_2" : "{{prev_proc_response_path3}}"
+                    
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "segmentclassifier1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "segmentdeduplicator1"
+                ],
+                
+                "input" : {
+                    "processor_name" : "segment_classifier",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {% set prev_proc_response_path = "{{"+"segmentdeduplicator1.output.response_file_path"+"}}" %}
+                    "prev_proc_response_file_path" : "{{prev_proc_response_path}}"
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "pagecolumndetector1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "segmentclassifier1"
+                ],
+                
+                "input" : {
+                    "processor_name" : "page_column_detector",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {% set prev_proc_response_path = "{{"+"segmentdeduplicator1.output.response_file_path"+"}}" %}
+                    "prev_proc_response_file_path" : "{{prev_proc_response_path}}"
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "segmentmerger1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "pagecolumndetector1"
+                ],
+                
+                "input" : {
+                    "processor_name" : "segment_merger",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {% set prev_proc_response_path = "{{"+"pagecolumndetector1.output.response_file_path"+"}}" %}
+                    "prev_proc_response_file_path" : "{{prev_proc_response_path}}"
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "segmentsequencer1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "segmentmerger1"
+                ],
+                
+                "input" : {
+                    "processor_name" : "Segment_sequencer",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {% set prev_proc_response_path = "{{"+"segmentmerger1.output.response_file_path"+"}}" %}
+                    "prev_proc_response_file_path" : "{{prev_proc_response_path}}"
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "chunkgenerator1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "segmentsequencer1"
+                ],
+                
+                "input" : {
+                    "processor_name" : "chunk_generator",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {% set prev_proc_response_path = "{{"+"segmentsequencer1.output.response_file_path"+"}}" %}
+                    "prev_proc_response_file_path" : "{{prev_proc_response_path}}"
+                    
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "vectordbindexer1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "chunkgenerator1"
+                ],
+                
+                "input" : {
+                    "processor_name" : "db_indexer",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {% set prev_proc_response_path = "{{"+"chunkgenerator1.output.response_file_path"+"}}" %}
+                    "prev_proc_response_file_path" : "{{prev_proc_response_path}}"
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragDppImage}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            },
+            "batchcloser1" : {
+                "type" : "generic",
+                "dependsOn" : [ 
+                    "vectordbindexer1"
+                ],
+                
+                "input" : {
+                    "processor_name" : "request_closer",
+                    {% set input_config = "{{"+"pipeline.variables.input_config_file_path"+"}}" %}
+                    "input_config_file_path" : "{{input_config}}",
+                    {% set prev_proc_response_path = "{{"+"vectordbindexer1.output.response_file_path"+"}}" %}
+                    "prev_proc_response_file_path" : "{{prev_proc_response_path}}"
+                },
+                "output" : {
+                    "response_file_path" : "/processor_output.txt"
+                },
+                "stepConfig" : {
+                    "entryPoint" : [ 
+                        "python", 
+                        "/app/src/app_dpp_container_external.py"
+                    ],
+                    "stepArguments" : [],
+                    "imageUri" : "{{ragImageName}}"
+                },
+                "resourceConfig" : {
+                    "computes" : [ 
+                        {
+                            "type" : "CPU",
+                            "maxQty" : 5,
+                            "memory" : "1",
+                            "minQty" : 1
+                        }
+                    ]
+                }
+            }
+        },
+        "variables" : {
+            "input_config_file_path" : "{{config_path_var}}"
+        },
+        "globalVariables" : {
+            "DPP_STORAGE_SERVER_URL" : "${DPP_STORAGE_SERVER_URL}",
+            "DPP_STORAGE_ROOT_URI" : "${DPP_STORAGE_ROOT_URI}",
+            "LOG_FILE_NAME" : "indexer",
+            "LOG_LEVEL" : "DEBUG"
+        }
+    }
+  }
