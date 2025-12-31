@@ -1,0 +1,35 @@
+:host ::ng-deep.dndflow{
+    max-height: var(--dndflow-max-height);
+    font-size: x-small !important;
+    aside .side-panel{
+        height: var(--dndflow-max-height);
+        max-height: var(--dndflow-max-height);
+    }
+}
+
+:host ::ng-deep.rjsf{
+    font-size: small !important;
+    input {
+        font-size: small !important;
+        color: #545353;
+    }
+}
+
+:host ::ng-deep.tf_button {
+    & {
+      padding: 1px 20px;
+    }
+    &_secondary {
+      padding: 4px 20px;
+      border-color: #42619D;
+      border-style: solid;
+      border-width: thin;
+      border-radius: 4px;
+    }
+  }
+   
+  :host ::ng-deep.material-symbols-outlined {
+    float: right;
+    color: #42619D;
+    font-weight: 200;
+  }

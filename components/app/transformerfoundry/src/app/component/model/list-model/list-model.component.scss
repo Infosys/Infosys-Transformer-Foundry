@@ -1,0 +1,29 @@
+.card_padding{
+    padding-top: 10px;
+}
+.description-container{
+    overflow: hidden;
+    position: relative;
+}
+.text-3line{
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    margin: 0;
+    overflow: hidden;
+    padding-left: 8px;
+    color: #737373;
+    height: 64px;
+}
+.mat-card-widget.mat-card {
+    min-height: 214px !important;
+}
+.mat-card-actions.mat-card-actions.wrapper{
+    box-shadow: 0 -3px 2px 0 hsla(0,0%,80%,.1);
+    padding-top: 0px;
+}
+.mat-card-actions, .mat-card-subtitle, .mat-card-content {
+    margin-bottom: 24px;
+}

@@ -1,0 +1,387 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="container" [style.max-width.px]="width">
+    <div class="row marB24" [style.width.px]="width">
+        <div class="col-md-6" style="display: flex;justify-content: right;">
+            <ng-container *ngIf="model.isBtnDisabled">
+                <tr>
+                    <td>
+                        <div class="loading-dots">
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-container>
+        </div>
+        <div class="col" style="display: flex; justify-content: right; margin-top: 7px;">
+            <button mat-flat-button class="tf_button" id="createBtn"
+                matTooltip="Deploy Model" matTooltipPosition="above" (click)="openConfirmDialog(confirmAction);"
+                style="float: right; margin-right: 35px;" [disabled]="model.isBtnDisabled">
+                Deploy
+            </button>
+        </div>
+    </div>
+    <div class="row" [style.max-width.px]="width" style="margin-top: 8px;">
+        <div class="col-lg-12" >
+            <div class="app_panel" style="padding: 16px 24px;">
+                <div class="table-wrapper" [style.height.px]="height">
+                    <!-- EndPointId & ModelId -->
+                    <div class="row" style="padding: 16px 24px;">
+                        <!---EndPointId--->
+                        <div class="col">
+                            <mat-form-field appearance="standard" floatLabel="always">
+                                <mat-label>EndPoint Name</mat-label>
+                                <input matInput placeholder=""
+                                    value="{{ model.endpointName }}" [(ngModel)]="model.endpointName" required
+                                    #myEndPointId="ngModel" disabled/>
+                            </mat-form-field>
+                            <div *ngIf="myEndPointId.invalid && myEndPointId.errors.required" class="err-msg-div">
+                                <mat-error>Mandatory field</mat-error>
+                            </div>
+                        </div>
+
+                        <!---ModelId--->
+                        <div class="col-md-6">
+                            <mat-form-field appearance="standard" floatLabel="always">
+                                <mat-label>Model Name</mat-label>
+                                <input matInput placeholder=""
+                                    value="{{ model.modelName }}" [(ngModel)]="model.modelName" required
+                                    #myModelId="ngModel" disabled/>
+                            </mat-form-field>
+                            <div *ngIf="myModelId.invalid && myModelId.errors.required" class="err-msg-div">
+                                <mat-error>Mandatory field</mat-error>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!---Version & ServingFramework--->
+                    <div class="row padT24 padLR24">
+
+                        <!---Version--->
+                        <div class="col-md-6">
+                            <mat-form-field appearance="standard" floatLabel="always">
+                                <mat-label>Version</mat-label>
+                                <input matInput placeholder="" value="{{ model.deployModelData.version }}"
+                                    [(ngModel)]="model.deployModelData.version" disabled/>
+                            </mat-form-field>
+                        </div>
+
+                        <!---ServingFramework--->
+                        <div class="col-md-6">
+                            <mat-form-field appearance="standard" floatLabel="always">
+                                <mat-label>Serving Framework</mat-label>
+                                <mat-select disableOptionCentering class="mat-select-dropdown"
+                                    [value]="model.deployModelData.inferenceConfig?.servingFramework"
+                                    [(ngModel)]="model.deployModelData.inferenceConfig.servingFramework"
+                                    #myFramework="ngModel">
+                                    <mat-option *ngFor="let item of ServingFramework" [value]="item.value">
+                                        {{ item.viewValue }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <div *ngIf="myFramework.invalid && myFramework.errors.required" class="err-msg-div">
+                                <mat-error>Mandatory field</mat-error>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!---Inference Specifications--->
+                    <div class="table-titleArea padT8 padLR24">
+                        <div class="marB24">
+                            <h5  (click)="toggleShowSection('inferenceSpec')">
+                                Inference Specification<mat-icon class="float-right" [ngClass]="showSection['inferenceSpec'] ? 'up-arrow' : 'down-arrow'">
+                                    {{showSection['inferenceSpec'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                  </mat-icon>
+                            </h5>
+                        </div>
+                        <div class="tab-data" *ngIf="showSection['inferenceSpec']">
+                            <div class="row">
+                                <!---Minimum Replica Count--->
+                                <div class="col">
+                                    <mat-form-field appearance="standard" floatLabel="always">
+                                        <mat-label>Min Replica Count</mat-label>
+                                        <input matInput placeholder="" [disabled]="model.isReadOnly"
+                                            value="{{ model.deployModelData.inferenceConfig.inferenceSpec.minReplicaCount }}"
+                                            [(ngModel)]="model.deployModelData.inferenceConfig.inferenceSpec.minReplicaCount"
+                                            type="number" min="1"/>
+                                    </mat-form-field>
+                                    <div class="err-msg-div">
+                                        <!-- <mat-error>Mandatory field</mat-error>      -->
+                                    </div>
+                                </div>
+
+                                <!---Maximum Replica Count--->
+                                <div class="col">
+                                    <mat-form-field appearance="standard" floatLabel="always">
+                                        <mat-label>Max Replica Count</mat-label>
+                                        <input matInput placeholder="" [disabled]="model.isReadOnly"
+                                            value="{{ model.deployModelData.inferenceConfig.inferenceSpec.maxReplicaCount }}"
+                                            [(ngModel)]="model.deployModelData.inferenceConfig.inferenceSpec.maxReplicaCount"
+                                            type="number"  min="1" />
+                                    </mat-form-field>
+                                    <div class="err-msg-div">
+                                        <!-- <mat-error>Mandatory field</mat-error>      -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!---Container Resource Configuration--->
+                    <div class="table-titleArea padT8 padLR24">
+                        <div class="marB24">
+                            <h5 
+                                (click)="toggleShowSection('containerResourceConfig')">Resource
+                                Configuration<mat-icon class="float-right" [ngClass]="showSection['containerResourceConfig'] ? 'up-arrow' : 'down-arrow'">
+                                    {{showSection['containerResourceConfig'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                  </mat-icon>
+                            </h5>
+                        </div>
+                        <div class="tab-data" *ngIf="showSection['containerResourceConfig']">
+                            <h6 style="margin-left: 20px">Computes</h6>
+                            <br>
+                            <div class="row">
+                                <!---Type--->
+                                <div class="col">
+                                    <mat-form-field appearance="standard" floatLabel="always">
+                                        <mat-label>Type</mat-label>
+                                        <mat-select disableOptionCentering class="mat-select-dropdown" 
+                                            [value]="model.deployModelData.inferenceConfig.inferenceSpec.containerResourceConfig.computes[0].type"
+                                            [(ngModel)]="model.deployModelData.inferenceConfig.inferenceSpec.containerResourceConfig.computes[0].type"
+                                            #myType="ngModel">
+                                            <mat-option *ngFor="let item of Type" [value]="item.value">
+                                                {{ item.viewValue }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <div *ngIf="myType.invalid && myType.errors.required" class="err-msg-div">
+                                        <mat-error>Mandatory field</mat-error>
+                                    </div>
+                                </div>
+
+                                <!---Memory--->
+                                <div class="col">
+                                    <mat-form-field appearance="standard" floatLabel="always">
+                                        <mat-label>Memory</mat-label>
+                                        <input matInput placeholder="" [disabled]="model.isReadOnly"
+                                            value="{{ model.deployModelData.inferenceConfig.inferenceSpec.containerResourceConfig.computes[0].memory }}"
+                                            [(ngModel)]="model.deployModelData.inferenceConfig.inferenceSpec.containerResourceConfig.computes[0].memory"
+                                            #myMemory="ngModel" type="text" onkeypress="return /[0-9]/i.test(event.key)"
+                                            (blur)="addGB()" />
+                                    </mat-form-field>
+                                    <div *ngIf="myMemory.invalid && myMemory.errors.required" class="err-msg-div">
+                                        <mat-error>Mandatory field</mat-error>
+                                    </div>
+                                </div>
+
+                                <!---Maximum Quantity--->
+                                <div class="col">
+                                    <mat-form-field appearance="standard" floatLabel="always">
+                                        <mat-label>Maximum Quantity</mat-label>
+                                        <input matInput placeholder="" [disabled]="model.isReadOnly"
+                                            value="{{ model.deployModelData.inferenceConfig.inferenceSpec.containerResourceConfig.computes[0].maxQty }}"
+                                            [(ngModel)]="model.deployModelData.inferenceConfig.inferenceSpec.containerResourceConfig.computes[0].maxQty"
+                                            #myMaxQnty="ngModel" type="number" min="1"/>
+                                    </mat-form-field>
+                                    <div *ngIf="myMaxQnty.invalid && myMaxQnty.errors.required" class="err-msg-div">
+                                        <mat-error>Mandatory field</mat-error>
+                                    </div>
+                                </div>
+
+                                <!---Minimum Quantity--->
+                                <div class="col">
+                                    <mat-form-field appearance="standard" floatLabel="always">
+                                        <mat-label>Minimum Quantity</mat-label>
+                                        <input matInput placeholder="" [disabled]="model.isReadOnly"
+                                            value="{{ model.deployModelData.inferenceConfig.inferenceSpec.containerResourceConfig.computes[0].minQty }}"
+                                            [(ngModel)]="model.deployModelData.inferenceConfig.inferenceSpec.containerResourceConfig.computes[0].minQty"
+                                            type="number" min="1"/>
+                                    </mat-form-field>
+                                    <!-- <div class="err-msg-div"><mat-error>Mandatory field</mat-error>
+                                                                            </div> -->
+                                </div>
+                            </div>
+                            <div class="row padT16">
+                                <!---Volume Size in GB--->
+                                <div class="col">
+                                    <mat-form-field appearance="standard" floatLabel="always">
+                                        <mat-label>Volume Size in GB</mat-label>
+                                        <input matInput placeholder="" [disabled]="model.isReadOnly"
+                                            value="{{ model.deployModelData.inferenceConfig.inferenceSpec.containerResourceConfig.volumeSizeinGB }}"
+                                            [(ngModel)]="model.deployModelData.inferenceConfig.inferenceSpec.containerResourceConfig.volumeSizeinGB"
+                                            #myVolumeSizeinGB="ngModel" type="number" min="1"/>
+                                    </mat-form-field>
+                                    <div *ngIf="myVolumeSizeinGB.invalid && myVolumeSizeinGB.errors.required"
+                                        class="err-msg-div"><mat-error>Mandatory field</mat-error>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!---Model Uri--->
+                    <div class="table-titleArea padT8 padLR24">
+                        <div class="marB24">
+                            <h5  (click)="toggleShowSection('modelUris')">
+                                Models <mat-icon class="float-right" [ngClass]="showSection['modelUris'] ? 'up-arrow' : 'down-arrow'">
+                                    {{showSection['modelUris'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                  </mat-icon>
+                            </h5>
+                        </div>
+                        <div class="tab-data" *ngIf="showSection['modelUris']">
+                            <ng-container
+                                *ngFor="let item of model.deployModelData.inferenceConfig.inferenceSpec.modelSpec; let i=index">
+                                <div class="padT8 padLR24">
+                                    <h6 
+                                        style="display: flex; justify-content: space-between; margin-left: 20px;">
+                                        Model URIs
+                                        <span>
+                                            <button mat-flat-button (click)="removeModel(i)">
+                                                  <mat-icon class="action-icons">delete</mat-icon>
+                                            </button>
+                                        </span>
+                                    </h6>
+                                    <div class="row marT24">
+                                        <!---Prefix Uri--->
+                                        <div class="col">
+                                            <mat-form-field appearance="standard" floatLabel="always">
+                                                <mat-label>Prefix URI</mat-label>
+                                                <input matInput placeholder="" [disabled]="model.isReadOnly"
+                                                    value="{{ model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].modelUris.prefixUri }}"
+                                                    [(ngModel)]="model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].modelUris.prefixUri"
+                                                    #myPrefixUri="ngModel" required/>
+                                            </mat-form-field>
+                                            <div *ngIf="myPrefixUri.invalid && myPrefixUri.errors.required"
+                                                class="err-msg-div">
+                                                <mat-error>Mandatory field</mat-error>
+                                            </div>
+                                        </div>
+
+                                        <!---Predict Uri--->
+                                        <div class="col">
+                                            <mat-form-field appearance="standard" floatLabel="always">
+                                                <mat-label>Predict URI</mat-label>
+                                                <input matInput placeholder="" [disabled]="model.isReadOnly"
+                                                    value="{{ model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].modelUris.predictUri }}"
+                                                    [(ngModel)]="model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].modelUris.predictUri"
+                                                    #myPredictUri="ngModel" required/>
+                                            </mat-form-field>
+                                            <div *ngIf="myPredictUri.invalid && myPredictUri.errors.required"
+                                                class="err-msg-div">
+                                                <mat-error>Mandatory field</mat-error>
+                                            </div>
+                                        </div>
+
+                                        <!---Explain Uri--->
+                                        <div class="col">
+                                            <mat-form-field appearance="standard" floatLabel="always">
+                                                <mat-label>Explain URI</mat-label>
+                                                <input matInput placeholder="" [disabled]="model.isReadOnly"
+                                                    value="{{ model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].modelUris.explainUri }}"
+                                                    [(ngModel)]="model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].modelUris.explainUri"
+                                                    #myPredictUri="ngModel" />
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!---Feedback Uri--->
+                                        <div class="col">
+                                            <mat-form-field appearance="standard" floatLabel="always">
+                                                <mat-label>Feedback URI</mat-label>
+                                                <input matInput placeholder="" [disabled]="model.isReadOnly"
+                                                    value="{{ model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].modelUris.feedbackUri }}"
+                                                    [(ngModel)]="model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].modelUris.feedbackUri"
+                                                    #myPredictUri="ngModel" />
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Div only when triton framework is selected -->
+                                <div *ngIf="model.deployModelData.inferenceConfig.servingFramework ==  ServingFramework[1].value">
+                                    <div class="table-titleArea padT8 padLR24">
+                                        <div class="marB24">
+                                            <h6 
+                                                (click)="toggleShowSection('storage')">
+                                                Triton Serving Config <mat-icon class="float-right" [ngClass]="showSection['storage'] ? 'up-arrow' : 'down-arrow'">
+                                                    {{showSection['storage'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                                  </mat-icon>
+                                            </h6>
+                                        </div>
+                                        <div class="tab-data" *ngIf="showSection['storage']">
+                                            <table class="app_tables">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Type</th>
+                                                        &nbsp;
+                                                        <th>URI</th>
+                                                        &nbsp;
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <mat-form-field appearance="standard" floatLabel="always">
+                                                                <mat-select disableOptionCentering
+                                                                    class="mat-select-dropdown"
+                                                                    [ngModel]="model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].tritonServingConfig.dependencyFileRepo.storageType ? model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].tritonServingConfig.dependencyFileRepo.storageType : ''"
+                                                                    (ngModelChange)="model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].tritonServingConfig.dependencyFileRepo.storageType = $event">
+                                                                    <mat-option *ngFor="let store of storage"
+                                                                        [value]="store.value">
+                                                                        {{ store.viewValue }}
+                                                                    </mat-option>
+                                                                </mat-select>
+                                                            </mat-form-field>
+                                                        </td>
+                                                        &nbsp;
+                                                        <td>
+                                                            <mat-form-field appearance="standard" floatLabel="always">
+                                                                    <input matInput placeholder=""
+                                                                    value="{{ model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].tritonServingConfig.dependencyFileRepo.uri }}"
+                                                                    [(ngModel)]="model.deployModelData.inferenceConfig.inferenceSpec?.modelSpec[i].tritonServingConfig.dependencyFileRepo.uri" />
+                                                            </mat-form-field>
+                                                        </td>
+                                                        &nbsp;
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="row padT8 padLR24">
+                                        <!---Triton log level--->
+                                        <div class="col-lg-12">
+                                            <mat-form-field appearance="standard" floatLabel="always">
+                                                <mat-label>Log Level</mat-label>
+                                                <input matInput placeholder=""
+                                                    value="{{ model.deployModelData.inferenceConfig.servingSpec?.tritonSpec.logLevel }}"
+                                                    [(ngModel)]="model.deployModelData.inferenceConfig.servingSpec?.tritonSpec.logLevel" />
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-container>
+                            <button mat-flat-button  (click)="addModel()">
+                                <mat-icon class="action-icons">add</mat-icon>
+                                Add Models
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #confirmAction let-modal let-c="close" let-s="confirm" let-d="dismiss">
+    <app-dialog-confirm (close)="c('Close click');" (confirm)="deployModel()">
+    </app-dialog-confirm>
+</ng-template>

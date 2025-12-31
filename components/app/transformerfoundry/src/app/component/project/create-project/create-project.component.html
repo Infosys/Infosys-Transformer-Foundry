@@ -1,0 +1,135 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="tf-content">
+  <mat-tab-group disableRipple>
+    <mat-tab label="&#10112; Project Details">
+      <div class="row" style="display: flex; justify-content: space-between; margin-top: 7px;"  [style.width.px]="model.width">
+        <div class="projectId_style" style="margin-left: 40px;">
+          <span> Project Id : {{ model.projectId }} </span>
+        </div>
+        <button mat-flat-button class="tf_button"
+          matTooltip="{{model.buttonName}} Project" matTooltipPosition="above"
+          (click)="openConfirmDialog(confirmAction);" [disabled]="model.isBtnDisabled"
+          style="float: right; margin-right: -10px;" [style.cursor]="model.isBtnDisabled ? 'not-allowed' : 'pointer'">
+          {{model.buttonName}}
+        </button>
+      </div>
+      <!-- <div class="container"> -->
+        <div class="row tf_table_row" [style.width.px]="model.width">
+          <div class="col-lg-12" style="padding-right: 0px;">
+            <div class="app_panel" style="padding: 24px 0px 24px 0px">
+              <div class="table-wrapper" [style.height.px]="model.height">
+                <div class="row textBox" style="padding: 24px 16px 0px 24px">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always"
+                      style="max-width: 520px;">
+                      <mat-label>Name</mat-label>
+                      <input matInput placeholder="" value="{{model.projectDetails.name}}"
+                        [(ngModel)]="model.projectDetails.name" #myName="ngModel" (input)="onInput($event)" required
+                        style="max-width: 520px;" [disabled]="model.isReadOnly"/>
+                    </mat-form-field>
+                    <div *ngIf="myName.invalid && myName.errors.required" class="err-msg-div"><mat-error>Mandatory
+                        field</mat-error></div>
+                  </div>
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always"
+                      style="max-width: 520px;">
+                      <mat-label>Description</mat-label>
+                      <input matInput placeholder="" value="{{ model.projectDetails.description }}"
+                        [(ngModel)]="model.projectDetails.description" #myDescription="ngModel" required
+                        style="max-width: 520px;" [disabled]="model.isReadOnly"/>
+                    </mat-form-field>
+                    <div *ngIf="myDescription.invalid && myDescription.errors.required" class="err-msg-div">
+                      <mat-error>Mandatory
+                        field</mat-error>
+                    </div>
+                  </div>
+                </div>
+                <div class="table-titleArea" style="padding: 16px 24px 0px 24px;">
+                  <div style="margin-bottom: 24px;">
+                    <h5>User Details</h5>
+                  </div>
+                  <table class="app_tables">
+                    <thead>
+                      <tr>
+                        <th style="width: 25%;">Email ID</th>&nbsp;
+                        <th style="width: 15%;">Admin</th>&nbsp;
+                        <th style="width: 15%;">View</th>&nbsp;
+                        <th style="width: 15%;">Execute</th>&nbsp;
+                        <th style="width: 15%;">Create</th>&nbsp;
+                        <th style="width: 15%;">Deploy</th>&nbsp;
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container *ngIf="model.projectDetails.userLists.length">
+                        <tr *ngFor="let key of model.projectDetails.userLists; let i=index">
+                          <td>
+                            <mat-form-field appearance="standard" floatLabel="always">
+                              <input matInput placeholder="" [(ngModel)]="key.userEmail" #emailRef="ngModel"
+                                required (input)="validateEmail(emailRef)" [disabled]="model.isReadOnly"/>
+                            </mat-form-field>
+                            <div *ngIf="emailRef.errors" class="email-err-msg">
+                              <div [hidden]="!emailRef.errors.required">
+                                <p style="margin-bottom: 0px;">&nbsp;Email id is mandatory</p>
+                              </div>
+                              <div [hidden]="!emailRef.errors.pattern">
+                                <p style="margin-bottom: 0px;">&nbsp;Email id is not entered in proper format</p>
+                              </div>
+                            </div>
+                          </td>&nbsp;
+                          <td>
+                            <mat-checkbox  [aria-label]="'checkbox'" disableRipple="true"
+                              [(ngModel)]="key.permissions.workspaceAdmin" [disabled]="model.isReadOnly">project</mat-checkbox>
+                          </td>&nbsp;
+                          <td>
+                            <mat-checkbox  [aria-label]="'checkbox'" disableRipple="true"
+                              [(ngModel)]="key.permissions.view" [disabled]="model.isReadOnly">project</mat-checkbox>
+                          </td>&nbsp;
+                          <td>
+                            <mat-checkbox  [aria-label]="'checkbox'" disableRipple="true"
+                              [(ngModel)]="key.permissions.executePipeline" [disabled]="model.isReadOnly">pipeline</mat-checkbox>
+                          </td>&nbsp;
+                          <td>
+                            <mat-checkbox  [aria-label]="'checkbox'" disableRipple="true"
+                              [(ngModel)]="key.permissions.createPipeline" [disabled]="model.isReadOnly">pipeline</mat-checkbox>
+                          </td>&nbsp;
+                          <td>
+                            <mat-checkbox  [aria-label]="'checkbox'" disableRipple="true"
+                              [(ngModel)]="key.permissions.deployModel" [disabled]="model.isReadOnly">model</mat-checkbox>
+                          </td>&nbsp;
+                          <td>
+                            <button mat-icon-button (click)="removeUserDetails(i)" [disabled]="model.isReadOnly">
+                              <mat-icon class="action-icons">delete</mat-icon>
+                            </button>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </table>
+                  <button mat-flat-button class="highlight-button" (click)="addUserDetails()" [disabled]="model.isReadOnly">
+                    <mat-icon class="material-icons">add</mat-icon>
+                    Add User
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <!-- </div> -->
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<ng-template #confirmAction let-modal let-c="close" let-s="confirm" let-d="dismiss">
+  <app-dialog-confirm (close)="c('Close click');" (confirm)="projectModification()">
+  </app-dialog-confirm>
+</ng-template>

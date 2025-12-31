@@ -1,0 +1,101 @@
+@import "src/styles.scss";
+
+.chat-container {
+  display: flex !important;
+  flex-direction: column;
+  height: 75vh;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.chat-messages {
+  flex: 1;
+  display: flex !important;
+  flex-direction: column;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+}
+
+.placeholder {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+  font-size: 1.2em;
+}
+
+.message-input {
+  display: flex;
+  padding: 10px;
+  //   border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.message-input textarea {
+  flex: 1;
+  resize: none;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.message-input button {
+  flex-shrink: 0;
+  background-color: $primary-color;
+}
+
+.btn-primary.fixed-width-btn {
+  width: 40px; /* Set the desired fixed width */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0px 5px;
+  border: none;
+  background-color: none;
+  color: none;
+
+  mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  &.delete-btn {
+    background-color: #eaeaea;
+    color: $primary-color;
+
+    &:disabled {
+      color: $primary-color;
+      background-color: #bababa;
+    }
+  }
+}
+
+.tf_button {
+  padding: 0px 5px !important;
+  margin-right: -5px !important;
+  margin-left: 25px;
+
+  &_secondary {
+    background: #ffffff;
+    color: #42619d;
+    border: 0.5px solid #42619d;
+    padding: 0px 5px !important;
+
+    &[disabled] {
+      background-color: #4b587477;
+      border: 0.5px solid #4b587477;
+    }
+  }
+
+  &[disabled] {
+    background-color: #4b587477;
+  }
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.5; /* Optional: to visually indicate that the div is disabled */
+}

@@ -1,0 +1,161 @@
+body,
+html {
+  font-family: "roboto", Arial, sans-serif;
+  font-size: 14px;
+  background: #efefef;
+  overflow-x: hidden;
+}
+
+header {
+  background: #f14a40;
+  padding: 16px;
+  color: #ffffff;
+  font-family: "roboto", Arial, sans-serif;
+  font-weight: 500;
+}
+
+header .logo {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+header h1 {
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+header .header-info-txt {
+  color: #ffffff;
+  font-size: 16px;
+  text-align: center;
+  line-height: 19px;
+  margin-bottom: 30px;
+}
+
+.tf_card-widget {
+  border: 5px;
+  -webkit-box-align: 0 1px 4px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16);
+  min-height: 50px;
+}
+header .tf_card-widget {
+  font-size: 14px;
+}
+
+.tf_card-widget .tf_grid {
+  display: grid;
+  -ms-grid-columns: 9% 10%;
+  grid-template-columns: 9% 10%;
+  margin-bottom: 18px;
+}
+
+.tf_grid > div {
+  -ms-flex-line-pack: left;
+  align-content: left;
+}
+
+.tf_card-widget .mat-card-title {
+  font-size: 14px;
+  font-family: "roboto", Arial, sans-serif;
+  font-weight: 400;
+  color: #d0332e;
+}
+
+.tf_card-widget .mat-card-content {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "roboto", Arial, sans-serif;
+}
+
+.tf_card-widget .tf_status {
+  width: 30px;
+  border: 12px;
+  border: 1px solid #d0332e;
+  height: 16px;
+  font-size: 12px;
+  font-family: "roboto", Arial, sans-serif;
+  font-weight: 400;
+  -webkit-box-align: center;
+  justify-self: unset;
+  align-items: center;
+  text-align: left;
+  line-height: 13px;
+  display: inline;
+  color: #d0332e;
+}
+
+.tf_card-widget.dark {
+  background: #eeee;
+}
+
+.tf_card-widget.dark .tf_status {
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+.primary,
+.tf_primary-btn,
+.tf_secondary-btn {
+  border-radius: 15px;
+  padding: 8px 16px;
+  font-size: 19px;
+  font-family: "roboto", Arial, sans-serif;
+  text-transform: uppercase;
+  line-height: 10px;
+  border: 1px solid transparent;
+  background: none;
+}
+
+.tf_primary-btn {
+  background: #5b616b;
+  color: #ffffff;
+}
+
+.tf_secondary-btn {
+  border: 1px solid #eeee;
+  color: #eeee;
+}
+
+.tf_content-section {
+  padding: 16px;
+}
+
+footer {
+  -webkit-box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  min-height: 40px;
+  display: -ms-grid !important;
+  display: grid !important;
+  -ms-grid-columns: 33.3% 33.3% 33.3%;
+  grid-template-columns: 33.3% 33.3% 33.3%;
+}
+
+footer a {
+  background: url(assets/images/home.png) no-repeat center 10px;
+  height: 54px;
+  font-size: 12px;
+  font-family: "roboto", Arial, sans-serif;
+  font-weight: 400;
+  color: #5b616e;
+  text-align: center;
+  padding-top: 30px;
+}
+
+footer a:hover {
+  text-decoration: none;
+  color: #5b616e;
+}
+/*# sourceMappingURL=styles.css.map */
+
+.custom {
+  background-color: #d0332e;
+}
+
+/* .array-item-add, .object-property-expand  */
+.my-add-property-button {
+  float: right;
+  color: palevioletred;
+}
+
+

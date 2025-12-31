@@ -1,0 +1,1521 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="container" [style.max-width.px]="width">
+    <div class="row" [style.width.px]="width">
+        <div class="col-md-6" style="display: flex;justify-content: right;">
+            <ng-container *ngIf="model.isBtnDisabled">
+                <tr>
+                    <td>
+                        <div class="loading-dots">
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-container>
+        </div>
+        <div class="col" style="display: flex; justify-content: right; margin-top: 7px;">
+            <button style="float: right; margin-right: 5px !important;" mat-flat-button class="tf_button" id="createBtn"
+                matTooltip="Update Model" matTooltipPosition="above"
+                (click)="openConfirmDialog(confirmAction);"[style.cursor]="model.isBtnDisabled ? 'not-allowed' : 'pointer'"
+                [disabled]="model.isBtnDisabled">
+                Update
+            </button>
+            <button style="float: right;" mat-flat-button class="tf_button" id="createBtn"
+                matTooltip="Next Tab" matTooltipPosition="above" (click)="nextTab.emit(1)">
+                Next
+            </button>
+        </div>
+    </div>
+    <div class="row" [style.max-width.px]="width" style="margin-top: 8px;">
+        <div class="col-lg-12">
+            <div class="app_panel" style="padding: 16px 24px;">
+                <div class="table-wrapper" [style.height.px]="height">
+                    <!--name, version, projectId-->
+                    <div class="row" style="padding: 16px 24px;">
+                        <div class="col">
+                            <mat-form-field class="standard" floatLabel="always">
+                                <mat-label>Name</mat-label>
+                                <input matInput placeholder="" value="{{ model.updateModelObject.name }}"
+                                    [(ngModel)]="model.updateModelObject.name" [disabled]="true" />
+                            </mat-form-field>
+                        </div>
+                        <div class="col">
+                            <mat-form-field class="standard" floatLabel="always">
+                                <mat-label>Version</mat-label>
+                                <input matInput placeholder="" value="{{ model.updateModelObject.version }}"
+                                    [(ngModel)]=model.updateModelObject.version [disabled]="true" type="number" />
+                            </mat-form-field>
+                        </div>
+                        <div class="col">
+                            <mat-form-field class="standard" floatLabel="always">
+                                <mat-label>ProjectId</mat-label>
+                                <input matInput placeholder="" value="{{ model.updateModelObject.projectId }}"
+                                    [(ngModel)]="model.updateModelObject.projectId" [disabled]="true" />
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!--name and description-->
+                    <div class="row" style="padding: 16px 24px;">
+                        <div class="col">
+                            <mat-form-field class="standard" floatLabel="always">
+                                <mat-label>Display Name</mat-label>
+                                <input matInput placeholder=""
+                                    value="{{ model.updateModelObject.metadata.modelDetails.displayName }}"
+                                    [(ngModel)]="model.updateModelObject.metadata.modelDetails.displayName" />
+                            </mat-form-field>
+                        </div>
+                        <div class="col">
+                            <mat-form-field class="standard" floatLabel="always">
+                                <mat-label>Description</mat-label>
+                                <input matInput placeholder="" value="{{ model.updateModelObject.description }}"
+                                    [(ngModel)]="model.updateModelObject.description" />
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="table-titleArea" style="padding: 16px 24px;">
+                        <div class="marB24">
+                            <h5  (click)="toggleShowSection('storage')">
+                                Artifacts<mat-icon class="float-right" [ngClass]="showSection['storage'] ? 'up-arrow' : 'down-arrow'">
+                                        {{showSection['storage'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                      </mat-icon></h5>
+                        </div>
+                        <div class="tab-data" *ngIf="showSection['storage']">
+                            <table class="app_tables">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        &nbsp;
+                                        <th>URI</th>
+                                        &nbsp;
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <mat-form-field class="standard"
+                                                floatLabel="always">
+                                                <input matInput
+                                                    value="{{ model.updateModelObject.artifacts.storageType }}"
+                                                    [(ngModel)]="model.updateModelObject.artifacts.storageType "
+                                                    [disabled]="true" />
+                                            </mat-form-field>
+                                        </td>
+                                        &nbsp;
+                                        <td>
+                                            <mat-form-field class="standard"
+                                                floatLabel="always">
+                                                <input matInput placeholder=""
+                                                    value="{{ model.updateModelObject.artifacts.uri }}"
+                                                    [(ngModel)]="model.updateModelObject.artifacts.uri "
+                                                    [disabled]="true" />
+                                            </mat-form-field>
+                                        </td>
+                                        &nbsp;
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!--container information-->
+                    <div class="table-titleArea" style="padding: 16px 24px;">
+                        <!--container title-->
+                        <div class="marB24">
+                            <h5  (click)="toggleShowSection('container')">
+                                Container<mat-icon class="float-right" [ngClass]="showSection['container'] ? 'up-arrow' : 'down-arrow'">
+                                        {{showSection['container'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                      </mat-icon>
+                            </h5>
+                        </div>
+
+                        <div class="tab-data" *ngIf="showSection['container']">
+                            <!--image uri, healthprobeuri-->
+                            <div class="row" style="padding: 16px 24px;">
+                                <div class="col">
+                                    <mat-form-field class="standard"
+                                        floatLabel="always">
+                                        <mat-label>Image URI</mat-label>
+                                        <input matInput placeholder=""
+                                            value="{{ model.updateModelObject.container.imageUri }}"
+                                            [(ngModel)]="model.updateModelObject.container.imageUri" #imageUri="ngModel"
+                                            required />
+                                    </mat-form-field>
+                                    <div *ngIf="imageUri.invalid && imageUri.errors.required" class="err-msg-div">
+                                        <mat-error>Mandatory field</mat-error>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <mat-form-field class="standard"
+                                        floatLabel="always">
+                                        <mat-label> Health Probe URI</mat-label>
+                                        <input matInput placeholder=""
+                                            value="{{ model.updateModelObject.container.healthProbeUri }}"
+                                            [(ngModel)]="model.updateModelObject.container.healthProbeUri" />
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!--environment variables-->
+                            <div class="table-titleArea" style="padding: 16px 24px;">
+                                <div class="marB24">
+                                    <h6 
+                                        (click)="toggleShowSection('envVariables')">
+                                        Environment Variables <mat-icon class="float-right" [ngClass]="showSection['envVariables'] ? 'up-arrow' : 'down-arrow'">
+                                                {{showSection['envVariables'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                              </mat-icon>
+                                    </h6>
+                                </div>
+                                <div class="tab-data" *ngIf="showSection['envVariables']">
+                                    <table class="app_tables">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                &nbsp;
+                                                <th>Value</th>
+                                                &nbsp;
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let item of model.updateModelObject.container.envVariables;let i = index">
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.name"
+                                                            (ngModelChange)="item.name = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.value"
+                                                            (ngModelChange)="item.value = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <button mat-flat-button (click)="removeEnvVariables(i)">
+                                                        <mat-icon class="action-icons">delete</mat-icon>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <button mat-flat-button  (click)="addNewEnvVariables()">
+                                        <mat-icon class="action-icons">add</mat-icon>
+                                        Add Environment Variables
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!--ports-->
+                            <div class="table-titleArea" style="padding: 16px 24px;">
+                                <div class="marB24">
+                                    <h6  (click)="toggleShowSection('ports')">
+                                        Ports 
+                                        <span style="font-size: 12px;">&#65290;</span>
+                                        <mat-icon class="float-right" [ngClass]="showSection['ports'] ? 'up-arrow' : 'down-arrow'">
+                                            {{showSection['ports'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                          </mat-icon>
+                                    </h6>
+                                </div>
+                                <div class="tab-data" *ngIf="showSection['ports']">
+                                    <table class="app_tables">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                &nbsp;
+                                                <th>Value</th>
+                                                &nbsp;
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let item of model.updateModelObject.container.ports; let i = index">
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.name"
+                                                            (ngModelChange)="item.name = $event" required/>
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.value" required
+                                                            (ngModelChange)="item.value = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <button mat-flat-button 
+                                                        (click)="removePort(i)">
+                                                                                                          <mat-icon class="action-icons">delete</mat-icon>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <button mat-flat-button  (click)="addNewPort()">
+                                        <mat-icon class="action-icons">add</mat-icon>
+                                        Add Ports
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!--labels-->
+                            <div class="table-titleArea" style="padding: 16px 24px;">
+                                <div class="marB24">
+                                    <h6  (click)="toggleShowSection('labels')">
+                                        Labels<mat-icon class="float-right" [ngClass]="showSection['labels'] ? 'up-arrow' : 'down-arrow'">
+                                                {{showSection['labels'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                              </mat-icon>
+                                    </h6>
+                                </div>
+                                <div class="tab-data" *ngIf="showSection['labels']">
+                                    <table class="app_tables">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                &nbsp;
+                                                <th>Value</th>
+                                                &nbsp;
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let item of model.updateModelObject.container.labels; let i = index">
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.name"
+                                                            (ngModelChange)="item.name = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.value"
+                                                            (ngModelChange)="item.value = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <button mat-flat-button 
+                                                        (click)="removeLabel(i)">
+                                                                                                          <mat-icon class="action-icons">delete</mat-icon>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <button mat-flat-button  (click)="addNewLabel()">
+                                        <mat-icon class="action-icons">add</mat-icon>
+                                        Add Label
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!--command, arguments-->
+                            <div class="row" style="padding: 16px 24px;">
+                                <div class="col">
+                                    <div class="table-titleArea textBox">
+                                        <div class="marB24">
+                                            <h6 
+                                                (click)="toggleShowSection('command')">
+                                                Command<mat-icon class="float-right" [ngClass]="showSection['command'] ? 'up-arrow' : 'down-arrow'">
+                                                        {{showSection['command'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                                      </mat-icon>
+                                            </h6>
+                                        </div>
+                                        <div class="tab-data" *ngIf="showSection['command']">
+                                            <table class="app_tables">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        &nbsp;
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr
+                                                        *ngFor="let item of model.updateModelObject.container.command; let i = index">
+                                                        <td>
+                                                            <mat-form-field
+                                                                class="standard"
+                                                                floatLabel="always"
+                                                                >
+                                                                <input matInput [ngModel]="item"
+                                                                    (ngModelChange)="this.model.updateModelObject.container.command[i] = $event"
+                                                                    [ngModelOptions]="{ updateOn: 'blur' }" />
+                                                            </mat-form-field>
+                                                        </td>
+                                                        &nbsp;
+                                                        <td>
+                                                            <button mat-flat-button 
+                                                                (click)="removeCommand(i)">
+                                                                <mat-icon class="action-icons">delete</mat-icon>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <button mat-flat-button  (click)="addNewCommand()">
+                                                <mat-icon class="action-icons">add</mat-icon>
+                                                Add Command
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="table-titleArea textBox">
+                                        <div class="marB24">
+                                            <h6 
+                                                (click)="toggleShowSection('args')">
+                                                Arguments <mat-icon class="float-right" [ngClass]="showSection['args'] ? 'up-arrow' : 'down-arrow'">
+                                                        {{showSection['args'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                                      </mat-icon>
+                                            </h6>
+                                        </div>
+                                        <div class="tab-data" *ngIf="showSection['args']">
+                                            <table class="app_tables">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        &nbsp;
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr
+                                                        *ngFor="let item of model.updateModelObject.container.args; let i = index">
+                                                        <td>
+                                                            <mat-form-field
+                                                                class="standard"
+                                                                floatLabel="always"
+                                                                >
+                                                                <input matInput [ngModel]="item"
+                                                                    (ngModelChange)="this.model.updateModelObject.container.args[i] = $event"
+                                                                    [ngModelOptions]="{ updateOn: 'blur' }" />
+                                                            </mat-form-field>
+                                                        </td>
+                                                        &nbsp;
+                                                        <td>
+                                                            <button mat-flat-button 
+                                                                (click)="removeArgument(i)">
+                                                                <mat-icon class="action-icons">delete</mat-icon>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <button mat-flat-button  (click)="addNewArgument()">
+                                                <mat-icon class="action-icons">add</mat-icon>
+                                                Add Arguments
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 style="padding: 16px 24px;">Metadata</h5>
+
+                    <!--Model Details-->
+                    <div class="table-titleArea" style="padding: 16px 24px;">
+                        <!--model details title-->
+                        <div style="margin-bottom: 24px;">
+                            <h6 
+                                (click)="toggleShowSection('modelDetails')">
+                                Model Details <mat-icon class="float-right" [ngClass]="showSection['modelDetails'] ? 'up-arrow' : 'down-arrow'">
+                                        {{showSection['modelDetails'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                      </mat-icon>
+                            </h6>
+                        </div>
+
+                        <div class="tab-data" style="padding-left: 48px;" *ngIf="showSection['modelDetails']">
+                            <!--task, overview, documentation, path-->
+                            <div class="row">
+                                <div class="col">
+                                    <mat-form-field class="standard"
+                                        floatLabel="always">
+                                        <mat-label>Task type</mat-label>
+                                        <input matInput placeholder=""
+                                            value="{{ model.updateModelObject.metadata.modelDetails.tasktype }}"
+                                            [(ngModel)]="model.updateModelObject.metadata.modelDetails.tasktype"
+                                            style="max-width: 510px" />
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col">
+                                    <mat-form-field class="standard"
+                                        floatLabel="always">
+                                        <mat-label> Overview</mat-label>
+                                        <input matInput placeholder=""
+                                            value="{{ model.updateModelObject.metadata.modelDetails.overview }}"
+                                            [(ngModel)]="model.updateModelObject.metadata.modelDetails.overview"
+                                            style="max-width: 510px" />
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col">
+                                    <mat-form-field class="standard"
+                                        floatLabel="always">
+                                        <mat-label> Path</mat-label>
+                                        <input matInput placeholder=""
+                                            value="{{ model.updateModelObject.metadata.modelDetails.path }}"
+                                            [(ngModel)]="model.updateModelObject.metadata.modelDetails.path" />
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col">
+                                    <mat-form-field class="standard"
+                                        floatLabel="always">
+                                        <mat-label> Documentation</mat-label>
+                                        <input matInput placeholder=""
+                                            value="{{ model.updateModelObject.metadata.modelDetails.documentation }}"
+                                            [(ngModel)]="model.updateModelObject.metadata.modelDetails.documentation" />
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!--custom tags, owners-->
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="marB24">
+                                        <h6 
+                                            (click)="toggleShowSection('customTags')">
+                                            Custom Tags<mat-icon class="float-right" [ngClass]="showSection['customTags'] ? 'up-arrow' : 'down-arrow'">
+                                                    {{showSection['customTags'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                                  </mat-icon>
+                                        </h6>
+                                    </div>
+                                    <div class="tab-data" *ngIf="showSection['customTags']">
+                                        <table class="app_tables">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tags</th>
+                                                    &nbsp;
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr
+                                                    *ngFor="let item of model.updateModelObject.metadata.modelDetails.customTags;let i = index">
+                                                    <td>
+                                                        <mat-form-field
+                                                            class="standard"
+                                                            floatLabel="always" >
+                                                            <input matInput [ngModel]="item.tags"
+                                                                (ngModelChange)="item.tags = $event" />
+                                                        </mat-form-field>
+                                                    </td>
+                                                    &nbsp;
+                                                    <td>
+                                                        <button mat-flat-button 
+                                                            (click)="removeTag(i)">
+                                                            <mat-icon class="action-icons">delete</mat-icon>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <button mat-flat-button  (click)="addNewTag()">
+                                            <mat-icon class="action-icons">add</mat-icon>
+                                            Add Tag
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-7">
+                                    <div class="marB24">
+                                        <h6 
+                                            (click)="toggleShowSection('owners')">
+                                            Owners<mat-icon class="float-right" [ngClass]="showSection['owners'] ? 'up-arrow' : 'down-arrow'">
+                                                    {{showSection['owners'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                                  </mat-icon>
+                                        </h6>
+                                    </div>
+                                    <div class="tab-data" *ngIf="showSection['owners']">
+                                        <table class="app_tables">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    &nbsp;
+                                                    <th>Contact</th>
+                                                    &nbsp;
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr
+                                                    *ngFor="let item of model.updateModelObject.metadata.modelDetails.owners;let i = index">
+                                                    <td>
+                                                        <mat-form-field
+                                                            class="standard"
+                                                            floatLabel="always" >
+                                                            <input matInput [ngModel]="item.name"
+                                                                (ngModelChange)="item.name = $event" />
+                                                        </mat-form-field>
+                                                    </td>
+                                                    &nbsp;
+                                                    <td>
+                                                        <mat-form-field
+                                                            class="standard"
+                                                            floatLabel="always" >
+                                                            <input matInput [ngModel]="item.contact"
+                                                                (ngModelChange)="item.contact = $event" />
+                                                        </mat-form-field>
+                                                    </td>
+                                                    &nbsp;
+                                                    <td>
+                                                        <button mat-flat-button 
+                                                            (click)="removeOwner(i)">
+                                                            <mat-icon class="action-icons">delete</mat-icon>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <button mat-flat-button  (click)="addOwner()">
+                                            <mat-icon class="action-icons">add</mat-icon>
+                                            Add Owners
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--version history-->
+                            <div class="table-titleArea">
+                                <div class="marB24">
+                                    <h6  (click)="toggleShowSection('history')">
+                                        Version History<mat-icon class="float-right" [ngClass]="showSection['history'] ? 'up-arrow' : 'down-arrow'">
+                                                {{showSection['history'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                              </mat-icon>
+                                    </h6>
+                                </div>
+                                <div class="tab-data" *ngIf="showSection['history']">
+                                    <table class="app_tables">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                &nbsp;
+                                                <th>Date</th>
+                                                &nbsp;
+                                                <th>Diff</th>
+                                                &nbsp;
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let item of model.updateModelObject.metadata.modelDetails.versionHistory;let i = index">
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.name"
+                                                            (ngModelChange)="item.name = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.date"
+                                                            (ngModelChange)="item.date = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.diff"
+                                                            (ngModelChange)="item.diff = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <button mat-flat-button 
+                                                        (click)="removeHistory(i)">
+                                                                                                          <mat-icon class="action-icons">delete</mat-icon>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <button mat-flat-button  (click)="addHistory()">
+                                        <mat-icon class="action-icons">add</mat-icon>
+                                        Add Label
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!--license-->
+                            <div class="table-titleArea">
+                                <div class="marB24">
+                                    <h6  (click)="toggleShowSection('licenses')">
+                                        Licenses<mat-icon class="float-right" [ngClass]="showSection['licenses'] ? 'up-arrow' : 'down-arrow'">
+                                                {{showSection['licenses'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                              </mat-icon>
+                                    </h6>
+                                </div>
+                                <div class="tab-data" *ngIf="showSection['licenses']">
+                                    <table class="app_tables">
+                                        <thead>
+                                            <tr>
+                                                <th>Identifier</th>
+                                                &nbsp;
+                                                <th>Custom Text</th>
+                                                &nbsp;
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let item of model.updateModelObject.metadata.modelDetails.licenses;let i = index">
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.identifier"
+                                                            (ngModelChange)="item.identifier = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.customText"
+                                                            (ngModelChange)="item.customText = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <button mat-flat-button 
+                                                        (click)="removeLicense(i)">
+                                                                                                          <mat-icon class="action-icons">delete</mat-icon>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <button mat-flat-button  (click)="addLicense()">
+                                        <mat-icon class="action-icons">add</mat-icon>
+                                        Add License
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!--references, citations-->
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="table-titleArea">
+                                        <div class="marB24">
+                                            <h6 
+                                                (click)="toggleShowSection('references')">
+                                                References<mat-icon class="float-right" [ngClass]="showSection['references'] ? 'up-arrow' : 'down-arrow'">
+                                                        {{showSection['references'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                                      </mat-icon>
+                                            </h6>
+                                        </div>
+                                        <div class="tab-data" *ngIf="showSection['references']">
+                                            <table class="app_tables">
+                                                <thead>
+                                                    <tr>
+                                                        <th>References</th>
+                                                        &nbsp;
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr
+                                                        *ngFor="let item of model.updateModelObject.metadata.modelDetails.references;let i = index">
+                                                        <td>
+                                                            <mat-form-field
+                                                                class="standard"
+                                                                floatLabel="always"
+                                                                >
+                                                                <input matInput [ngModel]="item.reference"
+                                                                    (ngModelChange)="item.reference = $event" />
+                                                            </mat-form-field>
+                                                        </td>
+                                                        &nbsp;
+                                                        <td>
+                                                            <button mat-flat-button 
+                                                                (click)="removeReferences(i)">
+                                                                <mat-icon class="action-icons">delete</mat-icon>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <button mat-flat-button  (click)="addReferences()">
+                                                <mat-icon class="action-icons">add</mat-icon>
+                                                Add Reference
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="table-titleArea">
+                                        <div class="marB24">
+                                            <h6 
+                                                (click)="toggleShowSection('citations')">
+                                                Citations<mat-icon class="float-right" [ngClass]="showSection['citations'] ? 'up-arrow' : 'down-arrow'">
+                                                        {{showSection['citations'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                                      </mat-icon>
+                                            </h6>
+                                        </div>
+                                        <div class="tab-data" *ngIf="showSection['citations']">
+                                            <table class="app_tables">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Style</th>
+                                                        &nbsp;
+                                                        <th>Citations</th>
+                                                        &nbsp;
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr
+                                                        *ngFor="let item of model.updateModelObject.metadata.modelDetails.citations;let i = index">
+                                                        <td>
+                                                            <mat-form-field
+                                                                class="standard"
+                                                                floatLabel="always"
+                                                                >
+                                                                <input matInput [ngModel]="item.style"
+                                                                    (ngModelChange)="item.style = $event" />
+                                                            </mat-form-field>
+                                                        </td>
+                                                        &nbsp;
+                                                        <td>
+                                                            <mat-form-field
+                                                                class="standard"
+                                                                floatLabel="always"
+                                                                >
+                                                                <input matInput [ngModel]="item.citation"
+                                                                    (ngModelChange)="item.citation = $event" />
+                                                            </mat-form-field>
+                                                        </td>
+                                                        &nbsp;
+                                                        <td>
+                                                            <button mat-flat-button 
+                                                                (click)="removeCitations(i)">
+                                                                <mat-icon class="action-icons">delete</mat-icon>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <button mat-flat-button  (click)="addCitations()">
+                                                <mat-icon class="action-icons">add</mat-icon>
+                                                Add Citation
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Model Parameters-->
+                    <div class="table-titleArea" style="padding: 16px 24px;">
+                        <div style="margin-bottom: 24px;">
+                            <h6 
+                                (click)="toggleShowSection('modelParams')">
+                                Model Parameters<mat-icon class="float-right" [ngClass]="showSection['modelParams'] ? 'up-arrow' : 'down-arrow'">
+                                        {{showSection['modelParams'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                      </mat-icon>
+                            </h6>
+                        </div>
+
+                        <div class="tab-data" style="padding-left: 48px;" *ngIf="showSection['modelParams']">
+                            <!--model architecture, input and output format-->
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <mat-form-field class="standard"
+                                        floatLabel="always">
+                                        <mat-label>Model Architecture</mat-label>
+                                        <input matInput placeholder=""
+                                            value="{{ model.updateModelObject.metadata.modelParameters.modelArchitecture }}"
+                                            [(ngModel)]="model.updateModelObject.metadata.modelParameters.modelArchitecture" />
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-md-4">
+                                    <mat-form-field class="standard"
+                                        floatLabel="always">
+                                        <mat-label>Input Format</mat-label>
+                                        <input matInput placeholder=""
+                                            value="{{ model.updateModelObject.metadata.modelParameters.inputFormat }}"
+                                            [(ngModel)]="model.updateModelObject.metadata.modelParameters.inputFormat" />
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-md-4">
+                                    <mat-form-field class="standard"
+                                        floatLabel="always">
+                                        <mat-label>Output Format</mat-label>
+                                        <div>
+                                            <input matInput placeholder=""
+                                                value="{{ model.updateModelObject.metadata.modelParameters.outputFormat }}"
+                                                [(ngModel)]="model.updateModelObject.metadata.modelParameters.outputFormat" />
+                                        </div>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!--data-->
+                            <!-- <div class="marB8">
+
+                            </div> -->
+                            <div class="tab-data" *ngIf="showSection['data']">
+                                <ng-container
+                                    *ngFor="let item of model.updateModelObject.metadata.modelParameters.data; let i=index">
+                                    <h6 
+                                        style="display: flex; justify-content: space-between;">
+                                        Data
+                                        <span>
+                                            <button mat-flat-button  (click)="removeData(i)">
+                                                <mat-icon class="action-icons">delete</mat-icon>
+                                            </button>
+                                        </span>
+                                    </h6>
+                                    <div class="table-titleArea padLR16">
+
+                                        <div class="tab-data" *ngIf="showSection['data']">
+                                            <!--name, link, classification-->
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always">
+                                                        <mat-label>Name</mat-label>
+                                                        <input matInput placeholder="" value="{{ item.name }}"
+                                                            [(ngModel)]="item.name" />
+                                                    </mat-form-field>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always">
+                                                        <mat-label>Link</mat-label>
+                                                        <div >
+                                                            <input matInput placeholder="" value="{{ item.link }}"
+                                                                [(ngModel)]="item.link" />
+                                                        </div>
+                                                    </mat-form-field>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always">
+                                                        <mat-label>Classification</mat-label>
+                                                        <div >
+                                                            <input matInput placeholder=""
+                                                                value="{{ item.classification }}"
+                                                                [(ngModel)]="item.classification" />
+                                                        </div>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-titleArea">
+                                            <div class="tab-data" *ngFor="let sensitiv of item.sensitive; let j=index ">
+                                                <div>
+                                                    <h6 
+                                                        (click)="toggleShowSection('sensitive')"
+                                                        style="display: flex; justify-content: space-between;"
+                                                        aria-required="true">
+                                                        Sensitive
+                                                        <span>
+                                                            <button mat-flat-button 
+                                                                (click)="removeSensitive(i,j)">
+                                                                <mat-icon class="action-icons">delete</mat-icon>
+                                                            </button>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                                <table class="app_tables" style="margin-left: 16px;">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Fields</th>
+                                                            &nbsp;
+                                                            <th></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr *ngFor="let field of sensitiv?.Fields; let k=index">
+                                                            <td>
+                                                                <mat-form-field
+                                                                    class="standard"
+                                                                    floatLabel="always">
+                                                                    <div >
+                                                                        <input matInput placeholder="" [ngModel]="field"
+                                                                            (ngModelChange)="this.model.updateModelObject.metadata.modelParameters.data[i].sensitive[j].Fields[k] = $event"
+                                                                            [ngModelOptions]="{ updateOn: 'blur' }" />
+                                                                    </div>
+                                                                </mat-form-field>
+                                                            </td>
+                                                            &nbsp;
+                                                            <td>
+                                                                <button mat-flat-button 
+                                                                    (click)="removeField(i,j,k)">
+                                                                    <mat-icon class="action-icons">delete</mat-icon>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <button mat-flat-button  (click)="addField(i,j)">
+                                                    <mat-icon class="action-icons">add</mat-icon>
+                                                    Add Fields
+                                                </button>
+                                            </div>
+                                            <button mat-flat-button  (click)="addSensitive(i)">
+                                                <mat-icon class="action-icons">add</mat-icon>
+                                                Add Sensitive
+                                            </button>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                                <button mat-flat-button  (click)="addData()">
+                                    <mat-icon class="action-icons">add</mat-icon>
+                                    Add Data
+                                </button>
+                            </div>
+
+                            <!--input and output format map-->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 
+                                        (click)="toggleShowSection('inputFormatMap')">
+                                        Input Format Map<mat-icon class="float-right" [ngClass]="showSection['inputFormatMap'] ? 'up-arrow' : 'down-arrow'">
+                                                {{showSection['inputFormatMap'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                              </mat-icon>
+                                    </h6>
+                                    <div class="tab-data" *ngIf="showSection['inputFormatMap']">
+                                        <table class="app_tables">
+                                            <thead>
+                                                <tr>
+                                                    <th>Key</th>
+                                                    &nbsp;
+                                                    <th>Value</th>
+                                                    &nbsp;
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr
+                                                    *ngFor="let item of model.updateModelObject.metadata.modelParameters.inputFormatMap; let i=index">
+                                                    <td>
+                                                        <mat-form-field
+                                                            class="standard"
+                                                            floatLabel="always" >
+                                                            <input matInput [ngModel]="item.key"
+                                                                (ngModelChange)="item.key = $event" />
+                                                        </mat-form-field>
+                                                    </td>
+                                                    &nbsp;
+                                                    <td>
+                                                        <mat-form-field
+                                                            class="standard"
+                                                            floatLabel="always" >
+                                                            <input matInput [ngModel]="item.value"
+                                                                (ngModelChange)="item.value = $event" />
+                                                        </mat-form-field>
+                                                    </td>
+                                                    &nbsp;
+                                                    <td>
+                                                        <button mat-flat-button 
+                                                            (click)="removeInputFormatMap(i)">
+                                                            <mat-icon class="action-icons">delete</mat-icon>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <button mat-flat-button  (click)="addInputFormatMap()">
+                                            <mat-icon class="action-icons">add</mat-icon>
+                                            Add Input Format Map
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 
+                                        (click)="toggleShowSection('outputFormatMap')">
+                                        Output Format Map<mat-icon class="float-right" [ngClass]="showSection['outputFormatMap'] ? 'up-arrow' : 'down-arrow'">
+                                                {{showSection['outputFormatMap'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                              </mat-icon>
+                                    </h6>
+                                    <div class="tab-data" *ngIf="showSection['outputFormatMap']">
+                                        <!-- TODO: HERE COMES the VOLUME SECTION -->
+                                        <table class="app_tables">
+                                            <thead>
+                                                <tr>
+                                                    <th>Key</th>
+                                                    &nbsp;
+                                                    <th>Value</th>
+                                                    &nbsp;
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr
+                                                    *ngFor="let item of model.updateModelObject.metadata.modelParameters.outputFormatMap; let i=index">
+                                                    <td>
+                                                        <mat-form-field
+                                                            class="standard"
+                                                            floatLabel="always" >
+                                                            <input matInput [ngModel]="item.key"
+                                                                (ngModelChange)="item.key = $event" />
+                                                        </mat-form-field>
+                                                    </td>
+                                                    &nbsp;
+                                                    <td>
+                                                        <mat-form-field
+                                                            class="standard"
+                                                            floatLabel="always" >
+                                                            <input matInput [ngModel]="item.value"
+                                                                (ngModelChange)="item.value = $event" />
+                                                        </mat-form-field>
+                                                    </td>
+                                                    &nbsp;
+                                                    <td>
+                                                        <button mat-flat-button 
+                                                            (click)="  removeOutputFormatMap(i)">
+                                                            <mat-icon class="action-icons">delete</mat-icon>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <button mat-flat-button  (click)="addOutputFormatMap()">
+                                            <mat-icon class="action-icons">add</mat-icon>
+                                            Add Output Format Map
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!--Quantitative analysis-->
+                    <div class="table-titleArea" style="padding: 16px 24px;">
+                        <div class="marB24">
+                            <h6 
+                                (click)="toggleShowSection('qAnalysis')">
+                                Quantitative Analysis<mat-icon class="float-right" [ngClass]="showSection['qAnalysis'] ? 'up-arrow' : 'down-arrow'">
+                                        {{showSection['qAnalysis'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                      </mat-icon>
+                            </h6>
+                        </div>
+                        <div class="tab-data" style="padding-left: 48px;" *ngIf="showSection['qAnalysis']">
+                            <ng-container
+                                *ngFor="let item of model.updateModelObject.metadata.quantitativeAnalysis.performanceMetrics; let i=index">
+                                <!--Performance Metrics-->
+                                <h6 
+                                    style="display: flex; justify-content: space-between;">
+                                    Performance Metrics
+                                    <span>
+                                        <button mat-flat-button  (click)="removeMetrics(i)">
+                                           <mat-icon class="action-icons">delete</mat-icon>
+                                        </button>
+                                    </span>
+                                </h6>
+
+                                <div style="padding-left: 16px">
+                                    <!--type, value, slice-->
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <mat-form-field class="standard"
+                                                floatLabel="always">
+                                                <mat-label>Type</mat-label>
+                                                <input matInput placeholder="" value="{{ item.type }}"
+                                                    [(ngModel)]="item.type" />
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <mat-form-field class="standard"
+                                                floatLabel="always">
+                                                <mat-label>Value</mat-label>
+                                                <div >
+                                                    <input matInput placeholder="" value="{{ item.value }}"
+                                                        [(ngModel)]="item.value" />
+                                                </div>
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <mat-form-field class="standard"
+                                                floatLabel="always">
+                                                <mat-label>Slice</mat-label>
+                                                <div >
+                                                    <input matInput placeholder="" value="{{ item.slice }}"
+                                                        [(ngModel)]="item.slice" />
+                                                </div>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+
+                                    <h6 style="margin-bottom: 24px;">Confidence Interval</h6>
+
+                                    <!--confidence interval-->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <mat-form-field class="standard"
+                                                floatLabel="always">
+                                                <mat-label>Upper Bound</mat-label>
+                                                <input matInput placeholder=""
+                                                    value="{{ item.confidenceInterval.upperBound }}"
+                                                    [(ngModel)]="item.confidenceInterval.upperBound" />
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <mat-form-field class="standard"
+                                                floatLabel="always">
+                                                <mat-label>Lower Bound</mat-label>
+                                                <div >
+                                                    <input matInput placeholder=""
+                                                        value="{{ item.confidenceInterval.lowerBound }}"
+                                                        [(ngModel)]="item.confidenceInterval.lowerBound" />
+                                                </div>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </ng-container>
+                            <button mat-flat-button  (click)="addMetrics()">
+                                <mat-icon class="action-icons">add</mat-icon>
+                                Add Metrics
+                            </button>
+                        </div>
+                    </div>
+
+                    <!--Considerations-->
+                    <div class="table-titleArea" style="padding: 16px 24px;">
+                        <div class="marB24">
+                            <h6 
+                                (click)="toggleShowSection('considerations')">
+                                Considerations<mat-icon class="float-right" [ngClass]="showSection['considerations'] ? 'up-arrow' : 'down-arrow'">
+                                        {{showSection['considerations'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                                      </mat-icon>
+                            </h6>
+                        </div>
+
+                        <div style="padding-left: 48px;" *ngIf="showSection['considerations']">
+                            <div class="row">
+                                <!--users-->
+                                <div class="col-md-3">
+                                    <table class="app_tables">
+                                        <thead>
+                                            <tr>
+                                                <th>Users</th>
+                                                &nbsp;
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let item of model.updateModelObject.metadata.considerations.users; let i=index">
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.description"
+                                                            (ngModelChange)="item.description = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <button mat-flat-button 
+                                                        (click)="removeUsers(i)">
+                                                                                                          <mat-icon class="action-icons">delete</mat-icon>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <button mat-flat-button  (click)="addUsers()">
+                                        <mat-icon class="action-icons">add</mat-icon>
+                                        Add Description
+                                    </button>
+                                </div>
+
+                                <!--use cases-->
+                                <div class="col-md-3">
+                                    <table class="app_tables">
+                                        <thead>
+                                            <tr>
+                                                <th>Use cases</th>
+                                                &nbsp;
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let item of model.updateModelObject.metadata.considerations.useCases; let i=index">
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.description"
+                                                            (ngModelChange)="item.description = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <button mat-flat-button 
+                                                        (click)="removeUseCases(i)">
+                                                                                                          <mat-icon class="action-icons">delete</mat-icon>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <button mat-flat-button  (click)="addUseCases()">
+                                        <mat-icon class="action-icons">add</mat-icon>
+                                        Add Description
+                                    </button>
+                                </div>
+
+                                <!--Limitations-->
+                                <div class="col-md-3">
+                                    <table class="app_tables">
+                                        <thead>
+                                            <tr>
+                                                <th>Limitations</th>
+                                                &nbsp;
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let item of model.updateModelObject.metadata.considerations.limitations; let i=index">
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.description"
+                                                            (ngModelChange)="item.description = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <button mat-flat-button 
+                                                        (click)="removeLimitations(i)">
+                                                                                                          <mat-icon class="action-icons">delete</mat-icon>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <button mat-flat-button  (click)="addLimitations()">
+                                        <mat-icon class="action-icons">add</mat-icon>
+                                        Add Description
+                                    </button>
+                                </div>
+
+                                <!--Tradeoffs-->
+                                <div class="col-md-3">
+                                    <table class="app_tables">
+                                        <thead>
+                                            <tr>
+                                                <th>Tradeoffs</th>
+                                                &nbsp;
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let item of model.updateModelObject.metadata.considerations.tradeoffs; let i=index">
+                                                <td>
+                                                    <mat-form-field
+                                                        class="standard"
+                                                        floatLabel="always" >
+                                                        <input matInput [ngModel]="item.description"
+                                                            (ngModelChange)="item.description = $event" />
+                                                    </mat-form-field>
+                                                </td>
+                                                &nbsp;
+                                                <td>
+                                                    <button mat-flat-button 
+                                                        (click)="removeTradeoffs(i)">
+                                                                                                          <mat-icon class="action-icons">delete</mat-icon>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <button mat-flat-button  (click)="addTradeoffs()">
+                                        <mat-icon class="action-icons">add</mat-icon>
+                                        Add Description
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!--Ethical Considerations-->
+                            <div class="table-titleArea padT16">
+                                <table class="app_tables">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            &nbsp;
+                                            <th>Mitigation Strategy</th>
+                                            &nbsp;
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            *ngFor="let item of model.updateModelObject.metadata.considerations.ethicalConsiderations; let i=index">
+                                            <td>
+                                                <mat-form-field class="standard"
+                                                    floatLabel="always" >
+                                                    <input matInput [ngModel]="item.name"
+                                                        (ngModelChange)="item.name = $event" />
+                                                </mat-form-field>
+                                            </td>
+                                            &nbsp;
+                                            <td>
+                                                <mat-form-field class="standard"
+                                                    floatLabel="always" >
+                                                    <input matInput [ngModel]="item.mitigationStrategy"
+                                                        (ngModelChange)="item.mitigationStrategy = $event" />
+                                                </mat-form-field>
+                                            </td>
+                                            &nbsp;
+                                            <td>
+                                                <button mat-flat-button 
+                                                    (click)="removeEthicalConsiderations(i)">
+<mat-icon class="action-icons">delete</mat-icon>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <button mat-flat-button  (click)="addEthicalConsiderations()">
+                                    <mat-icon class="action-icons">add</mat-icon>
+                                    Add Ethical Considerations
+                                </button>
+                            </div>
+
+                            <!--Environmental Considerations-->
+                            <div class="table-titleArea padT16">
+                                <table class="app_tables">
+                                    <thead>
+                                        <tr>
+                                            <th>Hardware Type</th>
+                                            &nbsp;
+                                            <th>Hours Used</th>
+                                            &nbsp;
+                                            <th>Cloud Provider</th>
+                                            &nbsp;
+                                            <th>Compute Region</th>
+                                            &nbsp;
+                                            <th>Carbon Emitted</th>
+                                            &nbsp;
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            *ngFor="let item of model.updateModelObject.metadata.considerations.environmentalConsiderations; let i=index">
+                                            <td>
+                                                <mat-form-field class="standard"
+                                                    floatLabel="always" >
+                                                    <input matInput [ngModel]="item.hardwareType"
+                                                        (ngModelChange)="item.hardwareType = $event" />
+                                                </mat-form-field>
+                                            </td>
+                                            &nbsp;
+                                            <td>
+                                                <mat-form-field class="standard"
+                                                    floatLabel="always" >
+                                                    <input matInput [ngModel]="item.hoursUsed"
+                                                        (ngModelChange)="item.hoursUsed = $event" />
+                                                </mat-form-field>
+                                            </td>
+                                            &nbsp;
+                                            <td>
+                                                <mat-form-field class="standard"
+                                                    floatLabel="always" >
+                                                    <input matInput [ngModel]="item.cloudProvider"
+                                                        (ngModelChange)="item.cloudProvider = $event" />
+                                                </mat-form-field>
+                                            </td>
+                                            &nbsp;
+                                            <td>
+                                                <mat-form-field class="standard"
+                                                    floatLabel="always" >
+                                                    <input matInput [ngModel]="item.computeRegion"
+                                                        (ngModelChange)="item.computeRegion = $event" />
+                                                </mat-form-field>
+                                            </td>
+                                            &nbsp;
+                                            <td>
+                                                <mat-form-field class="standard"
+                                                    floatLabel="always" >
+                                                    <input matInput [ngModel]="item.carbonEmitted"
+                                                        (ngModelChange)="item.carbonEmitted = $event" />
+                                                </mat-form-field>
+                                            </td>
+                                            &nbsp;
+                                            <td>
+                                                <button mat-flat-button 
+                                                    (click)="removeEnvironmentalConsiderations(i)">
+<mat-icon class="action-icons">delete</mat-icon>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <button mat-flat-button 
+                                    (click)="addEnvironmentalConsiderations()">
+                                    <mat-icon class="action-icons">add</mat-icon>
+                                    Add Environmental Considerations
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #confirmAction let-modal let-c="close" let-s="confirm" let-d="dismiss">
+    <app-dialog-confirm (close)="c('Close click');" (confirm)="updateModelData()">
+    </app-dialog-confirm>
+  </ng-template>

@@ -1,0 +1,313 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<!-- <div class="marB16"> -->
+  <!-- shows loader when data is not loaded -->
+  <div style="height: 65vh; overflow-x: hidden; display: flex;" *ngIf="!model.isDataLoaded">
+    <div class="loading-dots">
+      <div class="loading-dots--dot"></div>
+      <div class="loading-dots--dot"></div>
+      <div class="loading-dots--dot"></div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="model.isDataLoaded">
+    <ng-container *ngIf="model.apiError===''; else errorTemplate">
+      <!-- <div style="padding-left: 8px !important; padding-right: 8px !important;"> -->
+      <mat-card class="mat-card-widget.mat-card" style="padding: 0px 16px !important">
+        <div class="app_panel_body padTB8">
+          <!-- this section is for the header of the panel -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="flex-container" style="margin-bottom: 8px;">
+                <div class="flex-item-20 float-left">
+                  <h6
+                    style="margin-bottom: 0px;font-weight: 600; font-style: normal; font-family: myriad-pro, Arial, sans-serif !important;">
+                    {{model.modelDetails['metadata'].modelDetails.displayName}}</h6>
+                </div>
+                &nbsp;
+                <div class="flex-item-80 float-right">
+                  <span class="float-right marL8" *ngIf="model.modelDetails['status']">
+                    <span class="status-chip chip-margins" [ngClass]="getClass(model.modelDetails['status'])"
+                      matTooltip="Status" matTooltipPosition="below">
+                      {{ model.modelDetails["status"] }}
+                    </span>
+                    <br />
+                  </span>
+                  <span class="float-right marL8"
+                    *ngIf="model.modelDetails['metadata'].modelParameters.modelArchitecture">
+                    <span class="status-chip color-Grey  chip-margins" matTooltip="Model Architecture"
+                      matTooltipPosition="below">
+                      {{model.modelDetails['metadata'].modelParameters.modelArchitecture}}
+                    </span>
+                    <br />
+                  </span>
+                  <span class="float-right marL8"
+                    *ngIf="model.modelDetails['metadata'].modelDetails.licenses[0]['identifier']">
+                    <span class="status-chip color-Grey  chip-margins" matTooltip="License" matTooltipPosition="below">
+                      {{model.modelDetails['metadata'].modelDetails.licenses[0]['identifier']}}
+                    </span>
+                    <br />
+                  </span>
+                  <span class="float-right marL8" *ngIf="model.modelDetails['metadata'].modelDetails.tasktype">
+                    <span class="status-chip color-Grey  chip-margins" matTooltip="Task Type"
+                      matTooltipPosition="below">
+                      {{model.modelDetails['metadata'].modelDetails.tasktype}}
+                    </span>
+                    <br />
+                  </span>
+                  <span class="float-right marL8" *ngIf="model.modelDetails['metadata'].modelDetails?.customTags[1]?.tags">
+                    <span class="status-chip color-Grey  chip-margins" matTooltip="Provider"
+                      matTooltipPosition="below">
+                      {{model.modelDetails['metadata'].modelDetails?.customTags[1]?.tags}}
+                    </span>
+                    <br />
+                  </span>
+                </div>
+              </div>
+              <div class="mainBody_Txt2">
+                <div>{{ model.modelDetails["description"]}}</div><br />
+                <div>{{"Version: " + model.modelDetails["version"]}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- <div style="padding-left: 8px; padding-right: 8px;">
+            <mat-card class="mat-card-widget.mat-card" style="padding: 5px 16px 5px 16px;"> -->
+        <div class="secondary_style marB7" [style.height.px]="model.cardHeight">
+          <mat-tab-group>
+            <!-- Metadata tab -->
+            <mat-tab label="Metadata" class="mat-tab-sm">
+              <div style="overflow-x: hidden; overflow-y: scroll;" class="container-fluid"
+                [style.height.px]="model.metaDataHeight">
+                <!-- Model Details Section -->
+                <div class="row">
+                  <div class="col-md-12">
+                    <h5 class="sectionHeader metadata-tab-header mar1" (click)="toggleShowSection('modelDetails')">
+                      Model
+                      Details
+                      <mat-icon class="float-right" [ngClass]="showSection['modelDetails'] ? 'up-arrow' : 'down-arrow'">
+                        {{showSection['modelDetails'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                      </mat-icon>
+                    </h5>
+                    <div class="tab-data" *ngIf="showSection['modelDetails']">
+                      <div class="table-responsive">
+                        <table aria-hidden="true" class="app_tables marT4">
+                          <tbody>
+                            <tr>
+                              <td class="tdAI">
+                                <strong>Source</strong>
+                                <div class="mainBody_TxtXS">
+                                  {{model.modelDetails['metadata'].modelDetails.documentation}}
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Model Parameters Section -->
+                <div class="row">
+                  <div class="col-md-12">
+                    <h5 class="sectionHeader metadata-tab-header mar1" (click)="toggleShowSection('modelParameters')">
+                      Model Parameters
+                      <mat-icon class="float-right"
+                        [ngClass]="showSection['modelParameters'] ? 'up-arrow' : 'down-arrow'">
+                        {{showSection['modelParameters'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                      </mat-icon>
+                    </h5>
+                    <div class=" tab-data" *ngIf="showSection['modelParameters']">
+                      <div class="table-responsive">
+                        <table aria-hidden="true" class="app_tables marT4">
+                          <tbody>
+                            <tr>
+                              <td class="tdAI">
+                                <strong>Input Format</strong>
+                                <div class="mainBody_TxtXS">
+                                  {{model.modelDetails['metadata'].modelParameters.inputFormat}}
+                                </div>
+                              </td>
+                              <td class="tdAI">
+                                <strong>Output Format</strong>
+                                <div class="mainBody_TxtXS">
+                                  {{model.modelDetails['metadata'].modelParameters.outputFormat}}
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Quantitative Analysis Section -->
+                <div class="row">
+                  <div class="col-md-12">
+                    <h5 class="sectionHeader metadata-tab-header mar1"
+                      (click)="toggleShowSection('quantitativeAnalysis')">
+                      Quantitative Analysis
+                      <mat-icon class="float-right"
+                        [ngClass]="showSection['quantitativeAnalysis'] ? 'up-arrow' : 'down-arrow'">
+                        {{showSection['quantitativeAnalysis'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                      </mat-icon>
+                    </h5>
+                    <div class="tab-data" *ngIf="showSection['quantitativeAnalysis']">
+                      <ng-container [ngTemplateOutlet]="customTableTemplate"
+                        [ngTemplateOutletContext]="{tableContent:model.modelDetails['metadata'].quantitativeAnalysis.performanceMetrics}"></ng-container>
+                    </div>
+                  </div>
+                </div>
+                <!-- Considerations Section -->
+                <div class="row">
+                  <div class="col-md-12">
+                    <h5 class="sectionHeader metadata-tab-header mar1" (click)="toggleShowSection('considerations')">
+                      Considerations
+                      <mat-icon class="float-right"
+                        [ngClass]="showSection['considerations'] ? 'up-arrow' : 'down-arrow'">
+                        {{showSection['considerations'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                      </mat-icon>
+                    </h5>
+                    <div class="tab-data" *ngIf="showSection['considerations']">
+                      <div class="table-responsive">
+                        <table aria-hidden="true" class="app_tables marT4">
+                          <tbody>
+                            <tr>
+                              <td class="tdAI">
+                                <strong>Users</strong>
+                                <ng-container [ngTemplateOutlet]="description"
+                                  [ngTemplateOutletContext]="{fieldName:'users'}"></ng-container>
+                              </td>
+                              <td class="tdAI">
+                                <strong>Use Cases</strong>
+                                <ng-container [ngTemplateOutlet]="description"
+                                  [ngTemplateOutletContext]="{fieldName:'useCases'}"></ng-container>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="tdAI">
+                                <strong>Limitations</strong>
+                                <ng-container [ngTemplateOutlet]="description"
+                                  [ngTemplateOutletContext]="{fieldName:'limitations'}"></ng-container>
+                              </td>
+                              <td class="tdAI">
+                                <strong>Tradeoffs</strong>
+                                <ng-container [ngTemplateOutlet]="description"
+                                  [ngTemplateOutletContext]="{fieldName:'tradeoffs'}"></ng-container>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="tdAI" colspan="2">
+                                <strong>Environmental Considerations</strong>
+                                <ng-container [ngTemplateOutlet]="customTableTemplate"
+                                  [ngTemplateOutletContext]="{tableContent:model.modelDetails['metadata'].considerations.environmentalConsiderations}">
+                                </ng-container>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-tab>
+
+            <!-- Leaderboard list tab -->
+            <mat-tab label="Benchmarks" class="mat-tab-sm">
+              <app-model-leader-board [ParentHeight]="model.metaDataHeight" [ParentWidth]="model.metaDataWidth"
+                [modelFlag]="true" [leaderData]="model.benchMarkData" [modelName]="model.modelName"
+                [leaderDataCount]="model.benchmarkCount" [modality]="model.modality"
+                [exeModelName]="model.exeModelName"></app-model-leader-board>
+            </mat-tab>
+          </mat-tab-group>
+        </div>
+        <!-- </mat-card>
+          </div> -->
+      </mat-card>
+      <!-- </div> -->
+    </ng-container>
+    <ng-template #errorTemplate>
+      <div class="tf-content content-left" style="height: 70vh;   width: 100%; display: flex; text-align: center;">
+        {{model.apiError}}
+      </div>
+    </ng-template>
+  </ng-container>
+
+<!-- </div> -->
+
+<ng-template #customTableTemplate let-tableContent="tableContent">
+  <table class="app_tables marT8">
+    <thead>
+      <tr>
+        <th class="text_small" *ngFor="let tableItem of tableContent[0] | keyvalue: noSortCompareFn">
+          <strong>{{tableItem.key}}</strong>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of tableContent">
+        <td class="tdAI" *ngFor="let rowItem of item | keyvalue: noSortCompareFn">
+          <ng-container *ngIf="!isObject(rowItem.value) && !isArray(rowItem.value)">
+            <div class="mainBody_TxtXS inCustomTable">
+              {{ rowItem.value }}
+            </div>
+          </ng-container>
+          <ng-container *ngIf="isObject(rowItem.value)">
+            {{ rowItem.value["lowerBound"] +" - "+rowItem.value["upperBound"]}}
+          </ng-container>
+          <!-- check for isArray -->
+          <ng-container *ngIf="isArray(rowItem.value)">
+            <ng-container *ngFor="let arrItem of rowItem.value">
+              <ng-container [ngTemplateOutlet]="nestedTableTemplate"
+                [ngTemplateOutletContext]="{tableContent:arrItem}"></ng-container>
+            </ng-container>
+          </ng-container>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</ng-template>
+
+
+<ng-template #nestedTableTemplate let-tableContent="tableContent">
+  <table class="app_tables">
+    <tbody>
+      <ng-container *ngFor="let arrItem of tableContent">
+        <ng-container *ngFor="let item of arrItem | keyvalue: noSortCompareFn">
+          <ng-container *ngIf="!isArray(item.value)">
+            <tr>
+              <td class="text_small"><b>{{item.key}}</b></td>
+              <td class="mainBody_TxtXS">{{item.value}}</td>
+            </tr>
+          </ng-container>
+          <ng-container *ngIf="isArray(item.value)">
+            <tr>
+              <td>
+                <strong>{{item.key}}</strong>
+              </td>
+              <td>
+                <ng-container [ngTemplateOutlet]="customTableTemplate"
+                  [ngTemplateOutletContext]="{tableContent: item.value}">
+                </ng-container>
+              </td>
+            </tr>
+          </ng-container>
+        </ng-container>
+      </ng-container>
+    </tbody>
+  </table>
+</ng-template>
+
+<ng-template #description let-fieldName="fieldName">
+  <div class="mainBody_TxtXS">{{model.modelDetails['metadata'].considerations[fieldName][0]["description"] ?
+    model.modelDetails['metadata'].considerations[fieldName][0]["description"] : '-' }}</div>
+</ng-template>

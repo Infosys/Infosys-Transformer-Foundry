@@ -1,0 +1,253 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="tf_container">
+  <div class="row">
+    <div class="col-lg-12">
+      <div style="background-color:#fdfdfd1f;">
+        <header class="tf_header_bar">
+          <div class="container-fluid">
+            <!--Menu icon-->
+            <ng-container *ngIf="!isLoginPage()">
+              <i class="material-icons marT24 menu-icon float-left" (click)="toggleSidebar($event)"
+                aria-label="app menu" matTooltip="Menu" matTooltipPosition="above">menu</i>
+            </ng-container>
+
+            <!--Header-->
+            <div class="tf-header">Transformer Foundry</div>
+
+            <!--Profile icon-->
+            <ng-container *ngIf="!isLoginPage()">
+              <div class="float-right">
+                <i class="material-icons" [matMenuTriggerFor]="menu" yPosition="below" style="padding-top: 24px;"
+                  (click)="clickProfile()">account_circle</i>
+
+                <!-- Dropdown menu -->
+                <mat-menu #menu="matMenu" yPosition="below" style="padding: 16px;">
+                  <!-- User ID -->
+                  <div class="user-id">{{model.userId}}</div>
+
+                  <!-- Logout button -->
+                  <button mat-menu-item class="logout-button" (click)="logout()">
+                    <mat-icon>logout</mat-icon>
+                    <span>Logout</span>
+                  </button>
+                </mat-menu>
+              </div>
+            </ng-container>
+          </div>
+        </header>
+
+        <nav [ngClass]="{'show': isSidebarOpen}" class=" sidebar collapse sidebar-hide" id="sidebar"
+          (click)="$event.stopPropagation()">
+          <ul class="no-bullet marT32">
+            <div style="margin-top: 64px">
+              <li>
+                <span class="nav-list">
+                  <a href="javascript:void(0);" class="float-left">
+                    <img alt="Projects" style="width:1.66vw;" src="assets/images/Set2/projects.png" />
+                    <!-- src="assets/images/models.png" /> -->
+
+                  </a>
+                  <a [routerLink]="['projects']" style="text-decoration: none;" matTooltip="Projects"
+                    matTooltipPosition="above">
+                    <h6 class="nav-text">
+                      Projects
+                    </h6>
+                  </a>
+                </span>
+              </li>
+              <li>
+                <span class="nav-list" style="padding-top: 24px;">
+                  <a href="javascript:void(0);" class="float-left">
+                    <img alt="Models" style="width:1.66vw;" src="assets/images/Set2/models.png" />
+                  </a>
+                  <a (click)="navigateToModelZoo()" style="text-decoration: none; cursor: pointer" matTooltip="Models"
+                    matTooltipPosition="above">
+                    <h6 class="nav-text" title="Curated models">
+                      Model Zoo
+                    </h6>
+                  </a>
+                </span>
+              </li>
+              <li>
+                <span class="nav-list" style="padding-top: 24px;">
+                  <a href="javascript:void(0);" class="float-left">
+                    <img alt="Experiments" style="width:1.66vw;" src="assets/images/Set2/Experiments.png" />
+                  </a>
+                  <a style="text-decoration: none; cursor: pointer" matTooltip="Playground" matTooltipPosition="above">
+                    <h6 class="nav-text" title="Playground">
+                      Playground
+                    </h6>
+                  </a>
+                </span>
+              </li>
+              <li>
+                <span class="nav-list" style="padding-top: 12px; margin-left: 20px;">
+                  <!-- <a href="javascript:void(0);" class="float-left">
+                    <img alt="Experiments" style="width:1.66vw;" src="assets/images/Set2/Experiments.png" />
+                  </a> -->
+                  <a (click)="navigateToPlayground('playground')" style="text-decoration: none; cursor: pointer"
+                    matTooltip="Playground" matTooltipPosition="above">
+                    <h6 class="nav-text" title="Model Playground">
+                       LLM
+                    </h6>
+                  </a>
+                </span>
+              </li>
+              <li>
+                <span class="nav-list" style="padding-top: 12px; margin-left: 20px;">
+                  <!-- <a href="javascript:void(0);" class="float-left">
+                    <img alt="Experiments" style="width:1.66vw;" src="assets/images/Set2/Experiments.png" />
+                  </a> -->
+                  <a (click)="navigateToPlayground('rag-playground')" style="text-decoration: none; cursor: pointer"
+                    matTooltip="Playground" matTooltipPosition="above">
+                    <h6 class="nav-text" title="Rag Playground (alpha)">
+                      RAG (alpha)
+                    </h6>
+                  </a>
+                </span>
+              </li>
+              <div *ngIf="!isHomePage()">
+                <div class="combined-line" style="font-size:small;">
+                  <span class="dashed-line"></span>
+                  <span class="plain-text">My Project</span>
+                  <span class="dashed-line"></span>
+                </div>
+                <br />
+                <div class="combined-line web-GreyDarkest" title="{{ model.projectName }}"
+                  style="font-size:x-small;padding-left: 24px;">
+                  <span class="plain-text">[{{ model.projectName}}]</span>
+                </div>
+                <li>
+                  <span class="nav-list">
+                    <a href="javascript:void(0);" class="menu-icon float-left">
+                      <img alt="Data pre-processing pipelines" style="width:1.66vw;"
+                        src="assets\images\Set2\DataPipelines.png" />
+                      <!-- src="assets/images/models.png" /> -->
+
+                    </a>
+                    <a [routerLink]="['projects',model.projectId, 'pipelines']" [queryParams]="{ pn: model.projectName}"
+                      style="text-decoration: none; padding-top: 24px;" matTooltip="Data pre-processing pipelines"
+                      matTooltipPosition="above">
+                      <h6 class="nav-text">
+                        Data Pipelines
+                      </h6>
+                    </a>
+                  </span>
+                </li>
+                <li>
+                  <span class="nav-list">
+                    <a href="javascript:void(0);" class="menu-icon float-left">
+                      <img alt="Experiments" style="width:1.66vw;" src="assets/images/Set2/Experiments.png" />
+                      <!-- src="assets/images/models.png" /> -->
+
+                    </a>
+                    <a [routerLink]="['projects',model.projectId, 'experiments']"
+                      [queryParams]="{ pn: model.projectName}" style="text-decoration: none; padding-top: 24px;"
+                      matTooltip="Fine-tuned jobs" matTooltipPosition="above">
+                      <h6 class="nav-text">
+                        Experiments
+                      </h6>
+                    </a>
+                  </span>
+                </li>
+                <li>
+                  <span class="nav-list">
+                    <a href="javascript:void(0);" class="menu-icon float-left">
+                      <img alt="Models" style="width:1.66vw;" src="assets/images/Set2/modelsFinetuned.png" />
+                      <!-- src="assets/images/models.png" /> -->
+                      <!-- src="assets/images/models.png" /> -->
+
+                    </a>
+                    <a [routerLink]="['projects', model.projectId, 'models']" [queryParams]="{ pn: model.projectName}"
+                      style="text-decoration: none; padding-top: 24px;" matTooltip="Current project models"
+                      matTooltipPosition="above">
+                      <h6 class="nav-text">
+                        Fine-tuned Models
+                      </h6>
+                    </a>
+                  </span>
+                </li>
+                
+                <li>
+                  <span class="nav-list">
+                    <a href="javascript:void(0);" class="menu-icon float-left">
+                      <img alt="Models" style="width:1.66vw;" src="assets/images/Set2/benchmarks.png" />
+                    </a>
+                    <!-- <a [routerLink]="['benchmarks']" [queryParams]="{ pn: model.projectName}" -->
+                    <a [routerLink]="['projects',model.projectId, 'benchmarks']"
+                      [queryParams]="{ pn: model.projectName}" style="text-decoration: none; padding-top: 24px;"
+                      matTooltip="Submit Benchmark" matTooltipPosition="above">
+                      <h6 class="nav-text">
+                        Benchmarks
+                      </h6>
+                    </a>
+                  </span>
+                </li>
+                <li>
+                  <span class="nav-list">
+                    <a href="javascript:void(0);" class="menu-icon float-left">
+                      <img alt="Models" style="width:1.66vw;" src="assets/images/Set2/benchmarks.png" />
+                    </a>
+                    <!-- <a [routerLink]="['benchmarks']" [queryParams]="{ pn: model.projectName}" -->
+                    <a [routerLink]="['projects',model.projectId, 'datasets']"
+                      [queryParams]="{ pn: model.projectName}" style="text-decoration: none; padding-top: 24px;"
+                      matTooltip="RAG Evaluation" matTooltipPosition="above">
+                      <h6 class="nav-text">
+                        Datasets
+                      </h6>
+                    </a>
+                  </span>
+                </li>
+              </div>
+            </div>
+          </ul>
+        </nav>
+
+        <div class="clearfix">
+          <div class="container-fluid">
+            <div class="content-right nomarL_mb" id="mainrightCnt" style="margin-left:16px;">
+              <div class="tf-content">
+                <div class="row">
+                  <div class="col-lg-12">
+                    <div class="row bc-row-content mar8">
+                      <div class="col-md-9">
+                        <app-breadcrumb></app-breadcrumb>
+                      </div>
+                      <div class="col-md-3" style="white-space:nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <ng-container *ngIf="model.projectName">
+                          <span matTooltip="{{ model.projectName }}" matTooltipPosition="below"
+                            style="font-weight: bold; font-size: small;">Project Name:
+                            {{model.projectName }}
+                          </span>
+                        </ng-container>
+                      </div>
+                    </div>
+                    <div>
+                      <router-outlet></router-outlet>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="tf-footer">
+          <div class="container-fluid padLR8">
+            Copyright © 2023 Infosys Limited
+            <span style="float: right;">version: {{model.versionNumber}}</span>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+</div>

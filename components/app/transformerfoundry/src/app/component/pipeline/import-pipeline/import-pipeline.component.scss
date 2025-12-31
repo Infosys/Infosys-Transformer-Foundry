@@ -1,0 +1,31 @@
+.active {
+  background-color: #adcbe6; /* Light grey background for active items */
+  cursor: pointer;
+}
+
+mat-expansion-panel-header {
+  cursor: pointer;
+  border-bottom: 0.2px solid #cacaca;
+  padding: 0px 12px;
+}
+
+.mat-expansion-panel-header.mat-expanded {
+  height: 42px;
+}
+.mat-expansion-panel-body {
+  padding: 0 16px 8px;
+}
+
+mat-panel-title {
+  font-weight: 600;
+}
+
+div {
+  padding: 5px;
+  cursor: pointer;
+}
+
+.search-box {
+  width: 30%;
+  margin-left: 65%;
+}

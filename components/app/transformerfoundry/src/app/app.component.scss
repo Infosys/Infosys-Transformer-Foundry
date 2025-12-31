@@ -1,0 +1,60 @@
+.combined-line {
+  display: flex;
+  align-items: center;
+}
+
+.dashed-line {
+  flex-grow: 1;
+  border-bottom: 1px solid #dbd4d4;;
+}
+
+.plain-text {
+  padding: 0 10px; /* Add padding to separate the dashes from the text */
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;  /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;
+  /* Support for Safari and Chrome. */
+  text-rendering: optimizeLegibility;
+
+  /* Support for Firefox. */
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Support for IE. */
+  font-feature-settings: 'liga';
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  overflow-x: hidden;
+  transition: 0.5s;
+  z-index: 10;
+}
+
+.sidebar.show {
+  width: 450px; /* Or whatever width you want */
+  background-color: #ffffff;
+}
+
+.sidebar-hide{
+  left:-300px;
+  visibility: hidden;
+  transition:all 0.2s ease 0.2s;
+}

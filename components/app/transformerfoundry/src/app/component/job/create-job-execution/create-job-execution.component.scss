@@ -1,0 +1,29 @@
+.jobName_style{
+    // margin-top: -15px;
+    font-size: small;
+    margin-left: 25px;
+    margin-bottom: -5px;
+}
+
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.modal-body {
+    height: 80vh;
+    overflow-y: none;
+}
+
+.loading-icon{
+    display: flex;
+    justify-content: center;
+    position: relative;
+    top: 35vh;
+}
+
+.total-records{
+    font-size:x-small;
+    color: #737373;
+}

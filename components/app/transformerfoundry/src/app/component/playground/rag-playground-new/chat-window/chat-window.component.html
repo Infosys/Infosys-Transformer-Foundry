@@ -1,0 +1,64 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="chat-container" [ngClass]="{ disabled: model.disableChat }">
+  <!-- Chat Messages Window -->
+  <div class="chat-messages" id="chatMessages" #chatMessages>
+    <ng-container *ngIf="messages.length === 0">
+      <div class="placeholder" *ngIf="model.disableChat">
+        Chat is disabled. Please select an index to start the conversation.
+      </div>
+    </ng-container>
+    <ng-container *ngFor="let message of messages">
+      <chat-message
+        [messageData]="message"
+        (click)="onMessageClick(message)"
+        [selectedState]="model.selectedMessage?.id === message.id"
+      ></chat-message>
+    </ng-container>
+  </div>
+  <!-- Message Input Area -->
+  <div class="message-input">
+    <textarea
+      id="messageTextArea"
+      rows="1"
+      placeholder="Type your message here..."
+      [(ngModel)]="model.messageText"
+      (keydown)="handleKeyDown($event)"
+    ></textarea>
+    <button
+      type="button"
+      class="btn btn-primary fixed-width-btn"
+      [disabled]="model.messageText === '' || model.waitingForAPI"
+      (click)="submitSearch()"
+    >
+      <ng-container *ngIf="!model.waitingForAPI; else loadingTemplate">
+        <mat-icon>send</mat-icon>
+      </ng-container>
+      <ng-template #loadingTemplate>
+        <span
+          class="spinner-border spinner-border-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+      </ng-template>
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary fixed-width-btn delete-btn"
+      [disabled]="model.waitingForAPI || messages.length <= 1"
+      (click)="handleClearMessages($event)"
+    >
+      <ng-container>
+        <mat-icon>delete</mat-icon>
+      </ng-container>
+    </button>
+  </div>
+</div>

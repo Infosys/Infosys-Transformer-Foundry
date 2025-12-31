@@ -1,0 +1,17 @@
+{
+  "config": {
+    "environment": "local",
+    "pipelineManagementService-v1": "http://localhost:8087",
+    "pipelineManagementService-v2": "http://localhost:8003",
+    "modelManagementService": "http://localhost:8090",
+    "projectManagementService": "http://localhost:8088",
+    "mlFlowServiceBaserUrl": "http://localhost:30008",
+    "tenantID": "2d2f1ba6614c42219333d6e7b2b41ikl",
+    "tsGlobalProjectID": "85e24b401351413eb2c2f7c3da1092gh",
+    "tsGlobalProjectAdminID": "admin",
+    "leaderboardMfeUrl": "http://localhost:4102/mfe-tf-lb-oss/mfe-tf-leaderboard.js?v=",
+    "gUserId": "global",
+    "ragProjectId": "280f57798fb143e0ad45c995c203bbij",
+    "ragSearchBaseUrl": "http://localhost:8004"
+  }
+}

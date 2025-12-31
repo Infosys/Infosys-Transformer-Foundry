@@ -1,0 +1,96 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="tf-content">
+  <mat-tab-group disableRipple>
+    <mat-tab label="&#10112; Experiment List"> 
+      <!-- <div> -->
+        <div class="row" style="margin-top: 20px !important;"  [style.width.px]="model.width">
+          <div class="col-lg-12 tf_table_col">
+            <div class="app_panel" style="padding: 8px 24px;">
+              <div class="table-wrapper" [style.height.px]="model.height">
+                <table class="app_tables">
+                  <thead>
+                    <tr>
+                      <th width="20%">Name</th>
+                      <th width="10%">Version</th>
+                      <th width="35%">Description</th>
+                      <th width="20%">Created On</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <ng-container *ngIf="!model.isDataLoaded">
+                      <tr>
+                        <td colspan="5">
+                          <div class="loading-dots">
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                          </div>
+                        </td>
+                      </tr>
+                    </ng-container>
+                    <ng-container *ngIf="model.isDataLoaded">
+                      <ng-container *ngIf="experimentList?.length>0; else noData">
+                        <tr *ngFor="let item of model.currentPageData">
+                          <td>
+                            <a [routerLink]="['view', item.id]" [queryParams]="{ pn: model.projectName}" class="hyperlink">{{ item.name }} </a>
+                          </td>
+                          <td>{{ item.version }}</td>
+                          <td>{{ item.description }}</td>
+                          <td>{{ item.createdOn | utcToLocal }}</td>
+                        </tr>
+                      </ng-container>
+                    </ng-container>
+                    <ng-template #noData>
+                      <tr>
+                        <td colspan="5" class="text-center">No data found</td>
+                      </tr>
+                    </ng-template>
+                  </tbody>
+                </table>
+              </div>
+              <!-- <div class="flex-container" style="align-items: center;border-top: 1px solid #ccc;">
+                <div class="pagination flex-item-80"
+                  style="display:flex; float:left; justify-content: center; margin-top: 5px; margin-bottom: 5px;">
+                  <span class="marR24 marT8 goToPage">
+                    <label class="pagination-label">Go to:</label>
+                    <mat-form-field style="width:20px !important; margin-top:-5px">
+                      <input matInput [(ngModel)]="model.pageDefault">
+                    </mat-form-field>
+                  </span>
+                  <ngb-pagination [collectionSize]="model.totalItems" [(page)]="model.pageDefault" [maxSize]="3"
+                    [pageSize]="model.pageSize" class=" d-inline-block marT4" (pageChange)="onPageChange($event)">
+                    <ng-template ngbPaginationPrevious>
+                      <mat-icon>keyboard_arrow_left</mat-icon>
+                    </ng-template>
+                    <ng-template ngbPaginationNext>
+                      <mat-icon style="padding-top: inherit;">keyboard_arrow_right</mat-icon>
+                    </ng-template>
+                    <ng-template ngbPaginationNumber let-q>{{ q }}</ng-template>
+                  </ngb-pagination>
+                </div>
+                <div class="total-records float-right" style="margin-top: -15px; justify-content: center; padding-right: 48px;">
+                  Total Records: {{ model.totalItems }}
+                </div>
+              </div> -->
+
+              <div class="flex-container pagination">
+                <mat-paginator [length]="model.totalItems" [pageSize]="model.pageSize" [hidePageSize]="true"
+                  (page)="onPageChange($event)">
+                </mat-paginator>
+              </div>
+            </div>
+          </div>
+        </div>
+      <!-- </div> -->
+    </mat-tab>
+  </mat-tab-group>
+</div>

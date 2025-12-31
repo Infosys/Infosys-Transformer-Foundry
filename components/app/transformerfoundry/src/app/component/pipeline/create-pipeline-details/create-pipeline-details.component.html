@@ -1,0 +1,395 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="container" [style.max-width.px]="width">
+  <div class="row" *ngIf="model.isDataLoaded">
+    <div class="col-lg-12" style="margin-top: 20px">
+      <div class="app_panel" style="padding: 16px 24px 16px 24px;">
+        <div class="table-wrapper" [style.height.px]="height">
+          <div class="row textBox" style="padding: 16px 24px 16px 24px;">
+            <div class="col">
+              <mat-form-field appearance="standard" floatLabel="always">
+                <mat-label>Name</mat-label>
+                <input matInput placeholder="" value="{{ model.pipelineObject.pipeline.name }}"
+                  [(ngModel)]="model.pipelineObject.pipeline.name" #myName="ngModel" (input)="onInput($event)"
+                  [disabled]="isReadOnly" required style="max-width: 510px" />
+              </mat-form-field>
+              <div *ngIf="myName.invalid && myName.errors.required" class="err-msg-div">
+                <mat-error>Mandatory field</mat-error>
+              </div>
+            </div>
+            <div class="col">
+              <mat-form-field appearance="standard" floatLabel="always">
+                <mat-label>Description</mat-label>
+                <input matInput placeholder="" value="{{ model.pipelineObject.description }}"
+                  [(ngModel)]="model.pipelineObject.description" #myDescription="ngModel" [disabled]="isReadOnly"
+                  style="max-width: 510px" />
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row" style="padding: 16px 24px 16px 24px;">
+            <div class="col">
+              <mat-form-field appearance="standard" floatLabel="always">
+                <mat-label>Runtime</mat-label>
+                <mat-select disableOptionCentering class="mat-select-dropdown"
+                  [ngModel]="model.pipelineObject.pipeline.runtime" #myRuntime="ngModel" (selectionChange)="
+                    model.pipelineObject.pipeline.runtime = $event.value
+                  " [disabled]="isReadOnly" required>
+                  <mat-option *ngFor="let run of Runtime" [value]="run.value">
+                    {{ run.viewValue }}
+                  </mat-option>
+                </mat-select>
+                <!-- <mat-hint> Provide Numerical Value for Amount.</mat-hint> -->
+              </mat-form-field>
+              <div *ngIf="myRuntime.invalid && myRuntime.errors.required" class="err-msg-div">
+                <mat-error>Mandatory field</mat-error>
+              </div>
+            </div>
+            <div class="col">
+              <mat-form-field appearance="standard" floatLabel="always">
+                <mat-label>Orchestrator</mat-label>
+                <mat-select disableOptionCentering class="mat-select-dropdown"
+                  [ngModel]="model.pipelineObject.pipeline.operator" #myOperator="ngModel" (selectionChange)="
+                    model.pipelineObject.pipeline.operator = $event.value
+                  " [disabled]="isReadOnly" required>
+                  <mat-option *ngFor="let op of ops" [value]="op.value">
+                    {{ op.viewValue }}
+                  </mat-option>
+                </mat-select>
+                <!-- <mat-hint> Provide Numerical Value for Amount.</mat-hint> -->
+              </mat-form-field>
+              <div *ngIf="myOperator.invalid && myOperator.errors.required" class="err-msg-div">
+                <mat-error>Mandatory field</mat-error>
+              </div>
+            </div>
+          </div>
+          <div class="table-titleArea" style="padding: 16px 24px 16px 24px;">
+            <div style="margin-bottom: 24px;">
+              <h5 (click)="toggleShowSection('volume')"
+                style="color:black; display: flex; justify-content: space-between;">
+                Volume
+                <mat-icon class="float-right large-icons" style="font-size: large;"
+                  [ngClass]="showSection['volume'] ? 'up-arrow' : 'down-arrow'">
+                  {{showSection['volume'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                </mat-icon>
+              </h5>
+            </div>
+            <div class="tab-data" *ngIf="showSection['volume']">
+              <!-- TODO: HERE COMES the VOLUME SECTION -->
+              <table class="app_tables">
+                <thead>
+                  <tr>
+                    <th>Volume Name</th>
+                    &nbsp;
+                    <th>Mount Path</th>
+                    &nbsp;
+                    <th>Volume Size</th>
+                    &nbsp;
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngIf="
+                      model.pipelineObject.pipeline.volume !== null &&
+                      model.pipelineObject.pipeline.volume !== undefined
+                    ">
+                    <tr>
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <input matInput [ngModel]="
+                              model.pipelineObject.pipeline.volume.name
+                            " (ngModelChange)="
+                              model.pipelineObject.pipeline.volume.name = $event
+                            " [disabled]="isReadOnly" />
+                        </mat-form-field>
+                      </td>
+                      &nbsp;
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <input matInput [ngModel]="
+                              model.pipelineObject.pipeline.volume.mountPath
+                            " (ngModelChange)="
+                              model.pipelineObject.pipeline.volume.mountPath =
+                                $event
+                            " [disabled]="isReadOnly" />
+                        </mat-form-field>
+                      </td>
+                      &nbsp;
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <input matInput type="number" placeholder="" value="{{
+                              model.pipelineObject.pipeline.volume.sizeinGB
+                            }}" [(ngModel)]="
+                              model.pipelineObject.pipeline.volume.sizeinGB
+                            " #sizeinGB="ngModel" [disabled]="isReadOnly" style="max-width: 510px" min="1" />
+                        </mat-form-field>
+                      </td>
+                      <!-- -------- -->
+                      &nbsp;
+                      <td>
+                        <button mat-flat-button (click)="removeVolume()" [disabled]="isReadOnly">
+                          <mat-icon class="action-icons">delete</mat-icon>
+                        </button>
+                      </td>
+                      <!-- ----------- -->
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+              <button mat-flat-button class="highlight-button" style="margin-top: 8px; background: inherit;"
+                [disabled]="isReadOnly || model.pipelineObject.pipeline.volume !== undefined" (click)="addNewVolume()">
+                <mat-icon class="action-icons">add</mat-icon>
+                Add Volume
+              </button>
+            </div>
+          </div>
+          <div class="table-titleArea" style="padding: 16px 24px 16px 24px;">
+            <div style="margin-bottom: 24px;">
+              <h5 (click)="toggleShowSection('storage')"
+                style="color:black; display: flex; justify-content: space-between;">
+                Storage
+                <mat-icon class="float-right large-icons" style="font-size: large;"
+                  [ngClass]="showSection['storage'] ? 'up-arrow' : 'down-arrow'">
+                  {{showSection['storage'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                </mat-icon>
+              </h5>
+            </div>
+            <div class="tab-data" *ngIf="showSection['storage']">
+              <table class="app_tables">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    &nbsp;
+                    <th>Name</th>
+                    &nbsp;
+                    <th>URI</th>
+                    &nbsp;
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngIf="model.pipelineObject.pipeline.dataStorage.length">
+                    <tr *ngFor="
+                        let key of model.pipelineObject.pipeline.dataStorage;
+                        let i = index
+                      ">
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <mat-select disableOptionCentering class="mat-select-dropdown"
+                            [ngModel]="key?.storageType ? key.storageType : ''"
+                            (ngModelChange)="key.storageType = $event" [disabled]="isReadOnly">
+                            <mat-option *ngFor="let store of storage" [value]="store.value">
+                              {{ store.viewValue }}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </td>
+                      &nbsp;
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <input matInput placeholder="" [ngModel]="key?.name"
+                            (ngModelChange)="key.name = $event" [disabled]="isReadOnly" />
+                        </mat-form-field>
+                      </td>
+                      &nbsp;
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <input matInput placeholder="" [ngModel]="key?.uri ? key.uri : ''"
+                            (ngModelChange)="key.uri = $event" [disabled]="isReadOnly" />
+                        </mat-form-field>
+                      </td>
+                      <!-- -------- -->
+                      &nbsp;
+                      <td>
+                        <button mat-icon-button (click)="removeStorage(i)" [disabled]="isReadOnly">
+                          <mat-icon class="action-icons">delete</mat-icon>
+                        </button>
+                      </td>
+                      <!-- ----------- -->
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+              <button mat-flat-button [disabled]="isReadOnly" (click)="addNewStorage()"
+                style="margin-top: 8px; background: inherit;" class="highlight-button">
+                <mat-icon class="action-icons">add</mat-icon>
+                Add Storage
+              </button>
+            </div>
+          </div>
+
+          <div class="table-titleArea" style="padding: 16px 24px 16px 24px;">
+            <div style="margin-bottom: 24px;">
+              <h5 (click)="toggleShowSection('environmentVariables')"
+                style="color:black; display: flex; justify-content: space-between;">
+                Environment Variables
+                <mat-icon class="float-right large-icons" style="font-size: large;"
+                  [ngClass]="showSection['environmentVariables'] ? 'up-arrow' : 'down-arrow'">
+                  {{showSection['environmentVariables'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                </mat-icon>
+              </h5>
+            </div>
+            <div class="tab-data" *ngIf="showSection['environmentVariables']">
+              <table class="app_tables">
+                <thead>
+                  <tr>
+                    <th width="45%">Name</th>
+                    &nbsp;
+                    <th width="45%">Value</th>
+                    &nbsp;
+                    <th width="10%"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container [ngTemplateOutlet]="environmentVariablesTemplate" [ngTemplateOutletContext]="{
+                      pipelineData:
+                        model.pipelineObject.pipeline.globalVariables,
+                      varType: this.variables[1].value
+                    }">
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="table-titleArea" style="padding: 16px 24px 16px 24px;">
+            <div style="margin-bottom: 24px;">
+              <h5 (click)="toggleShowSection('pipelineVariables')"
+                style="color:black; display: flex; justify-content: space-between;">
+                Pipeline Variables
+                <mat-icon class="float-right large-icons" style="font-size: large;"
+                  [ngClass]="showSection['pipelineVariables'] ? 'up-arrow' : 'down-arrow'">
+                  {{showSection['pipelineVariables'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                </mat-icon>
+              </h5>
+            </div>
+            <div class="tab-data" *ngIf="showSection['pipelineVariables']">
+              <table class="app_tables">
+                <thead>
+                  <tr>
+                    <th width="45%">Name</th>
+                    &nbsp;
+                    <th width="45%">Value</th>
+                    &nbsp;
+                    <th width="10%"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container [ngTemplateOutlet]="pipelineVariablesTemplate" [ngTemplateOutletContext]="{
+                      pipelineData: model.pipelineObject.pipeline.variables,
+                      varType: this.variables[0].value
+                    }">
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #environmentVariablesTemplate let-pipelineObject="pipelineData" let-variableType="varType">
+  <ng-container *ngFor="let key of getKeys(pipelineObject); let i = index">
+    <tr>
+      <td>
+        <mat-form-field appearance="standard" floatLabel="always">
+          <input matInput placeholder="" value="{{ key }}" (change)="
+              updateVariableName(
+                pipelineObject,
+                key,
+                $event.target.value,
+                variableType
+              )
+            " [disabled]="isReadOnly" />
+        </mat-form-field>
+      </td>
+      &nbsp;
+      <td>
+        <mat-form-field appearance="standard" floatLabel="always">
+          <div class="password-container" style="display: flex; justify-content: space-between;  width: -webkit-fill-available;">
+            <input matInput placeholder="" (change)="updateVariableValue(key, pipelineObject, $event)"
+              [type]="(model.pipelineData?.['globalVariables']?.[key] == undefined || !model.pipelineData?.['globalVariables']?.[key]) ? 'text':'password'"
+              [value]="(model.pipelineData?.['globalVariables']?.[key] == undefined || !model.pipelineData?.['globalVariables']?.[key]) ? pipelineObject[key]:'*'.repeat(10)"
+              [disabled]="isReadOnly" />
+            <div *ngIf="!isReadOnly && model.pipelineData?.['globalVariables']?.[key]">
+              <mat-icon class="action-icons"
+                (click)="toggleConfidentialData(key, model.pipelineData['globalVariables'], $event)">visibility_off</mat-icon>
+            </div>
+            <div *ngIf="!isReadOnly && !model.pipelineData?.['globalVariables']?.[key]">
+              <mat-icon class="action-icons"
+                (click)="toggleConfidentialData(key, model.pipelineData['globalVariables'],$event)">visibility</mat-icon>
+            </div>
+          </div>
+        </mat-form-field>
+      </td>
+      &nbsp;
+      <td>
+        <button mat-icon-button (click)="deleteAddedVariables(pipelineObject, key)"
+          [disabled]="isReadOnly">
+          <mat-icon class="action-icons">delete</mat-icon>
+        </button>
+      </td>
+    </tr>
+  </ng-container>
+  <button mat-flat-button class="highlight-button" (click)="addNewVariable(variableType)" style="margin-top: 8px; background: inherit;" [disabled]="isReadOnly">
+    <mat-icon class="action-icons">add</mat-icon>
+    Add Variable
+  </button>
+</ng-template>
+
+<ng-template #pipelineVariablesTemplate let-pipelineObject="pipelineData" let-variableType="varType">
+  <ng-container *ngFor="let key of getKeys(pipelineObject); let i = index">
+    <tr>
+      <td>
+        <mat-form-field appearance="standard" floatLabel="always">
+          <input matInput placeholder="" value="{{ key }}" (change)="
+              updateVariableName(
+                pipelineObject,
+                key,
+                $event.target.value,
+                variableType
+              )
+            " [disabled]="isReadOnly" />
+        </mat-form-field>
+      </td>
+      &nbsp;
+      <td>
+        <mat-form-field appearance="standard" floatLabel="always">
+          <div class="password-container" style="display: flex; justify-content: space-between; width: -webkit-fill-available;">
+            <input matInput placeholder="" (change)="updateVariableValue(key, pipelineObject, $event)"
+              [type]="(model.pipelineData?.['variables']?.[key] == undefined || !model.pipelineData?.['variables']?.[key]) ? 'text':'password'"
+              [value]="(model.pipelineData?.['variables']?.[key] == undefined || !model.pipelineData?.['variables']?.[key]) ? pipelineObject[key]:'*'.repeat(10)"
+              [disabled]="isReadOnly" />
+            <div *ngIf="!isReadOnly && model.pipelineData['variables']?.[key]">
+              <mat-icon class="action-icons"
+                (click)="toggleConfidentialData(key, model.pipelineData['variables'], $event)">visibility_off</mat-icon>
+            </div>
+            <div *ngIf="!isReadOnly && !model.pipelineData['variables']?.[key]">
+              <mat-icon class="action-icons"
+              (click)="toggleConfidentialData(key, model.pipelineData['variables'], $event)">visibility</mat-icon>
+            </div>
+          </div>
+        </mat-form-field>
+      </td>
+      &nbsp;
+      <td>
+        <button mat-icon-button (click)="deleteAddedVariables(pipelineObject, key)"
+          [disabled]="isReadOnly">
+          <mat-icon class="action-icons">delete</mat-icon>
+        </button>
+      </td>
+    </tr>
+  </ng-container>
+  <button mat-flat-button class="highlight-button" style="margin-top: 8px; background: inherit;" (click)="addNewVariable(variableType)" [disabled]="isReadOnly">
+    <mat-icon class="action-icons">add</mat-icon>
+    Add Variable
+  </button>
+</ng-template>

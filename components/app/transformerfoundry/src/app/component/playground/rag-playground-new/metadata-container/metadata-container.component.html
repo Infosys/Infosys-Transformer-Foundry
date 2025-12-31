@@ -1,0 +1,60 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div>
+  <h6>Information Panel</h6>
+  <ng-container *ngIf="messageMetadata !== undefined">
+    <ng-container *ngIf="messageMetadata.length > 0; else noDataTemplate">
+      <owl-carousel-o [options]="carouselOptions">
+        <ng-container *ngFor="let item of messageMetadata">
+          <ng-template carouselSlide [id]="item.chunk_id">
+            <table class="metadata-table">
+              <tr>
+                <th>Document:</th>
+                <td>{{ item?.docName }}</td>
+              </tr>
+              <tr>
+                <th>Content:</th>
+                <td>
+                  <div class="content-scrollable">
+                    {{ item?.content }}
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th>Score:</th>
+                <td>{{ item?.score }}</td>
+              </tr>
+              <tr>
+                <th>Page No:</th>
+                <td>{{ item?.pageNo }}</td>
+              </tr>
+              <tr>
+                <th>Sequence No:</th>
+                <td>{{ item?.sequenceNo }}</td>
+              </tr>
+              <tr>
+                <th>Character Count:</th>
+                <td>{{ item?.charCount }}</td>
+              </tr>
+              <tr>
+                <th>Chunking Method:</th>
+                <td>{{ item?.chunkingMethod }}</td>
+              </tr>
+            </table>
+          </ng-template>
+        </ng-container>
+      </owl-carousel-o>
+    </ng-container>
+  </ng-container>
+  <ng-template #noDataTemplate>
+    <p>No data available</p>
+  </ng-template>
+</div>

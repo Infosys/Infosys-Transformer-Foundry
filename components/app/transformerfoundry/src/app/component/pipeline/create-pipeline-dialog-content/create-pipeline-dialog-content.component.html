@@ -1,0 +1,196 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div id="content" class="container-fluid" style="width: 100%; height: 100%">
+  <div class="modal-header">
+    <div class="clearfix">
+      <div class="row" style="display: flex;justify-content: space-between;margin-bottom: 2vh;">
+        <h4 class="float-left" style="padding-left: 20px; padding-top: 8px;">Execution Details</h4>
+        <button type="button" class="close" aria-label="Close" (click)="closeWindow()">
+          <mat-icon class="action-icons">close</mat-icon>
+        </button>
+      </div>
+      <ng-container *ngIf="!model.pipelineObject  || model.pipelineData==undefined">
+        <span class="loading-dots">
+          <span class="loading-dots--dot"></span>
+          <span class="loading-dots--dot"></span>
+          <span class="loading-dots--dot"></span>
+        </span>
+      </ng-container>
+      <!-- <div class="table-wrapper"> -->
+      <ng-container *ngIf="model.pipelineObject  && model.pipelineData != undefined">
+        <div class="table-wrapper" style="width: 800px; height: 400px">
+          <div class="table-titleArea padT16 padLR24" style="padding: 16px 8px 0px 8px;">
+            <div class="marB24" style="margin-bottom: 24px;">
+              <h5>Storage</h5>
+            </div>
+            <table class="app_tables">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  &nbsp;
+                  <th>Name</th>
+                  &nbsp;
+                  <th>URI</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngIf="model.pipelineObject.pipeline.dataStorage.length ">
+                  <tr *ngFor="let key of model.pipelineObject.pipeline.dataStorage; let i=index">
+                    <td>
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <mat-select disableOptionCentering class="mat-select-dropdown"
+                          [ngModel]="key?.storageType ? key.storageType : ''" (ngModelChange)="key.storageType = $event"
+                          [disabled]="isViewMode">
+                          <mat-option *ngFor="let store of storage" [value]="store.value">
+                            {{ store.viewValue }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </td>
+                    &nbsp;
+                    <td>
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <input matInput placeholder="" [ngModel]="key?.name" (ngModelChange)="key.name = $event"
+                          [disabled]="isViewMode" />
+                      </mat-form-field>
+                    </td>
+                    &nbsp;
+                    <td>
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <input matInput placeholder="" [ngModel]="key?.uri ? key.uri : ''"
+                          (ngModelChange)="key.uri = $event" [disabled]="isViewMode" />
+                      </mat-form-field>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-titleArea padT16 padLR24" style="padding: 16px 24px 0px 24px;">
+            <div class="marB24" style="margin-bottom: 24px;">
+              <h5>Environment Variables</h5>
+            </div>
+            <table class="app_tables">
+              <thead>
+                <tr>
+                  <th width="45%">Name</th>&nbsp;
+                  <th width="45%">Value</th>&nbsp;
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container [ngTemplateOutlet]="environmentVariablesTemplate"
+                  [ngTemplateOutletContext]="{pipelineData: model.pipelineObject.pipeline.globalVariables, varType: this.variables[1].viewValue}">
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-titleArea padT16 padLR24" style="padding: 16px 24px 0px 24px;">
+            <div class="marB24" style="margin-bottom: 24px;">
+              <h5>Pipeline Variables</h5>
+            </div>
+            <table class="app_tables">
+              <thead>
+                <tr>
+                  <th width="45%">Name</th>&nbsp;
+                  <th width="45%">Value</th>&nbsp;
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container [ngTemplateOutlet]="pipelineVariablesTemplate"
+                  [ngTemplateOutletContext]="{pipelineData: model.pipelineObject.pipeline.variables, varType: this.variables[0].value}">
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer" style="float: right;">
+          <button class="tf_button" style="margin-right: 24px;" mat-flat-button [disabled]="isViewMode"
+            (click)="onSave();">
+            Ok
+          </button>
+          <button class="tf_button_secondary" mat-flat-button (click)="closeWindow()">
+            Cancel
+          </button>
+        </div>
+      </ng-container>
+      <!-- </div> -->
+    </div>
+  </div>
+</div>
+
+<ng-template #environmentVariablesTemplate let-pipelineObject="pipelineData" let-variableType="varType">
+  <ng-container *ngFor="let key of getKeys(pipelineObject); let i=index;">
+    <tr>
+      <td>
+        <mat-form-field appearance="standard" floatLabel="always">
+          <input matInput placeholder="" value={{key}}
+            (change)="updateVariableName(pipelineObject, key, $event.target.value, variableType)"
+            [disabled]="isViewMode" />
+        </mat-form-field>
+      </td>
+      &nbsp;
+      <td>
+        <mat-form-field appearance="standard" floatLabel="always">
+          <div class="password-container"
+            style="display:flex;justify-content: space-between; width: -webkit-fill-available">
+            <input matInput placeholder="" (change)="updateVariableValue(key, pipelineObject, $event)"
+              [type]="(model.pipelineData?.['globalVariables']?.[key] == undefined || !model.pipelineData?.['globalVariables']?.[key]) ? 'text':'password'"
+              [value]="(model.pipelineData?.['globalVariables']?.[key] == undefined || !model.pipelineData?.['globalVariables']?.[key]) ? pipelineObject[key]:'*'.repeat(10)"
+              [disabled]="isViewMode" />
+            <div *ngIf="!isViewMode && model.pipelineData['globalVariables']?.[key]">
+              <mat-icon class="action-icons"
+                (click)="toggleConfidentialData(key, model.pipelineData['globalVariables'], 'globalVariables', $event)">visibility_off</mat-icon>
+            </div>
+            <div *ngIf="!isViewMode && !model.pipelineData['globalVariables']?.[key]">
+              <mat-icon class="action-icons"
+                (click)="toggleConfidentialData(key, model.pipelineData['globalVariables'], 'globalVariables', $event)">visibility</mat-icon>
+            </div>
+          </div>
+        </mat-form-field>
+      </td>
+    </tr>
+  </ng-container>
+</ng-template>
+
+<ng-template #pipelineVariablesTemplate let-pipelineObject="pipelineData" let-variableType="varType">
+  <ng-container *ngFor="let key of getKeys(pipelineObject); let i=index;">
+    <tr>
+      <td>
+        <mat-form-field appearance="standard" floatLabel="always">
+          <input matInput placeholder="" value={{key}}
+            (change)="updateVariableName(pipelineObject, key, $event.target.value, variableType)"
+            [disabled]="isViewMode" />
+        </mat-form-field>
+      </td>
+      &nbsp;
+      <td>
+        <mat-form-field appearance="standard" floatLabel="always">
+          <div class="password-container" style="display:flex;justify-content: space-between; width: -webkit-fill-available;">
+            <input matInput placeholder="" (change)="updateVariableValue(key, pipelineObject, $event)"
+              [type]="(model.pipelineData?.['variables']?.[key] == undefined || !model.pipelineData?.['variables']?.[key]) ? 'text':'password'"
+              [value]="(model.pipelineData?.['variables']?.[key] == undefined || !model.pipelineData?.['variables']?.[key]) ? pipelineObject[key]:'*'.repeat(10)"
+              [disabled]="isViewMode" />
+            <div *ngIf="!isViewMode && model.pipelineData['variables']?.[key]">
+              <mat-icon class="action-icons"
+                (click)="toggleConfidentialData(key, model.pipelineData['variables'], 'variables', $event)">visibility_off</mat-icon>
+              <!-- <i class="icon x-24 hide-icon"  (click)="toggleConfidentialData(key, model.pipelineData['variables'], 'variables', $event)" ></i> -->
+            </div>
+            <div *ngIf="!isViewMode && !model.pipelineData['variables']?.[key]">
+              <mat-icon class="action-icons"
+                (click)="toggleConfidentialData(key, model.pipelineData['variables'], 'variables', $event)">visibility</mat-icon>
+              <!-- <i class="icon x-24 show-icon"  (click)="toggleConfidentialData(key, model.pipelineData['variables'], 'variables', $event)" ></i> -->
+            </div>
+          </div>
+        </mat-form-field>
+      </td>
+    </tr>
+  </ng-container>
+</ng-template>

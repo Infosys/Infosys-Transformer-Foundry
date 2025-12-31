@@ -1,0 +1,121 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div style="overflow: hidden">
+  <div class="row tf_table_row">
+    <div class="col-lg-12 tf_table_col">
+      <div class="container" style="padding: 8px 8px">
+        <div>
+          <h4>Create Pipeline from Template</h4>
+          <button
+            type="button"
+            class="close"
+            aria-label="Close"
+            (click)="closeWindow()"
+            style="margin-top: -40px"
+          >
+            <mat-icon class="action-icons">close</mat-icon>
+          </button>
+        </div>
+        <!-- Search Box -->
+        <div class="search-box">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search..."
+            [(ngModel)]="searchText"
+            (keyup)="filterData()"
+          />
+        </div>
+        <div class="table-wrapper" [style.height.px]="model.height">
+          <table class="app_tables">
+            <thead>
+              <tr>
+                <th width="20%">Name</th>
+                <th width="10%">Version</th>
+                <th width="20%">Type</th>
+                <th width="30%">Description</th>
+                <th width="20%">Created On</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngIf="!model.isDataLoaded">
+                <tr>
+                  <td colspan="5">
+                    <div class="loading-dots">
+                      <div class="loading-dots--dot"></div>
+                      <div class="loading-dots--dot"></div>
+                      <div class="loading-dots--dot"></div>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+              <ng-container *ngIf="model.isDataLoaded">
+                <ng-container *ngIf="filteredData.length > 0; else noData">
+                  <tr
+                    class="icon-column"
+                    *ngFor="let item of filteredData"
+                    (click)="setActiveItem(item)"
+                    [class.active]="isItemActive(item)"
+                  >
+                    <td>{{ item.metadata.displayName }}</td>
+                    <td>{{ item.metadata.version }}</td>
+                    <td>{{ item.metadata.type }}</td>
+                    <td>{{ item.metadata.description }}</td>
+                    <td>
+                      {{ item.createdOn | utcToLocal }}
+                    </td>
+                  </tr>
+                </ng-container>
+                <ng-template #noData>
+                  <tr>
+                    <td colspan="5" class="text-center">No data found</td>
+                  </tr>
+                </ng-template>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+        <div class="flex-container pagination">
+          <mat-paginator
+            [length]="filteredData.length"
+            [pageSize]="model.pageSize"
+            [hidePageSize]="true"
+            (page)="onPageChange($event)"
+          >
+          </mat-paginator>
+        </div>
+        <button
+          mat-flat-button
+          class="tf_button"
+          routerLink="create"
+          [queryParams]="{ pn: model.projectName }"
+          matTooltip="New Pipeline"
+          matTooltipPosition="above"
+          style="float: right; margin-right: 24px; margin-top: 5px"
+          (click)="closeWindow()"
+        >
+          Create New
+        </button>
+        <button
+          mat-flat-button
+          class="tf_button"
+          matTooltip="New Pipeline"
+          matTooltipPosition="above"
+          style="float: right; margin-right: 24px; margin-top: 5px"
+          (click)="importPipeline(activeItem?.metadata.id)"
+          disabled="{{ !activeItem }}"
+        >
+          Import Template
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

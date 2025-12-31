@@ -1,0 +1,69 @@
+::ng-deep .mat-tab-body-content {
+    overflow: hidden !important;
+}
+::ng-deep .mat-tab-label {
+    font-size: 15px !important;
+    max-height: 25px !important;
+  }
+
+/* table row */
+.tf_table_row {
+    margin-top: 35px !important;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .icon-column .only-show-on-hover {
+    visibility: hidden;
+    float: right;
+  }
+  .icon-column:hover .only-show-on-hover {
+    visibility: visible;
+  }
+
+  .app_tables tbody tr td {
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
+
+  .description {
+    display: inline-block;
+    width: 400px; /* Adjust this value as needed */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }::ng-deep .mat-tab-body-content {
+    overflow: hidden !important;
+}
+::ng-deep .mat-tab-label {
+    font-size: 15px !important;
+    max-height: 25px !important;
+  }
+
+/* table row */
+.tf_table_row {
+    margin-top: 35px !important;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .icon-column .only-show-on-hover {
+    visibility: hidden;
+    float: right;
+  }
+  .icon-column:hover .only-show-on-hover {
+    visibility: visible;
+  }
+
+  .app_tables tbody tr td {
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
+
+  .description {
+    display: inline-block;
+    width: 400px; /* Adjust this value as needed */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }

@@ -1,0 +1,42 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="tf_container" id="loginCnt">
+  <img src="assets/images/Login_1.png" alt="Description of the image">
+  <div style="
+      text-align: center;
+      align-items: center;
+      justify-content: space-around;
+      float: right;
+      width: 40%;
+      height: 300px;
+      padding: 16px;
+      margin: -400px 40px 0 0;
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      position: relative;
+    ">
+    <div>
+      <h4>WELCOME</h4>
+      <br />
+    </div>
+    <mat-form-field floatLabel="never">
+      <input matInput #loginRef type="text" placeholder="Email ID" [formControl]="emailFormControl"
+        [(ngModel)]="model.loginId" autofocus (keyup.enter)="focusLoginButton()" autocomplete="off"
+        spellcheck="false" />
+      <mat-hint>Please provide valid email ID.</mat-hint>
+    </mat-form-field>
+    <button [disabled]="emailFormControl.invalid" type="button" #loginBtnRef class="tf_button" (click)="handleLogin()"
+      style="width: 100%; justify-content: center; margin-right: 0px !important;" (keydown.enter)="handleLogin()">
+      Log In
+    </button>
+  </div>
+</div>

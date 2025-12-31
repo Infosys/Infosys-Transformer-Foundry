@@ -1,0 +1,27 @@
+.color-grey{
+    color: #737373;
+}
+.app_breadcrumb a span{
+    padding: 0 10px 0 0;
+}
+.hyperLink-btn{
+    font-weight: 500;
+    text-decoration: none;
+}
+.small-size *{
+    font-size: inherit;
+    text-transform: capitalize;
+}
+.small-size{
+    font-size: x-small;
+    position:relative;
+    margin-left: 5px;
+    font-family: roboto,Arial!important;
+}
+.app_breadcrumb a::after{
+    content: ">";
+    margin-top: -5px;
+    font-size: small;
+    font-weight: 500;
+    margin: 0px 8px 0 0;
+}

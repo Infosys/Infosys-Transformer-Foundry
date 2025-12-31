@@ -1,0 +1,28 @@
+.status-cls{
+    text-transform: lowercase;
+}
+.status-cls::first-letter{
+    text-transform: capitalize;
+}
+.row{
+    margin-top: -20px;
+}
+.total-records{
+    font-size:x-small;
+    color: #737373;
+}
+.pipelineName_style{
+    font-size: small;
+    margin-left: 25px;
+    margin-bottom: -5px;
+}
+.table-wrapper{
+    overflow-y: auto;
+    bottom: 0;
+    overflow-x: hidden;
+}
+
+::ng-deep .mat-paginator-navigation-next.mat-icon-button:not([disabled]),
+::ng-deep .mat-paginator-navigation-previous.mat-icon-button:not([disabled]) {
+  color: #0b50db !important;
+}

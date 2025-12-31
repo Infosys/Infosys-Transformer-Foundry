@@ -1,0 +1,136 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="tf-content">
+  <mat-tab-group disableRipple>
+    <mat-tab label="&#10112; Project List">
+      <button mat-flat-button class="tf_button" routerLink="create" matTooltip="New Project" matTooltipPosition="above"
+        [disabled]="!isCreateAllowed()"
+        style="justify-content:right; margin-right: 24px; margin-top: 5px; float: right;">
+        New
+      </button>
+      <div [style.width.px]="model.width">
+        <div class="row tf_table_row">
+          <div class="col-lg-12 tf_table_col">
+            <div class="app_panel padTB8 padLR24" style="padding: 8px 24px;">
+              <div class="table-wrapper" [style.height.px]="model.height">
+                <table class="app_tables">
+                  <thead>
+                    <tr>
+                      <th width="25%">Name</th>
+                      <th width="35%">Description</th>
+                      <th width="20%">Created On</th>
+                      <th width="20%"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <ng-container *ngIf="!model.isDataLoaded">
+                      <tr>
+                        <td colspan="4">
+                          <div class="loading-dots">
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                          </div>
+                        </td>
+                      </tr>
+                    </ng-container>
+                    <ng-container *ngIf="model.isDataLoaded">
+                      <ng-container *ngIf="projectList?.length>0;else noData">
+                        <tr class="icon-column" *ngFor="let item of model.currentPageData; let i=index">
+                          <td>
+                            <a [routerLink]="[item.id,'modelZoo']" [queryParams]="{ pn: item.name}" class="hyperlink">
+                              {{ item.name}}
+                            </a><!-- (click)="setLocalSessionData(item.id,item.name)" -->
+                          </td>
+                          <!-- <td>{{ item.description }}</td> -->
+                          <td><span class="description" [title]="item.description">{{ item.description }}</span></td>
+                          <!-- <td><span class="description">{{ item.description }}</span></td> -->
+                          <td>{{ item.createdOn | utcToLocal}}</td>
+                          <td>
+                            <button (click)="open(confirmAction, true, item.id);" mat-icon-button
+                              [disabled]="!isDeleteAllowed(i)" matTooltip="Delete Project" matTooltipPosition="above">
+                              <span class="only-show-on-hover">
+                                <mat-icon class="material-icons action-icons"
+                                  [style.cursor]="isDeleteAllowed(i) ? 'pointer' : 'not-allowed'">delete</mat-icon>
+                              </span>
+                            </button>
+                            <ng-container *ngIf="!isUpdateAllowed(i)">
+                              <button mat-icon-button [routerLink]="[item.id, 'view']" matTooltip="View Project"
+                                matTooltipPosition="above">
+                                <span class="only-show-on-hover">
+                                  <mat-icon class="material-icons action-icons"
+                                    [style.cursor]="isUpdateAllowed(i) ? 'pointer' : 'not-allowed'">visibility</mat-icon>
+                                </span>
+                              </button>
+                            </ng-container>
+                            <ng-container *ngIf="isUpdateAllowed(i)">
+                              <button mat-icon-button [routerLink]="[item.id, 'edit']" matTooltip="Edit Project"
+                                matTooltipPosition="above">
+                                <span class="only-show-on-hover">
+                                  <mat-icon class="material-icons action-icons"
+                                    [style.cursor]="isDeleteAllowed(i) ? 'pointer' : 'not-allowed'">edit</mat-icon>
+                                </span>
+                              </button>
+                            </ng-container>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </ng-container>
+                    <ng-template #noData>
+                      <tr>
+                        <td colspan="4" class="text-center">{{model.message}}</td>
+                      </tr>
+                    </ng-template>
+                  </tbody>
+                </table>
+              </div>
+              <div class="flex-container pagination">
+                <mat-paginator [length]="model.totalItems" [pageSize]="model.pageSize" [hidePageSize]="true"
+                  (page)="onPageChange($event)">
+                </mat-paginator>
+              </div>
+              <!-- <div class="flex-container" style="align-items: center;border-top: 1px solid #ccc;">
+                <div class="pagination flex-item-80"
+                  style="display:flex; float:left; justify-content: center; margin-top: 5px; margin-bottom: 5px;">
+                  <span class="marR24 marT8 goToPage">
+                    <label class="pagination-label">Go to:</label>
+                    <mat-form-field style="width:20px !important; margin-top:-5px">
+                      <input matInput [(ngModel)]="model.pageDefault">
+                    </mat-form-field>
+                  </span>
+                  <ngb-pagination [collectionSize]="model.totalItems" [(page)]="model.pageDefault" [maxSize]="3"
+                    [pageSize]="model.pageSize" class=" d-inline-block marT4" (pageChange)="onPageChange($event)">
+                    <ng-template ngbPaginationPrevious>
+                      <mat-icon>keyboard_arrow_left</mat-icon>
+                    </ng-template>
+                    <ng-template ngbPaginationNext>
+                      <mat-icon style="padding-top: inherit;">keyboard_arrow_right</mat-icon>
+                    </ng-template>
+                    <ng-template ngbPaginationNumber let-q>{{ q }}</ng-template>
+                  </ngb-pagination>
+                </div>
+                <div class="total-records float-right" style="margin-top: -15px; justify-content: center;">
+                  Total Records: {{ model.totalItems }}
+                </div>
+              </div> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<ng-template #confirmAction let-modal let-c="close" let-s="confirm" let-d="dismiss">
+  <app-dialog-confirm [isBtnDisabled]="model.isBtnDisabled" (close)="c('Close click');"
+    (confirm)="deleteProject(deleteId)">
+  </app-dialog-confirm>
+</ng-template>

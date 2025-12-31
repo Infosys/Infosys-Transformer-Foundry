@@ -1,0 +1,60 @@
+{
+    "message": [
+        {
+            "msgCode": 101,
+            "msgText": "Name already exists, it will override previous value."
+        },
+        {
+            "msgCode": 102,
+            "msgText": "Pipeline created successfully."
+        },
+        {
+            "msgCode": 103,
+            "msgText": "Pipeline executed successfully."
+        },
+        {
+            "msgCode": 104,
+            "msgText": "Error occured while creating pipeline."
+        },
+        {
+            "msgCode": 105,
+            "msgText": "Data saved successfully."
+        },
+        {
+            "msgCode": 106,
+            "msgText": "Error occurred, please try again."
+        },
+        {
+            "msgCode": 107,
+            "msgText": "Project created successfully."
+        },
+        {
+            "msgCode": 108,
+            "msgText": "Project updated successfully."
+        },
+        {
+            "msgCode": 109,
+            "msgText": "Project deletion successful."
+        },
+        {
+            "msgCode": 110,
+            "msgText": "Trial executed successfully."
+        },
+        {
+            "msgCode": 111,
+            "msgText":"No data found. Please contact the admin for project access."
+        },
+        {
+            "msgCode": 112,
+            "msgText":"Model updated successfully."
+        },
+        {
+            "msgCode": 113,
+            "msgText":"Endpoint created successfully."
+        },
+        {
+            "msgCode": 114,
+            "msgText":"Model deployed successfully."
+        }
+     ]
+}

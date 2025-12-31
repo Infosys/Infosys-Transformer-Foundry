@@ -1,0 +1,58 @@
+{
+    "response": {
+        "featureAuthDataList": [
+            {
+                "featureId": "project-create",
+                "accessLevelCde": 3
+            },
+            {
+                "featureId": "project-delete",
+                "accessLevelCde": 3
+            },
+            {
+                "featureId": "project-list",
+                "accessLevelCde": 3
+            },
+            {
+                "featureId": "project-view",
+                "accessLevelCde": 3
+            },
+            {
+                "featureId": "pipeline-create",
+                "accessLevelCde": 3
+            },
+            {
+                "featureId": "pipeline-execute",
+                "accessLevelCde": 3
+            },
+            {
+                "featureId": "pipeline-list",
+                "accessLevelCde": 3
+            },
+            {
+                "featureId": "pipeline-view",
+                "accessLevelCde": 3
+            },
+            {
+                "featureId": "model-deploy",
+                "accessLevelCde": 3
+            },
+            {
+                "featureId": "model-list",
+                "accessLevelCde": 3
+            },
+            {
+                "featureId": "model-view",
+                "accessLevelCde": 3
+            },
+            {
+                "featureId": "model-create",
+                "accessLevelCde": 3
+            }
+        ]
+    },
+    "responseCde": 0,
+    "responseMsg": "Success",
+    "timestamp": "2023-08-07 07:47:09 PM",
+    "responseTimeInSecs": 0.062
+}

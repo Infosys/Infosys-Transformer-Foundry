@@ -1,0 +1,12 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Full viewport height */
+}
+
+.scrollable-container {
+    flex: 1; /* Takes up remaining space */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    height:400px;
+}

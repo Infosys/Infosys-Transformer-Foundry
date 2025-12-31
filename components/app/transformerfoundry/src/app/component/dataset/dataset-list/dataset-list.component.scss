@@ -1,0 +1,30 @@
+/* table row */
+.tf_table_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  // background-color: aqua;
+}
+
+.tf_table_col {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+.mat-raised-button {
+  background: none; /* Remove button background */
+  border: none;     /* Remove button border */
+  padding: 0;       /* Remove button padding */
+  box-shadow: none; /* Remove button shadow */
+  cursor: pointer;  /* Makes the button look clickable */
+  font-size: 24px;  /* Adjust icon size as needed */
+}
+
+
+// styling for displaying JSON DATA DIRECTLY
+// h1 {
+//   color: #2c3e50;
+// }
+// pre {
+//   background-color: #ecf0f1;
+//   padding: 10px;
+//   border-radius: 5px;
+// }

@@ -1,0 +1,19 @@
+.table-wrapper {
+  overflow-x: hidden;
+  overflow-y: auto;
+  .row {
+    padding: 16px 24px !important;
+  }
+}
+
+.table-titleArea{
+    padding: 8px 24px !important;
+    
+}
+.container {
+  padding-bottom: 10px;
+}
+.err-msg-div {
+  font-size: 10px;
+  margin-top: -12px;
+}

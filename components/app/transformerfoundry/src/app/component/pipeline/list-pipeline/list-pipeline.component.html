@@ -1,0 +1,474 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<!-- <div class="tf-content">
+  <mat-tab-group disableRipple>
+    <mat-tab label="&#10112; Pipeline List">
+      <button mat-flat-button class="tf_button" routerLink="create" [queryParams]="{ pn: model.projectName}"
+        matTooltip="New Pipeline" matTooltipPosition="above" style="float:right; margin-right: 24px; margin-top: 5px;">
+        New
+      </button>
+      <div [style.width.px]="model.width">
+        <div class="row tf_table_row">
+          <div class="col-lg-12 tf_table_col">
+            <div class="app_panel" style="padding: 8px 24px;">
+              <div class="table-wrapper" [style.height.px]="model.height">
+                <table class="app_tables">
+                  <thead>
+                    <tr>
+                      <th width="20%">Name</th>
+                      <th width="10%">Version</th>
+                      <th width="35%">Description</th>
+                      <th width="20%">Created On</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <ng-container *ngIf="!model.isDataLoaded">
+                      <tr>
+                        <td colspan="4">
+                          <div class="loading-dots">
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                          </div>
+                        </td>
+                      </tr>
+                    </ng-container>
+                    <ng-container *ngIf="model.isDataLoaded">
+                      <ng-container *ngIf="pipelineList?.length>0;else noData">
+                        <tr class="icon-column" *ngFor="let item of model.currentPageData">
+                          <td>
+                            <a [routerLink]="['view', item.id]" [queryParams]="{ pn: model.projectName}"
+                              class="hyperlink">{{ item.pipeline.name
+                              }}</a>
+                          </td>
+                          <td>{{ item.pipeline.version }}</td>
+                          <td>{{ item.description }}</td>
+                          <td>{{ item.createdOn | utcToLocal }}
+                            <button mat-icon-button matTooltip="Recreate Pipeline" matTooltipPosition="above"
+                              [disabled]="!model.permissionStatus" [routerLink]="['view', item.id]"
+                              [queryParams]="{ rc: true , pn: model.projectName }">
+                              <span class="only-show-on-hover">
+                                <mat-icon class="material-icons action-icons"
+                                  [style.cursor]="model.permissionStatus ? 'pointer' : 'not-allowed'">content_copy</mat-icon>
+                              </span>
+                            </button>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </ng-container>
+                    <ng-template #noData>
+                      <tr>
+                        <td colspan="4" class="text-center">No data found</td>
+                      </tr>
+                    </ng-template>
+                  </tbody>
+                </table>
+              </div>
+              <div class="flex-container pagination">
+                <mat-paginator [length]="model.totalItems" [pageSize]="model.pageSize" [hidePageSize]="true"
+                  (page)="onPageChange($event)">
+                </mat-paginator>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div> -->
+<!-- <ng-template #templateAction let-modal let-c="close" let-s="save" let-d="dismiss">
+  <app-import-pipeline (close)="c('Close click')">
+  </app-import-pipeline>
+</ng-template>
+<div class="tf-content">
+  <mat-tab-group disableRipple>
+    <mat-tab label="&#10112; Pipeline List">
+    
+      <div class="search-container">
+        <div class="search-box-wrapper">
+        <input class="search-box" type="text" placeholder="Search by name or created on"   (input)="filterList($event.target.value)">
+     
+        <input
+        type="date"
+        class="form-control"
+        placeholder="From Date"
+        [(ngModel)]="fromDate" (change)="applyFilters()"
+      />
+      <input
+        type="date"
+        class="form-control"
+        placeholder="To Date"
+        [(ngModel)]="toDate" (change)="applyFilters()"
+      />
+      <button mat-icon-button (click)="applyFilters()">
+        <mat-icon>search</mat-icon>
+      </button>
+
+    
+      <button mat-flat-button class="tf_button" [disabled]="false"
+        (click)="open(templateAction,false);" 
+        matTooltip="New Pipeline" matTooltipPosition="above" style="float:right; margin-right: 24px; margin-top: 5px;"
+        >
+        New
+      </button>
+    </div>
+      </div>
+
+      <div [style.width.px]="model.width">
+        <div class="row tf_table_row">
+          <div class="col-lg-12 tf_table_col">
+            <div class="app_panel" style="padding: 8px 24px;">
+              <div class="table-wrapper" [style.height.px]="model.height">
+                <table class="app_tables">
+                  <thead>
+                    <tr>
+                      <th width="20%">Name</th>
+                      <th width="10%">Version</th>
+                      <th width="35%">Description</th>
+                      <th width="20%">Created On</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <ng-container *ngIf="!model.isDataLoaded">
+                      <tr *ngFor="let pipeline of filteredPipelineList">
+                     
+
+                        <td>{{ pipeline.pipeline.name }}</td>
+                        <td>{{ pipeline.pipeline.version }}</td>
+                        <td>{{ pipeline.description }}</td>
+                        <td>{{ pipeline.createdOn | date: 'medium' }}</td>
+                       
+                      </tr>
+                      <tr *ngIf="filteredPipelineList.length === 0">
+                        <td colspan="5">
+                          <div class="loading-dots">
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                          </div>
+                        </td>
+                      </tr>
+                    </ng-container>
+                    <ng-container *ngIf="model.isDataLoaded">
+                      <ng-container *ngIf="pipelineList?.length>0;else noData">
+                        <tr class="icon-column" *ngFor="let item of model.currentPageData">
+                          <td>
+                            <a [routerLink]="['view', item.id]" [queryParams]="{ pn: model.projectName}"
+                              class="hyperlink">{{ item.pipeline.name
+                              }}</a>
+                          </td>
+                          <td>{{ item.pipeline.version }}</td>
+                          <td>{{ item.description }}</td>
+                          <td>{{ item.createdOn | utcToLocal }}
+                            <button mat-icon-button matTooltip="Recreate Pipeline" matTooltipPosition="above"
+                              [disabled]="!model.permissionStatus" [routerLink]="['view', item.id]"
+                              [queryParams]="{ rc: true , pn: model.projectName }">
+                              <span class="only-show-on-hover">
+                                <mat-icon class="material-icons action-icons"
+                                  [style.cursor]="model.permissionStatus ? 'pointer' : 'not-allowed'">content_copy</mat-icon>
+                              </span>
+                            </button>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </ng-container>
+                    <ng-template #noData>
+                      <tr>
+                        <td colspan="4" class="text-center">No data found</td>
+                      </tr>
+                    </ng-template>
+                  </tbody>
+                </table>
+              </div>
+              <div class="flex-container pagination">
+                <mat-paginator [length]="model.totalItems" [pageSize]="model.pageSize" [hidePageSize]="true"
+                  (page)="onPageChange($event)">
+                </mat-paginator>
+              </div>
+             
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div> -->
+
+<!-- old code -->
+<!-- <ng-template #templateAction let-modal let-c="close" let-s="save" let-d="dismiss">
+  <app-import-pipeline (close)="c('Close click')">
+  </app-import-pipeline>
+</ng-template>
+<div class="tf-content">
+  <mat-tab-group disableRipple>
+    <mat-tab label="&#10112; Pipeline List">
+      <div class="search-container">
+        <div class="search-box-wrapper">
+      <input class="search-box" type="text" placeholder="Search by name or created on"   (input)="filterList($event.target.value)"/>
+      <input type="date" class="form-control" placeholder="From Date" [(ngModel)]="fromDate" 
+      (ngModelChange)="applyFilters()"/>
+      <input type="date" class="form-control" placeholder="To Date" [(ngModel)]="toDate" 
+      (ngModelChange)="applyFilters()"/>
+     
+      <button mat-flat-button class="tf_button" [disabled]="false"
+        (click)="open(templateAction,false);" 
+        matTooltip="New Pipeline" matTooltipPosition="above" style="float:right; margin-right: 24px; margin-top: 5px;"
+        >
+        New
+      </button>
+</div>
+
+
+</div>
+      <div [style.width.px]="model.width">
+        <div class="row tf_table_row">
+          <div class="col-lg-12 tf_table_col">
+            <div class="app_panel" style="padding: 8px 24px;">
+              <div class="table-wrapper" [style.height.px]="model.height">
+                <table class="app_tables">
+                  <thead>
+                    <tr>
+                      <th width="20%">Name</th>
+                      <th width="10%">Version</th>
+                      <th width="35%">Description</th>
+                      <th width="20%">Created On</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <ng-container *ngIf="!model.isDataLoaded">
+                      <tr>
+                        <td colspan="4">
+                          <div class="loading-dots">
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                          </div>
+                        </td>
+                      </tr>
+                    </ng-container>
+                    <ng-container *ngIf="model.isDataLoaded">
+                      <ng-container *ngIf="pipelineList?.length>0;else noData">
+                        <tr class="icon-column" *ngFor="let item of model.currentPageData">
+                          <td>
+                            <a [routerLink]="['view', item.id]" [queryParams]="{ pn: model.projectName}"
+                              class="hyperlink">{{ item.pipeline.name
+                              }}</a>
+                          </td>
+                          <td>{{ item.pipeline.version }}</td>
+                          <td>{{ item.description }}</td>
+                          <td>{{ item.createdOn | utcToLocal }}
+                            <button mat-icon-button matTooltip="Recreate Pipeline" matTooltipPosition="above"
+                              [disabled]="!model.permissionStatus" [routerLink]="['view', item.id]"
+                              [queryParams]="{ rc: true , pn: model.projectName }">
+                              <span class="only-show-on-hover">
+                                <mat-icon class="material-icons action-icons"
+                                  [style.cursor]="model.permissionStatus ? 'pointer' : 'not-allowed'">content_copy</mat-icon>
+                              </span>
+                            </button>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </ng-container>
+                    <ng-template #noData>
+                      <tr>
+                        <td colspan="4" class="text-center">No data found</td>
+                      </tr>
+                    </ng-template>
+                  </tbody>
+                </table>
+              </div>
+              <div class="flex-container pagination">
+                <mat-paginator [length]="model.totalItems" [pageSize]="model.pageSize" [hidePageSize]="true"
+                  (page)="onPageChange($event)">
+                </mat-paginator>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div> -->
+
+
+<!-- working everything well for search filter-->
+<ng-template #templateAction let-modal let-c="close" let-s="save" let-d="dismiss">
+  <app-import-pipeline (close)="c('Close click')">
+  </app-import-pipeline>
+</ng-template>
+<div class="tf-content">
+<mat-tab-group disableRipple>
+    <mat-tab label="&#10112; Pipeline List">
+      <!-- <div class="search-container">
+        <div class="search-box-wrapper"> -->
+          <!-- <div class="row" style="padding: 14px;"> -->
+           <div  style="display: flex; flex-wrap: wrap; gap: 10px; padding-top:20px;">
+            <div class="col-md-3">
+                <mat-form-field appearance="standard" floatLabel="always"  [ngStyle]="{ 'width': '200px'}" >
+                    <mat-label style="margin-top: 10px;"> Name</mat-label>
+                    <input matInput  style="margin-top: 10px;" type="text" [(ngModel)]="searchTerm" />
+                </mat-form-field>
+            </div>
+            <!-- (input)="filterList($event.target.value)" -->
+            <div class="col-md-3" >
+              <mat-form-field appearance="standard" floatLabel="always">
+                <mat-label>From Date</mat-label>
+                <input matInput [matDatepicker]="fromDatePicker"  [(ngModel)]="fromDate"  />
+                <mat-datepicker-toggle matSuffix [for]="fromDatePicker"></mat-datepicker-toggle>
+                <mat-datepicker #fromDatePicker></mat-datepicker>
+              </mat-form-field>
+            </div>
+            <div class="col-md-3">
+              <!-- (ngModelChange)="applyFilters()" -->
+              <mat-form-field appearance="standard" floatLabel="always">
+                <mat-label>To Date</mat-label>
+                <input matInput [matDatepicker]="toDatePicker"  [(ngModel)]="toDate" />
+                <mat-datepicker-toggle matSuffix [for]="toDatePicker"></mat-datepicker-toggle>
+                <mat-datepicker #toDatePicker></mat-datepicker>
+              </mat-form-field>
+            </div>
+           
+          <!-- <div class="col-md-1 "> -->
+            <button  mat-flat-button (click)="applyFilters()"
+                style="bottom: -8px; background: none; display: inline-flex; justify-content: center;">
+                <span style="line-height: 50px;">
+                    <mat-icon class="action-icons">search</mat-icon>
+                </span>
+            </button>
+        <!-- </div> -->
+        <!-- <div class="col-md-1 "> -->
+          <button  mat-flat-button (click)="refreshFilter()"
+              style="bottom: -8px; background: none; display: inline-flex; justify-content: center;">
+              <span style="line-height: 50px;">
+                  <mat-icon class="action-icons">refresh</mat-icon>
+              </span>
+          </button>
+      <!-- </div> -->
+
+        
+
+          <!-- <button (click)="refreshFilter()">Refresh</button> -->
+
+            
+          
+          
+          
+          <!-- <input class="form-control search-box"  type="text" placeholder="Search by name or created on" (input)="filterList($event.target.value)"/> -->
+         
+          <!-- <input type="date" class="form-control" placeholder="From Date" [(ngModel)]="fromDate" (ngModelChange)="applyFilters()"/> -->
+          <!-- <input type="date" class="form-control" placeholder="To Date" [(ngModel)]="toDate" (ngModelChange)="applyFilters()"/> -->
+          <div class="col-md" style="float: right;">
+          <button mat-flat-button class="tf_button" [disabled]="false"
+            (click)="open(templateAction,false);" 
+            matTooltip="New Pipeline" matTooltipPosition="above" style="float:right; margin-right: 24px; margin-top: 5px;">
+            New
+          </button>
+          </div>
+        </div>
+          <!-- </div> -->
+          <!-- </div> -->
+        <!-- </div> -->
+    
+      <div [style.width.px]="model.width" style="margin-top:-40px ;">
+        <div class="row tf_table_row">
+          <div class="col-lg-12 tf_table_col">
+            <div class="app_panel" style="padding: 8px 24px;">
+              <div class="table-wrapper" [style.height.px]="model.height">
+                <table class="app_tables">
+                  <thead>
+                    <tr>
+                      <th width="20%">Name</th>
+                      <th width="10%">Version</th>
+                      <th width="35%">Description</th>
+                      <th width="20%">Created On</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <ng-container *ngIf="!model.isDataLoaded">
+                      <tr>
+                        <td colspan="4">
+                          <div class="loading-dots">
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                            <div class="loading-dots--dot"></div>
+                          </div>
+                        </td>
+                      </tr>
+                    </ng-container>
+                    <!-- <ng-container *ngIf="model.isDataLoaded">
+                      <ng-container *ngIf="filteredPipelineList?.length > 0">
+                        <tr class="icon-column" *ngFor="let item of filteredPipelineList">
+                          <td>
+                            <a [routerLink]="['view', item.id]" [queryParams]="{ pn: model.projectName }" class="hyperlink">{{ item.pipeline.name }}</a>
+                          </td>
+                          <td>{{ item.pipeline.version }}</td>
+                          <td>{{ item.description }}</td>
+                          <td>{{ item.createdOn | date: 'short' }}</td>
+                        </tr>
+                      </ng-container>
+                    </ng-container> -->
+                    
+              
+                 
+                    <!-- <ng-template #noFilteredData> -->
+                      <ng-container *ngIf="filteredPipelineList?.length >0 ">
+                        <tr class="icon-column" *ngFor="let item of model.currentPageData">
+                          <td>
+                            <a [routerLink]="['view', item.id]" [queryParams]="{ pn: model.projectName }" class="hyperlink">{{ item.pipeline.name }}</a>
+                          </td>
+                          <td>{{ item.pipeline.version }}</td>
+                          <td>{{ item.description }}</td>
+                          <td>{{ item.createdOn | utcToLocal }}
+                            <button mat-icon-button matTooltip="Recreate Pipeline" matTooltipPosition="above" [disabled]="!model.permissionStatus" [routerLink]="['view', item.id]" [queryParams]="{ rc: true , pn: model.projectName }">
+                              <span class="only-show-on-hover">
+                                <mat-icon class="material-icons action-icons" [style.cursor]="model.permissionStatus ? 'pointer' : 'not-allowed'">content_copy</mat-icon>
+                              </span>
+                            </button>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    <!-- </ng-template> -->
+                    <!-- <ng-template  #noData> -->
+                      <ng-container *ngIf=" filteredPipelineList?.length  == 0  ">
+                      <tr>
+                        <td colspan="4" class="text-center">No data found</td>
+                      </tr>
+                      </ng-container>
+                      <!-- </ng-template> -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="flex-container pagination">
+                <!-- model.items -->
+                <mat-paginator [length]="filteredPipelineList?.length"
+                 [pageSize]="model.pageSize"
+                  [hidePageSize]="true" (page)="onPageChange($event)">
+                </mat-paginator>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- </div> -->
+      <!-- //end of row -->
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+
+
+
+
+
+

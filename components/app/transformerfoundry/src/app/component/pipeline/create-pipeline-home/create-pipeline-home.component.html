@@ -1,0 +1,58 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<ng-container *ngIf="!model.isDataLoaded">
+  <tr class="row" style="justify-content: center;">
+    <td>
+      <div class="loading-dots">
+        <div class="loading-dots--dot"></div>
+        <div class="loading-dots--dot"></div>
+        <div class="loading-dots--dot"></div>
+      </div>
+    </td>
+  </tr>
+</ng-container>
+<ng-container *ngIf="model.isDataLoaded">
+  <div class="secondary_style marT8">
+    <mat-tab-group (selectedTabChange)="onTabChange($event)" [selectedIndex]="model.selectedTabIndex" disableRipple>    
+      <mat-tab label= "&#10112; Pipeline Details">
+        <ng-template matTabContent>
+          <app-create-pipeline-details [isReadOnly]="model.isReadOnly" [isDataLoaded]="model.isDataLoaded"
+            [inputPipelineData]="model.pipelineData" [inputConfidentialData]="model.confidentialData" [height]=this.model.height [width]=this.model.width (pipelinedtData)="onPipelineDetail($event)" (confidentialData)="onConfidentialData($event)"></app-create-pipeline-details>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab label="&#10113; Flow Editor">
+        <ng-template matTabContent>
+          <app-create-pipeline-flow [isReadOnly]="model.isReadOnly" (nodePayload)="onNodePayload($event)" (flowData)="onFlowData($event)"
+            [inputPayloadData]="model.nodePayload" [pipelineDetailData]="model.pipelineData" [inputFlowData]="model.flowData"
+            [inputPipelineData]="model.pipelineData" [height]=this.model.height [width]=this.model.width></app-create-pipeline-flow>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab label="&#10114; Summary">
+        <ng-template matTabContent>
+          <app-create-pipeline-summary [isReadOnly]="model.isReadOnly" [isDataLoaded]="model.isDataLoaded" [inputNodePayload]="model.nodePayload" 
+          [inputPipelineData]="model.pipelineData" [inputConfidentialData]="model.confidentialData" [height]=this.model.height [width]=this.model.width (pipelineId)="onCreatePipeline($event)"></app-create-pipeline-summary>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab label="&#10115; Execution">
+        <ng-template matTabContent>
+          <app-create-pipeline-execution [isReadOnly]="model.isReadOnly" [isDataLoaded]="model.isDataLoaded"
+            [inputPipelineData]="model.pipelineData" [pipelineId]="model.pipelineId" [inputPipelineName]="model.pipelineData.pipeline.name"
+            [inputExecutionData]="model.executionData" 
+            [inputConfidentialData]="model.confidentialData" [height]=this.model.height [width]=this.model.width (executionData)="onExecutionData($event)" [projectId]="model.projectId"></app-create-pipeline-execution>
+        </ng-template>
+      </mat-tab>
+
+    </mat-tab-group>
+  </div>
+</ng-container>

@@ -1,0 +1,42 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<ng-container>
+  <!-- *ngIf="model.isDataLoaded" -->
+  <div class="secondary_style marT8">
+    <mat-tab-group disableRipple>
+      <mat-tab label="Dataset List">
+        <ng-template matTabContent>
+          <app-rag-dataset-list
+            [height]="this.model.height"
+            [width]="this.model.width"
+          ></app-rag-dataset-list>
+        </ng-template>
+      </mat-tab>
+
+     
+      <!-- <mat-tab label="Dataset Details">
+        <ng-template matTabContent>
+          < <app-rag-data-register         -->
+             <!-- [height]="this.model.height" -->
+            <!-- [width]="this.model.width" ></app-rag-data-register> -->
+        
+        
+        <!-- </ng-template>
+      </mat-tab> --> 
+     
+    </mat-tab-group>
+     
+  </div> 
+  
+   
+</ng-container>
+
+ 

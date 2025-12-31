@@ -1,0 +1,164 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div id="content" class="container-fluid" style="width: 100%; height: 100%">
+  <div class="modal-header">
+    <div class="clearfix">
+      <div class="row" style="display: flex;justify-content: space-between;margin-bottom: 2vh;">
+        <h4 class="float-left" style="padding-left: 20px; padding-top: 8px;">Execution Details</h4>
+        <button type="button" class="close" aria-label="Close" (click)="closeWindow()">
+          <mat-icon class="action-icons">close</mat-icon>
+        </button>
+      </div>
+      <ng-container *ngIf="!model.trialData">
+        <span class="loading-dots">
+          <span class="loading-dots--dot"></span>
+          <span class="loading-dots--dot"></span>
+          <span class="loading-dots--dot"></span>
+        </span>
+      </ng-container>
+      <ng-container *ngIf="model.trialData">
+        <div class="table-wrapper" style="width: 800px; height: 400px">
+          <div class="row padT16 padLR8 textBox" style="padding: 16px 8px 0px 8px;">
+            <div class="col">
+              <mat-form-field appearance="standard" floatLabel="always">
+                <mat-label>Trial Name</mat-label>
+                <input matInput placeholder="" value="{{model.trialData.name}}"
+                  (input)="model.trialData.name = $event.target.value" />
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="table-titleArea padT16 padLR8" style="padding: 16px 8px 0px 8px;">
+            <div class="marB24" style="margin-bottom: 24px;">
+              <h5>Run Arguments</h5>
+            </div>
+            <table class="app_tables" style="margin-bottom: 24px;">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  &nbsp;
+                  <th>Argument</th>
+                  &nbsp;
+                  <!-- <th></th> -->
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let item of model.trialData.runArguments">
+                  <tr>
+                    <td>
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <input matInput placeholder="" value="{{item.name}}" />
+                      </mat-form-field>
+                    </td>
+                    &nbsp;
+                    <td>
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <input matInput placeholder="" value="{{item.argValue}}"
+                          [(ngModel)]="item.argValue" />
+                      </mat-form-field>
+                    </td>
+                    &nbsp;
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+            <div class="marB24" style="margin-bottom: 24px;">
+              <h5>Resource Configuration</h5>
+            </div>
+            <div class="marB24" style="margin-bottom: 24px;">
+              <mat-form-field appearance="standard" floatLabel="always"
+                style="max-width: 630px;">
+                <mat-label>Volume Size in GB</mat-label>
+                <input matInput placeholder="" value="" style="max-width: 630px;"
+                  [(ngModel)]="model.trialData.resourceConfig.volumeSizeinGB" type="number" />
+              </mat-form-field>
+            </div>
+            <table class="app_tables">
+              <thead>
+                <tr>
+                  <th width="10%">Type</th>&nbsp;
+                  <th width="10%">Memory</th>&nbsp;
+                  <th width="10%">Max Qty</th>&nbsp;
+                  <th width="10%">Min Qty</th>&nbsp;
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngIf="model.trialData.resourceConfig.computes?.length">
+                  <tr *ngFor="let item of model.trialData.resourceConfig.computes; let index=index">
+                    <td>
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <mat-select disableOptionCentering class="mat-select-dropdown" 
+                         [ngModel]="item?.type ? item.type : ''"
+                          (ngModelChange)="item.type = $event">
+                          <mat-option value="CPU">CPU</mat-option>
+                          <mat-option value="GPU">GPU</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </td>
+                    &nbsp;
+                    <td>
+                      <mat-form-field appearance="standard" floatLabel="always"
+                        style="max-width: 120px;">
+                        <input matInput placeholder="" value="" style="max-width: 120px;"
+                          [ngModel]="item.memory" (ngModelChange)="item.memory = $event" />
+                      </mat-form-field>
+                    </td>
+                    &nbsp;
+                    <td>
+                      <mat-form-field appearance="standard" floatLabel="always"
+                        style="max-width: 120px;">
+                        <input matInput placeholder="" value="" style="max-width: 280px;"
+                          [ngModel]="item.maxQty" (ngModelChange)="item.maxQty = $event" type="number" min="0" />
+                      </mat-form-field>
+                    </td>
+                    &nbsp;
+                    <td>
+                      <mat-form-field appearance="standard" floatLabel="always"
+                        style="max-width: 120px;">
+                        <input matInput placeholder="" value="" style="max-width: 120px;"
+                          [ngModel]="item.minQty" (ngModelChange)="item.minQty = $event" type="number" min="0" />
+                      </mat-form-field>
+                    </td>
+                    &nbsp;
+                    <td>
+                      <button mat-icon-button (click)="deleteCompute(index)">
+                        <mat-icon class="action-icons">delete</mat-icon>
+                      </button>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+            <button mat-flat-button class="highlight-button" (click)="addComputes()">
+              <mat-icon class="action-icons">add</mat-icon>
+              Add Compute
+            </button>
+            <br>
+            <br>
+          </div>
+        </div>
+        <div class="modal-footer" style="float: right;">
+          <div *ngIf="showLoadIcon">
+            <span class="loading-dots--dot"></span>
+            <span class="loading-dots--dot"></span>
+            <span class="loading-dots--dot"></span>
+          </div>
+          <button class="tf_button" style="margin-bottom: 24px;" mat-flat-button (click)="executeTrial()"
+            [disabled]="showLoadIcon">
+            Ok
+          </button>
+          <button class="tf_button_secondary" style="margin-bottom: 24px;" mat-flat-button (click)="closeWindow()">
+            Cancel
+          </button>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

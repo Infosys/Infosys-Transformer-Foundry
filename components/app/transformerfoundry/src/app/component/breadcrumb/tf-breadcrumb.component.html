@@ -1,0 +1,24 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="app_breadcrumb small-size" style="margin-bottom: 8px;" >
+    <ng-container *ngFor="let breadcrumb of model.breadcrumbItems; let last = last">
+        <ng-container *ngIf="breadcrumb.routerLink; else disabledLink">
+            <a class="hyperLink-btn" [routerLink]="breadcrumb.routerLink" [queryParams]="breadcrumb.routerLink !== '/projects' ? { pn: model.projectName }: ''">
+                <span>{{ breadcrumb.path }}</span>
+            </a>
+        </ng-container>
+        <ng-template #disabledLink >
+            <span class="color-grey">{{ breadcrumb.path }}</span>
+        </ng-template>
+        <span class="color-grey" *ngIf="!last"></span>
+    </ng-container>
+</div>
+

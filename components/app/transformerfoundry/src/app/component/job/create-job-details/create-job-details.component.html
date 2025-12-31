@@ -1,0 +1,746 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="container" [style.max-width.px]="width">
+  <div class="row" *ngIf="model.isDataLoaded">
+    <div class="col-lg-12" style="margin-top: 20px">
+      <div class="app_panel" style="padding: 16px 24px 16px 24px">
+        <div class="table-wrapper" [style.height.px]="height">
+          
+          <!-- Name & Description -->
+          <div class="row" style="padding: 16px 24px 0px 24px;">
+            <!---name--->
+            <div class="col">
+                <mat-form-field appearance="standard" floatLabel="always">
+                  <mat-label>Name</mat-label>
+                  <input matInput placeholder="" [disabled]="model.isReadOnly" value="{{ model.jobDataObject.name }}" [(ngModel)]="model.jobDataObject.name" (input)="onInput($event)" #myName="ngModel" required/>
+                </mat-form-field>
+                <div *ngIf="myName.invalid && myName.errors.required" class="err-msg-div">
+                  <mat-error>Mandatory field</mat-error>
+                </div>
+            </div>
+
+            <!---description--->
+            <div class="col">
+              <mat-form-field appearance="standard" floatLabel="always">
+                <mat-label>Description</mat-label>
+                <input matInput placeholder="" [disabled]="model.isReadOnly" value="{{ model.jobDataObject.description }}" [(ngModel)]="model.jobDataObject.description" #myDescription="ngModel" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Job Arguments -->
+          <div class="table-titleArea" style="padding: 24px 24px 0px 24px;">
+            <div style="margin-bottom: 24px;">
+              <h5 (click)="toggleShowSection('jobArguments')"
+                style="color:black; display: flex; justify-content: space-between;">
+                Job Arguments
+                <mat-icon class="float-right large-icons" style="font-size: large;"
+                  [ngClass]="showSection['jobArguments'] ? 'up-arrow' : 'down-arrow'">
+                  {{showSection['jobArguments'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                </mat-icon>
+              </h5>
+            </div>
+            <!-- display list if there are some args. -->
+            <div class="tab-data" *ngIf="showSection['jobArguments']">
+              <ng-container *ngIf="model.jobDataObject?.jobArguments?.length > 0">
+                <table class="app_tables">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      &nbsp;
+                      <th>Value</th>
+                      &nbsp;
+                      <th>Type</th>
+                      &nbsp;
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of model.jobDataObject.jobArguments;let i=index">
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <input matInput placeholder="" value="{{ item.name }}" [(ngModel)]="item.name" [disabled]="model.isReadOnly"/>
+                        </mat-form-field>
+                      </td>
+                      &nbsp;
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <input matInput placeholder="" value="{{ item.defaultVal }}" [(ngModel)]="item.defaultVal" [disabled]="model.isReadOnly"/>
+                        </mat-form-field>
+                      </td>
+                      &nbsp;
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <mat-select
+                            disableOptionCentering
+                            class="mat-select-dropdown"
+                            [value]="item?.dataType"
+                            [ngModel]="item?.dataType ? item.dataType : ''"
+                            (ngModelChange)="item.dataType = $event"
+                            [disabled]="model.isReadOnly"
+                            >
+                            <mat-option
+                              *ngFor="let store of dataType"
+                              [value]="store.value">
+                              {{ store.viewValue }}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </td>
+                      &nbsp;
+                      <td>
+                        <button mat-icon-button (click)="removeJobArgs(i)" [disabled]="model.isReadOnly">
+                          <mat-icon class="action-icons">delete</mat-icon>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ng-container>
+              <!-- display a default empty row otherwise -->
+              <ng-container *ngIf="!model.jobDataObject?.jobArguments">
+                <table class="app_tables">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      &nbsp;
+                      <th>Value</th>
+                      &nbsp;
+                      <th>Type</th>
+                      &nbsp;
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let i=index">
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <input matInput placeholder="" value="" [disabled]="model.isReadOnly"/>
+                        </mat-form-field>
+                      </td>
+                      &nbsp;
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <input matInput placeholder="" value="" [disabled]="model.isReadOnly"/>
+                        </mat-form-field>
+                      </td>
+                      &nbsp;
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <mat-select
+                            disableOptionCentering
+                            class="mat-select-dropdown"
+                            [(value)]="selectedDataType"
+                            [disabled]="model.isReadOnly">
+                            <mat-option
+                              *ngFor="let store of dataType"
+                              [value]="store.value">
+                              {{ store.viewValue }}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </td>
+                      &nbsp;
+                      <td>
+                        <button mat-icon-button (click)="removeJobArgs(i)" [disabled]="model.isReadOnly">
+                          <mat-icon class="action-icons">delete</mat-icon>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ng-container>
+
+              <button mat-flat-button class="highlight-button" (click)="addJobArgs()" [disabled]="model.isReadOnly"
+                style="padding-top: 8px; background: inherit;">
+                <mat-icon class="action-icons">add</mat-icon>
+                Add Argument
+              </button>
+            </div>
+          </div>
+
+          <!-- Image Container -->
+          <div class="table-titleArea" style="padding: 8px 24px 0px 24px;">
+            <div style="margin-bottom: 24px;">
+              <h5 (click)="toggleShowSection('container')"
+                style="color:black; display: flex; justify-content: space-between;">
+                Container
+                <mat-icon class="float-right large-icons" style="font-size: large;"
+                  [ngClass]="showSection['container'] ? 'up-arrow' : 'down-arrow'">
+                  {{showSection['container'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                </mat-icon>
+              </h5>
+            </div>
+            <div class="tab-data" *ngIf="showSection['container']">
+              <div class="row">
+                <div class="col">
+                  <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.container?.imageUri;else emptyField">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Image URI</mat-label>
+                      <input matInput placeholder="uri" value="{{model.jobDataObject?.steps[0]?.trainingStep?.container?.imageUri}}" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.container.imageUri" [disabled]="model.isReadOnly" #myImageURI="ngModel" required/>
+                    </mat-form-field>
+                    <div *ngIf="myImageURI.invalid && myImageURI.errors.required" class="err-msg-div">
+                      <mat-error>Mandatory field</mat-error>     
+                    </div>
+                  </ng-container>
+                  <ng-template #emptyField>
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Image URI</mat-label>
+                      <input matInput placeholder="uri" value="" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.container.imageUri" [disabled]="model.isReadOnly" #myImageURI="ngModel" required/>
+                    </mat-form-field>
+                    <div *ngIf="myImageURI.invalid && myImageURI.errors.required" class="err-msg-div">
+                      <mat-error>Mandatory field</mat-error>     
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Storage Details -->
+          <div class="table-titleArea" style="padding: 8px 24px 0px 24px;">
+            <div class="marB24" style="margin-bottom: 24px;">
+              <h5 (click)="toggleShowSection('storage')"
+                style="color:black; display: flex; justify-content: space-between;">
+                Storage
+                <mat-icon class="float-right large-icons" style="font-size: large;"
+                  [ngClass]="showSection['storage'] ? 'up-arrow' : 'down-arrow'">
+                  {{showSection['storage'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                </mat-icon>
+              </h5>
+            </div>
+            <div class="tab-data" *ngIf="showSection['storage']">
+              <table class="app_tables">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    &nbsp;
+                    <!-- <th>Name</th>
+                    &nbsp; -->
+                    <th>URI</th>
+                    <!-- &nbsp;
+                    <th>Action</th> -->
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- <ng-container *ngIf="model.jobDataObject.steps[0].trainingStep.inputArtifacts"> -->
+                  <tr>
+                    <td *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.inputArtifacts?.storageType;else emptyFieldType">
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <mat-select disableOptionCentering class="mat-select-dropdown" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.inputArtifacts.storageType" [disabled]="model.isReadOnly">
+                          <mat-option
+                            *ngFor="let store of storage"
+                            [value]="store.value">
+                            {{ store.viewValue }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </td>
+                    <ng-template #emptyFieldType>
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <mat-select disableOptionCentering class="mat-select-dropdown" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.inputArtifacts.storageType" [disabled]="model.isReadOnly">
+                            <mat-option
+                              *ngFor="let store of storage"
+                              [value]="store.value">
+                              {{ store.viewValue }}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </td>
+                      </ng-template>
+                    &nbsp;
+                        <td *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.inputArtifacts?.uri;else emptyFieldStoreURI">
+                          <mat-form-field appearance="standard" floatLabel="always">
+                            <input
+                              matInput
+                              placeholder=""
+                              value="{{model.jobDataObject.steps[0].trainingStep.inputArtifacts.uri}}" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.inputArtifacts.uri" style="max-width: 500px;" [disabled]="model.isReadOnly"/>
+                          </mat-form-field>
+                        </td>
+                        <ng-template #emptyFieldStoreURI>
+                        <td>
+                          <mat-form-field appearance="standard" floatLabel="always">
+                            <input
+                              matInput
+                              placeholder=""
+                              value=""  [(ngModel)]="model.jobDataObject.steps[0].trainingStep.inputArtifacts.uri" style="max-width: 500px;"  [disabled]="model.isReadOnly"/>
+                          </mat-form-field>
+                        </td>
+                        </ng-template>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Environment Variables-->
+          <div class="table-titleArea" style="padding: 8px 24px 0px 24px;">
+            <div style="margin-bottom: 24px;">
+              <h5 (click)="toggleShowSection('environmentVariables')"
+                style="color:black; display: flex; justify-content: space-between;">
+                Environment Variables
+                <mat-icon class="float-right large-icons" style="font-size: large;"
+                  [ngClass]="showSection['environmentVariables'] ? 'up-arrow' : 'down-arrow'">
+                  {{showSection['environmentVariables'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                </mat-icon>
+              </h5>
+            </div>
+            <div class="tab-data" *ngIf="showSection['environmentVariables']">
+              <ng-container *ngIf="model.jobDataObject">
+                <!-- display if env var exists and is not null -->
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.container?.envVariables">
+                  <table class="app_tables">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        &nbsp;
+                        <th>Value</th>
+                        &nbsp;
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let item of model.jobDataObject.steps[0].trainingStep.container.envVariables;let i=index">
+                        <td>
+                          <mat-form-field appearance="standard" floatLabel="always">
+                            <input
+                              matInput
+                              placeholder=""
+                              value="{{item.name}}" [(ngModel)]="item.name" [disabled]="model.isReadOnly" style="max-width: 410px"/>
+                          </mat-form-field>
+                        </td>
+                        &nbsp;
+                        <td>
+                          <mat-form-field appearance="standard" floatLabel="always">
+                            <input
+                              matInput
+                              placeholder=""
+                              value="{{item.value}}" [(ngModel)]="item.value" [disabled]="model.isReadOnly" style="max-width: 410px"/>
+                          </mat-form-field>
+                        </td>
+                        &nbsp;
+                        <td>
+                          <button mat-flat-button (click)="removeEnvVariable(i)" [disabled]="model.isReadOnly">
+                            <mat-icon class="action-icons">delete</mat-icon>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </ng-container>
+                <!-- else display empty secion -->
+                <ng-container
+                  *ngIf="!model.jobDataObject?.steps[0]?.trainingStep?.container?.envVariables">
+                  <table class="app_tables">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        &nbsp;
+                        <th>Value</th>
+                        &nbsp;
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.container?.envVariables">
+                      <tr *ngFor="let item of model.jobDataObject.steps[0].trainingStep.container.envVariables;let i=index">
+                        <td>
+                          <mat-form-field appearance="standard" floatLabel="always">
+                            <input matInput placeholder="" [value]="item.name" (input)="item.name=$event.target.value" [disabled]="model.isReadOnly" style="max-width: 410px"/>
+                          </mat-form-field>
+                        </td>
+                        &nbsp;
+                        <td>
+                          <mat-form-field appearance="standard" floatLabel="always">
+                            <input matInput placeholder="First Name" [value]="item.value" (input)="item.value=$event.target.value" [disabled]="model.isReadOnly" style="max-width: 410px"/>
+                          </mat-form-field>
+                        </td>
+                        &nbsp;
+                        <td>
+                          <button mat-flat-button (click)="removeEnvVariable(i)" [disabled]="model.isReadOnly">
+                            <mat-icon class="action-icons">delete</mat-icon>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </ng-container>
+                <button mat-flat-button class="highlight-button" (click)="addEnvVariable()" [disabled]="model.isReadOnly"
+                  style="padding-top: 8px; background: inherit;">
+                  <mat-icon class="action-icons">add</mat-icon>
+                  Add Variables
+                </button>
+              </ng-container>
+            </div>
+          </div>
+
+          <!-- Command & Arguments -->
+          <div class="table-titleArea" style="padding: 24px 24px 0px 24px;">
+            <div style="margin-bottom: 24px">
+              <h5 (click)="toggleShowSection('commandAndArguments')"
+                style="color:black; display: flex; justify-content: space-between;">
+                Command & Arguments
+                <mat-icon class="float-right large-icons" style="font-size: large;"
+                  [ngClass]="showSection['commandAndArguments'] ? 'up-arrow' : 'down-arrow'">
+                  {{showSection['commandAndArguments'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                </mat-icon>
+              </h5>
+            </div>
+            <div class="tab-data" *ngIf="showSection['commandAndArguments']">
+              <div class="row" style="margin-top: 8px;">
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.container?.command">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Command</mat-label>
+                      <input
+                        matInput
+                        placeholder=""
+                        value="{{ model.jobDataObject?.steps[0]?.trainingStep?.container?.command[0] }}" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.container.command[0]" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.container?.command === undefined">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Command</mat-label>
+                      <input matInput placeholder="" value="" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+                <!--  -->
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.container?.args !== undefined && model.jobDataObject?.steps[0]?.trainingStep?.container?.args !== null">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Arguments</mat-label>
+                      <input
+                        matInput
+                        placeholder=""
+                        value="{{ model.jobDataObject?.steps[0]?.trainingStep?.container?.args }}" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.container.args" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf=" model.jobDataObject?.steps[0]?.trainingStep?.container?.args === undefined ||model.jobDataObject?.steps[0]?.trainingStep?.container?.args === null">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Arguments</mat-label>
+                      <input matInput placeholder="" [value]="model.jobDataObject?.steps[0]?.trainingStep?.container?.args" (input)="model.jobDataObject.steps[0].trainingStep.container.args=$event.target.value" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+              <!-- </ng-container> -->
+              </div>
+
+              <!-- framework fields -->
+              <div class="row">
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.framework?.name !== undefined && model.jobDataObject?.steps[0]?.trainingStep?.framework?.name !== null">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Framework Name</mat-label>
+                      <input
+                        matInput
+                        placeholder=""
+                        value="{{ model.jobDataObject?.steps[0]?.trainingStep?.framework?.name }}" [(ngModel)]="model.jobDataObject?.steps[0].trainingStep.framework.name" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.framework?.name === undefined ||model.jobDataObject?.steps[0]?.trainingStep?.framework?.name === null">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Framework Name</mat-label>
+                      <input matInput placeholder="" value="" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+
+                <!-- framework version -->
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.framework?.version !== undefined && model.jobDataObject?.steps[0]?.trainingStep?.framework?.version !== null">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Framework Version</mat-label>
+                      <input
+                        matInput
+                        placeholder=""
+                        value="{{ model.jobDataObject?.steps[0]?.trainingStep?.framework?.version }}" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.framework.version" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.framework?.name === undefined ||model.jobDataObject?.steps[0]?.trainingStep?.framework?.name === null">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Framework Version</mat-label>
+                      <input matInput placeholder="" value="" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+                <!-- </ng-container> -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Pretrained Models -->
+          <div class="table-titleArea padT8 padLR24" style="padding: 8px 24px 0px 24px;">
+            <div style="margin-bottom: 24px;">
+              <h5 (click)="toggleShowSection('pretrainedModel')"
+                style="color:black; display: flex; justify-content: space-between;">
+                Pretrained Model
+                <mat-icon class="float-right large-icons" style="font-size: large;"
+                  [ngClass]="showSection['pretrainedModel'] ? 'up-arrow' : 'down-arrow'">
+                  {{showSection['pretrainedModel'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                </mat-icon>
+              </h5>
+            </div>
+            <div class="tab-data" *ngIf="showSection['pretrainedModel']">
+              <div class="row">
+                <ng-container *ngIf="model.jobDataObject">
+                <!-- pretrained model NAME -->
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.name !==undefined &&model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.name !==null">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Name</mat-label>
+                      <input
+                        matInput
+                        placeholder=""
+                        value="{{model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.name}}" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.preTrainedModelDetails.name" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.name ===undefined ||model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.name ===null">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Name</mat-label>
+                      <input matInput placeholder="" value="" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+
+                <!-- pretrained model VERSION -->
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.version !== undefined && model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.version !== null">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Version</mat-label>
+                      <input
+                        matInput
+                        placeholder=""
+                        value="{{model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.version}}" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.preTrainedModelDetails.version" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.name ===undefined || model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.name === null">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Version</mat-label>
+                      <input matInput placeholder="" value="" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+              </ng-container>
+              </div>
+
+              <table class="app_tables">
+                <thead>
+                  <tr>
+                    <th>Storage Type</th>
+                    &nbsp;
+                    <!-- <th>Name</th>
+                    &nbsp; -->
+                    <th>URI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngIf="model.jobDataObject">
+                  <tr>
+                    <td *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.artifacts?.storageType;else emptyFieldPreStoreType">
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <mat-select
+                          disableOptionCentering class="mat-select-dropdown"
+                          [(ngModel)]="model.jobDataObject.steps[0].trainingStep.preTrainedModelDetails.artifacts.storageType" [disabled]="model.isReadOnly">
+                          <!-- [value]="model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.artifacts?.storageType" -->
+                          <mat-option
+                            *ngFor="let store of storage"
+                            [value]="store.value">
+                            {{ store.viewValue }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </td>
+                    <ng-template #emptyFieldPreStoreType>
+                      <td>
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <mat-select
+                          disableOptionCentering class="mat-select-dropdown"
+                          [(ngModel)]="model.jobDataObject.steps[0].trainingStep.preTrainedModelDetails.artifacts.storageType" [disabled]="model.isReadOnly">
+                          <mat-option
+                            *ngFor="let store of storage"
+                            [value]="store.value">
+                            {{ store.viewValue }}
+                          </mat-option>
+                        </mat-select>
+                        </mat-form-field>
+                      </td>
+                    </ng-template>
+                    &nbsp;
+                      <td *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.artifacts?.uri;else emptyFieldPreStoreURI">
+                        <mat-form-field appearance="standard" floatLabel="always">
+                          <input
+                            matInput
+                            placeholder=""
+                            value="{{model.jobDataObject?.steps[0]?.trainingStep?.preTrainedModelDetails?.artifacts?.uri}}" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.preTrainedModelDetails.artifacts.uri" style="max-width: 500px;" [disabled]="model.isReadOnly"/>
+                        </mat-form-field>
+                      </td>
+                      <ng-template #emptyFieldPreStoreURI>
+                        <td>
+                          <mat-form-field appearance="standard" floatLabel="always">
+                            <input
+                              matInput
+                              placeholder=""
+                              value="" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.preTrainedModelDetails.artifacts.uri" style="max-width: 500px;" [disabled]="model.isReadOnly"/>
+                          </mat-form-field>
+                        </td>
+                      </ng-template>
+                    <!-- </ng-container> -->
+                  </tr>
+                </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Output -->
+          <div class="table-titleArea" style="padding: 8px 24px 0px 24px;">
+            <div style="margin-bottom: 24px;">
+              <h5 (click)="toggleShowSection('output')"
+                style="color:black; display: flex; justify-content: space-between;">
+                Output & Metric Details
+                <mat-icon class="float-right large-icons" style="font-size: large;"
+                  [ngClass]="showSection['output'] ? 'up-arrow' : 'down-arrow'">
+                  {{showSection['output'] ? 'arrow_drop_up' : 'arrow_drop_down'}}
+                </mat-icon>
+              </h5>
+            </div>
+            <div class="tab-data" *ngIf="showSection['output']">
+              <div class="row">
+                <!-- <ng-container *ngIf="model.jobDataObject"> -->
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.outputArtifactBaseUri;else emptyField">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Output Artifact Base URI</mat-label>
+                      <input
+                        matInput
+                        placeholder=""
+                        value="{{model.jobDataObject?.steps[0]?.trainingStep?.outputArtifactBaseUri}}" [(ngModel)]="model.jobDataObject?.steps[0].trainingStep.outputArtifactBaseUri" style="width: 1055px;" [disabled]="model.isReadOnly"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+                <ng-template #emptyField>
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Output Artifact Base URI</mat-label>
+                      <input
+                        matInput
+                        placeholder=""
+                        value="" [(ngModel)]="model.jobDataObject?.steps[0].trainingStep.outputArtifactBaseUri" style="width: 1055px;" [disabled]="model.isReadOnly"/>
+                    </mat-form-field>
+                  </div>
+                </ng-template>
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.outputArtifactBaseUri ===undefined">
+                  <div class="col">
+                    <mat-form-field appearance="standard" floatLabel="always">
+                      <mat-label>Output Artifact Base URI</mat-label>
+                      <input matInput placeholder="" value="" [disabled]="model.isReadOnly" style="width: 1055px;"/>
+                    </mat-form-field>
+                  </div>
+                </ng-container>
+              <!-- </ng-container> -->
+              </div>
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.metricDetails">
+                  <div class="row">
+                    <div class="col">
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <mat-label>Name</mat-label>
+                        <input
+                          matInput
+                          placeholder=""
+                          value="{{model.jobDataObject?.steps[0]?.trainingStep?.metricDetails?.name}}" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.metricDetails.name" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                      </mat-form-field>
+                    </div>
+                    <div class="col">
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <mat-label>Goal</mat-label>
+                        <input
+                          matInput
+                          placeholder=""
+                          value="{{model.jobDataObject?.steps[0]?.trainingStep?.metricDetails?.goal}}" [(ngModel)]="model.jobDataObject?.steps[0].trainingStep.metricDetails.goal" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col">
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <mat-label>Regex</mat-label>
+                        <input
+                          matInput
+                          placeholder=""
+                          value="{{model.jobDataObject?.steps[0]?.trainingStep?.metricDetails?.regex}}" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.metricDetails.regex" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                      </mat-form-field>
+                    </div>
+                    <div class="col">
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <mat-label>Log File URI</mat-label>
+                        <input
+                          matInput
+                          placeholder=""
+                          value="{{model.jobDataObject?.steps[0]?.trainingStep?.metricDetails?.logFileUri}}" [(ngModel)]="model.jobDataObject.steps[0].trainingStep.metricDetails.logFileUri" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                </ng-container>
+                <!-- if does not exist -->
+                <ng-container *ngIf="model.jobDataObject?.steps[0]?.trainingStep?.metricDetails === undefined">
+                  <div class="row">
+                    <div class="col">
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <mat-label>Name</mat-label>
+                        <input matInput placeholder="" value="" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                      </mat-form-field>
+                    </div>
+                    <div class="col">
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <mat-label>Goal</mat-label>
+                        <input matInput placeholder="" value="" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col">
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <mat-label>Regex</mat-label>
+                        <input matInput placeholder="" value="" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                      </mat-form-field>
+                    </div>
+                    <div class="col">
+                      <mat-form-field appearance="standard" floatLabel="always">
+                        <mat-label>Log File URI</mat-label>
+                        <input matInput placeholder="" value="" [disabled]="model.isReadOnly" style="max-width: 500px;"/>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                </ng-container>
+                <!-- </ng-container> -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,166 @@
+# Left menu items schema
+nodePanelSchema:
+  - group: Generic
+    nodes:
+      - label: Python Node
+        enabled: true
+        nodeAttribute:
+          namedId: PythonNode
+          uiNamedRef: customUI
+          propertyNamedRef: custom-1
+          parentNamedIds: []
+          backgroundColor: rgb(255,212,128)
+# Individual node's properties schema
+namedNodePropertySchema:
+  custom-1:
+    $ref: "#/definitions/main"
+    definitions:
+      main:
+        type: object
+        additionalProperties: false
+        properties:
+          name:
+            type: string
+            title: Name
+          type:
+            type: string
+            title: Type
+            default: generic
+          imageUri:
+            title: Image URI
+            description: "Container image name"
+            default: ""
+            type: string
+          # input:
+          #   $ref: "#/definitions/Input"
+          # output:
+          #   $ref: "#/definitions/Output"
+          stepConfig:
+            $ref: "#/definitions/StepConfig"
+          resourceConfig:
+            $ref: "#/definitions/ResourceConfig"
+        required: [imageUri]
+      Input:
+        type: object
+        properties: {}
+        # description: "Set of user-defined named parameters sent as input to step code"
+        required: []
+        title: Input
+        default: {}
+        additionalProperties:
+          type: string
+          examples: []
+      Output:
+        type: object
+        properties: {}
+        # description: "Set of user-defined named parameters received as output from step code"
+        required: []
+        title: Output
+        default: {}
+        additionalProperties:
+          type: string
+          examples: []
+      ResourceConfig:
+        type: object
+        additionalProperties: false
+        # description: "List of hardware configuration"
+        properties:
+          computes:
+            title: Computes
+            type: array
+            minItems: 1
+            default:
+              - type: "CPU"
+                memory: 1
+                maxQty: 5
+                minQty: 1
+            items:
+              $ref: "#/definitions/Compute"
+
+        required: ["computes"]
+        title: Resource Configuration
+      StepConfig:
+        type: object
+        additionalProperties: false
+        properties:
+
+          input:
+            $ref: "#/definitions/Input"
+          output:
+            $ref: "#/definitions/Output"
+          entryPoint:
+            title: Entry Point
+            # description: "The code file that will be invoked"
+            type: array
+            minItems: 1
+            items:
+              type: string
+          stepArguments:
+            title: Additional Arguments
+            # description: "Additional arguments to step code"
+            type: array
+            items:
+              type: string
+        required: ["entryPoint"]
+        title: Configuration
+      Compute:
+        type: object
+        additionalProperties: false
+        properties:
+          type:
+            title: Type
+            examples: [CPU, GPU]
+            type: string
+          memory:
+            title: Memory in GB
+            description: "RAM or GPU memory. e,g. 2GB"
+            type: integer
+            minimum: 1
+          maxQty:
+            title: Max Qty
+            description: "Max quantity of requested resource"
+            type: integer
+            minimum: 1
+          minQty:
+            title: Min Qty
+            description: "Min quantity of requested resource"
+            type: integer
+            minimum: 1
+        required: []
+        title: Compute
+# Editor will now handle this field via uiNamedRef property
+# UI look and feel schema
+namedNodeUiSchema:
+  customUI:
+    name:
+      "ui:autofocus": true
+    type:
+      "ui:disabled": true
+    stepConfig:
+      input:
+        additionalProperties:
+          "ui:title": ""
+      output:
+        additionalProperties:
+          "ui:title": ""
+      entryPoint:
+        items:
+          "ui:title": ""
+      stepArguments:
+        items:
+          "ui:title": ""
+    resourceConfig:
+      computes:
+        "ui:field": "CustomArrayToTableField"
+      # volumeSizeinGB: {}
+
+#  any default values go into the prefill. and are loaded when the node is created.
+# This object contains the values for **EACH** individual node.
+namedFormDefaultData:
+  PythonNode:
+    type: generic
+    stepConfig:
+      entryPoint:
+        - python
+        - ""
+

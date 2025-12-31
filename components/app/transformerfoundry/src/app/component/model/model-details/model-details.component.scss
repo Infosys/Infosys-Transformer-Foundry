@@ -1,0 +1,94 @@
+.mat-card-widget.mat-card {
+  padding: 24px;
+  min-height: 50px;
+  border-radius: 0;
+  margin-top: 10px;
+}
+
+.table-inner {
+  font-size: x-small;
+}
+
+.tdAI {
+  width: 50% !important;
+  vertical-align: top !important;
+  height: 60px !important;
+
+  strong {
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+
+  .mainBody_TxtXS {
+    margin: 6px 0;
+    font-size: 12px;
+
+    &.inCustomTable {
+      margin: 0;
+    }
+  }
+}
+
+.metadata-tab-header {
+  margin: 0;
+  font-size: 14px;
+  padding: 8px 5px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #acc1ebc7;
+  }
+}
+
+td {
+  overflow-wrap: break-word;
+  overflow: hidden;
+}
+
+.table-responsive {
+  table {
+    table-layout: fixed;
+    width: 100%;
+  }
+}
+
+.up-arrow{
+  content: &uarr;
+}
+
+:host ::ng-deep .material-icons {  
+  color: #0740b1;
+  float: right;
+}
+
+.app_tables {
+  justify-content: center;
+  tbody tr td {
+    padding: 8px 4px;
+    height: fit-content !important;
+  }
+
+  thead tr th {
+    padding: 0 4px 4px;
+    text-transform: capitalize;
+  }
+}
+
+.text_small {
+  font-size: 12px;
+  // background-color: red;
+}
+
+.body-text {
+  font-size: 12px;
+}
+
+.tab-label {
+  font-family: "roboto", Arial, sans-serif !important;
+}
+
+::ng-deep.secondary_style .mat-tab-label,
+.secondary_style .mat-tab-link {
+  height: 25px !important;
+  font-size: 15px !important;
+}

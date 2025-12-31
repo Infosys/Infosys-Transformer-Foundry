@@ -1,0 +1,129 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="row" style="overflow-y: auto;" [style.height.px]="model.height" 
+[style.width.px]="model.width">
+  <ng-container *ngIf="!model.isDataLoaded">
+    <div class="loading-dots">
+      <div class="loading-dots--dot"></div>
+      <div class="loading-dots--dot"></div>
+      <div class="loading-dots--dot"></div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="model.isDataLoaded">
+    <ng-container *ngIf="model.modelsWithMetadata?.length > 0">
+      <div class="col-lg-4 card_padding" *ngFor="let modelItem of model.modelsWithMetadata">
+        <div *ngIf="!modelItem.isDeleted && modelItem.metadata?.modelDetails != undefined || null">
+          <mat-card (click)="navigateToModelDetails(modelItem)" style="cursor: pointer">
+            <mat-card-header>
+              <mat-card-title>
+                <div class="flex-container">
+                  <div class="flex-item-50 float-left">
+                    <h6 style="margin-bottom: 0px;font-weight: 600;">{{ modelItem.metadata.modelDetails.displayName }}
+                    </h6>
+                  </div>
+                  <div *ngIf="modelItem?.metadata?.modelDetails?.customTags[1]?.tags" class="flex-item-20 float-right">
+                    <span class="status-chip float-right color-Teal">
+                      {{modelItem?.metadata?.modelDetails?.customTags[1]?.tags  }}</span>
+                  </div>
+                  &nbsp;
+                  <div class="float-right">
+                    <span class="status-chip float-right" [ngClass]="getClass(modelItem.status)">
+                      {{   modelItem.status }}</span>
+                  </div>
+                </div>
+              </mat-card-title>
+              <mat-card-subtitle class=" model-license">
+                {{ modelItem?.metadata?.modelDetails?.licenses[0]?.identifier ?
+                (modelItem.metadata.modelDetails.licenses[0].identifier | titlecase) : '-' }}
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <p class=" text-3line">{{ modelItem.description }}</p>
+            </mat-card-content>
+
+            <mat-card-actions class="wrapper">
+              <div *ngIf="isProjectSelected()" style="display: flex;justify-content: space-between;">
+                <button mat-button [routerLink]="['/projects', model.projectId, 'experiments', modelItem.pipl_tmpl_id]"
+                  [queryParams]="{ rc: true, pn: model.projectName }"
+                  [disabled]="!isProjectSelected() || model.isProjectModel">
+                  Fine Tune
+                </button>
+                <button mat-button [disabled]="!isProjectSelected()"
+                  [routerLink]="['/projects', model.projectId, model.selectedModel, modelItem.id, 'deploy']"
+                  [queryParams]="{ mn:modelItem.metadata.modelDetails.displayName ,pn: model.projectName, mv: modelItem.version }"
+                  [disabled]="deployDisabled(modelItem.status)">
+                  Deploy
+                </button>
+              </div>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="model.modelsWithoutMetadata?.length > 0">
+      <div class="col-lg-4 card_padding" *ngFor="let modelItem of model.modelsWithoutMetadata">
+        <div *ngIf="!modelItem.isDeleted && modelItem.metadata?.modelDetails == undefined || null">
+          <mat-card (click)="navigateToModelDetails(modelItem)" style="cursor: pointer">
+            <mat-card-header>
+              <mat-card-title>
+                <div class="flex-container">
+                  <div class="flex-item-50 float-left">
+                    <h6 style="margin-bottom: 0px;font-weight: 600;">{{ modelItem.name }}
+                    </h6>
+                  </div>
+                  <div *ngIf="modelItem?.metadata?.modelDetails?.customTags[1]?.tags" class="flex-item-20 float-right">
+                    <span class="status-chip float-right color-Teal">
+                      {{modelItem?.metadata?.modelDetails?.customTags[1]?.tags  }}
+                    </span>
+                  </div>
+                  &nbsp;
+                  <div class="float-right">
+                    <span class="status-chip float-right" [ngClass]="getClass(modelItem.status)">
+                      {{   modelItem.status }}</span>
+                  </div>
+                </div>
+              </mat-card-title>
+              <mat-card-subtitle class=" model-license">
+                {{ modelItem?.metadata?.modelDetails?.licenses[0]?.identifier ?
+                (modelItem.metadata.modelDetails.licenses[0].identifier | titlecase) : '-' }}
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <p class=" text-3line">{{ modelItem.description }}</p>
+            </mat-card-content>
+
+            <mat-card-actions class="wrapper">
+              <div *ngIf="isProjectSelected()" style="display: flex;justify-content: space-between;">
+                <button mat-button [routerLink]="['/projects', model.projectId, 'experiments', modelItem.pipl_tmpl_id]"
+                  [queryParams]="{ rc: true, pn: model.projectName }"
+                  [disabled]="!isProjectSelected() || model.isProjectModel">
+                  Fine Tune
+                </button>
+                <button mat-button [disabled]="!isProjectSelected()"
+                  [routerLink]="['/projects', model.projectId, model.selectedModel, modelItem.id, 'deploy']"
+                  [queryParams]="{ mn:modelItem.name ,pn: model.projectName, mv: modelItem.version}">
+                  Deploy
+                </button>
+              </div>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="model.modelsWithoutMetadata?.length == 0 && model.modelsWithMetadata?.length == 0">
+      <div class="container-fluid" style="text-align: center; font-size: smaller;">
+        {{modelErrorMessage == ''? "No data found.":modelErrorMessage}}
+      </div>
+    </ng-container>
+  </ng-container>
+</div>

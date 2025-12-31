@@ -1,0 +1,52 @@
+.card_padding {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.projectId{
+  margin-left: 25px;
+  margin-top: 15px;
+  margin-bottom: -15px;
+  font-size: small;
+}
+.total-records{
+  font-size:x-small;
+  color: #737373;
+}
+.table-wrapper{
+  overflow-x: hidden;
+  overflow-y:auto;
+}
+::ng-deep .mat-tab-label {
+  font-size: 15px !important;
+  max-height: 25px !important;
+}
+
+::ng-deep .mat-paginator-navigation-next.mat-icon-button:not([disabled]),
+::ng-deep .mat-paginator-navigation-previous.mat-icon-button:not([disabled]) {
+  color: #0b50db !important;
+}
+
+/* table row */
+.tf_table_row {
+  margin-top: 35px !important;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.icon-column .only-show-on-hover {
+  visibility: hidden;
+  float: right;
+}
+.icon-column:hover .only-show-on-hover {
+  visibility: visible;
+}
+
+.mat-icon-button {
+  height: 25px;
+  line-height: 25px;
+}
+
+.app_tables tbody tr td {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}

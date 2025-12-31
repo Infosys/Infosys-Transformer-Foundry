@@ -1,0 +1,116 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+
+<div class="container" [style.max-width.px]="model.width">
+  
+  <div class="row" [style.width.px]="model.width">
+    
+    <div
+      class="col"
+      style="display: flex; justify-content: right; margin-top: 7px"
+    >
+      <button routerLink="create" [queryParams]="{ pn: model.projectName}"  class="table-wrapper" 
+       style="float: right; margin-right: 5px !important"
+        mat-flat-button
+        class="tf_button"
+        id="createBtn"
+        matTooltip="Submit RAG"
+        matTooltipPosition="above"
+      
+      >
+     Register
+      </button>
+      <!-- [queryParams]="{ pn: model.projectName}" -->
+    </div>
+  </div>
+  <div  class="row tf_table_row ">
+    <div class="col-lg-12 tf_table_col">
+      <div class="app_panel" style="padding: 8px 24px">
+        <div class="table-wrapper" [style.height.px]="model.height">
+        
+          <table class="app_tables">
+            <thead>
+                
+              <tr>
+                <th width="20%">Name</th>
+                <th width="10%">Version</th>
+                <th width="35%">Description</th>
+                <th width="20%">createdon</th>
+                <th>actions</th>
+            
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngIf="data && data.length > 0;else noData" >
+              <tr *ngFor="let item of data" (click)="logItemId(item)">
+                  <td (click)="navigateToViewDetails(item.id) "  > <a    class="hyperlink">{{ item.dataset?.name }}</a></td>  
+                <td>{{ item.dataset?.version }}</td>
+                <td>{{ item.dataset?.description}}</td>  
+                <td>{{item.createdOn| utcToLocal}}
+                  
+             <td>  <button (click)="deleteDataset(item.id, userId)" mat-icon-button
+                              matTooltip="Delete Project" matTooltipPosition="above">
+                              <span class="only-show-on-hover">
+                                <mat-icon class="material-icons action-icons"
+                                  >delete</mat-icon>
+                              </span>
+                            </button>
+                            <button  mat-icon-button (click)="navigateToUpdateDetails(item.id)" 
+                            matTooltip="Update" matTooltipPosition="above">
+                            <span class="only-show-on-hover">
+                              <mat-icon class="material-icons action-icons"
+                                >edit </mat-icon>
+                            </span>
+                          </button></td> 
+                           
+              </tr>
+             </ng-container>
+              <ng-template #noData>
+                <tr>
+                  <td colspan="5" class="text-center">No data found</td>
+                </tr>
+              </ng-template>
+              
+            </tbody>
+          </table>
+        </div>
+        <div class="flex-container pagination">
+          <mat-paginator
+            [length]="model.totalItems"
+            [pageSize]="model.pageSize"
+            [hidePageSize]="true"
+            (page)="onPageChange($event)"
+          >
+          </mat-paginator>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

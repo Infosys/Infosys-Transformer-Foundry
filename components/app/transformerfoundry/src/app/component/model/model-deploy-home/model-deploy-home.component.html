@@ -1,0 +1,32 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<ng-container> <!-- *ngIf="model.isDataLoaded" -->
+  <div class="secondary_style marT8">
+      <mat-tab-group  (selectedTabChange)="onTabChange($event)" [selectedIndex]="model.selectedTabIndex" disableRipple>
+        <mat-tab label="&#10112; Model Registration">
+          <ng-template matTabContent>
+            <app-update-model-details [height]=this.model.height [width]=this.model.width [inputUpdateModelData]="model.updateModelData" [inputModelName]=this.model.modelName [inputModelId]="model.modelId" [inputModelVersion]="model.modelVersion" [inputProjectId]="model.projectId" [inputArtifacts]="model.artifacts" (updateModeldtData)="onUpdateModelDetail($event)" (nextTab)="nextTab($event);"></app-update-model-details>
+          </ng-template>
+        </mat-tab>
+        <mat-tab label="&#10113; Endpoint Creation">
+          <ng-template matTabContent>
+            <app-model-endpoint-details [height]=this.model.height [width]=this.model.width [inputModelId]="model.modelId" [inputEndpointId]="model.endpointId" [inputModelVersion]="model.modelVersion" [inputEndpointData]="model.endpointData" [inputProjectId]="model.projectId" (nextTab)="nextTab($event);" (endpointDt)="onEndpointDetailChanges($event)" (endpointId)="onEndpointId($event)"></app-model-endpoint-details>
+          </ng-template>
+        </mat-tab>
+        <mat-tab label="&#10114; Deployment">
+          <ng-template matTabContent>
+            <app-model-deploy-details [height]="this.model.height" [width]="this.model.width" [inputEndpointId]="model.endpointId" [inputEndpointName]=this.model.endpointName [inputDeployModelData]="model.deployData" [inputModelName]=this.model.modelName [inputModelId]="model.modelId" (deployDt)="onDeployDetailChanges($event)"></app-model-deploy-details>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </ng-container>
+  

@@ -1,0 +1,12 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<app-mfe-tf-leaderboard [modelListData]="model.modelListData" [projectId]="model.pId" [userId]="model.userId" [standaloneFlag]="model.standaloneFlag" [l1RowLeaderboardEnabled]="model.l1RowLeaderboardEnabled" [l1RowBenchmarkEnabled]="model.l1RowBenchmarkEnabled" [dynamicOffset]="model.dynamicOffset" (selectedBenchmarkData)="onSelectedBenchmarkData($event)" *axLazyElement="model.leaderboardMfeUrl; errorTemplate: error"></app-mfe-tf-leaderboard>
+<ng-template #error>Loading of MFE failed...</ng-template>

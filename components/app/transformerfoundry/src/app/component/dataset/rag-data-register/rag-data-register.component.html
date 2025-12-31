@@ -1,0 +1,273 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div   class="container"  [style.max-width.px]="width">
+  <div class="row scrollable-container"  class="content" [style.width.px]="width">
+    <div class="col-md-6" style="display: flex; justify-content: right">
+      <!-- <ng-container *ngIf="!isDataLoaded"> -->
+        <ng-container *ngIf="!isDataLoaded"> 
+        <tr>
+          <td>
+            <div class="loading-dots">
+              <div class="loading-dots--dot"></div>
+              <div class="loading-dots--dot"></div>
+              <div class="loading-dots--dot"></div>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+    </div>
+    <div
+      class="col"
+      style="display: flex; justify-content: right; margin-top: 7px">
+ 
+      <button *ngIf="isCreateMode"
+        style="float: right; margin-right: 5px !important"
+        mat-flat-button
+        class="tf_button"
+        id="createBtn"
+       matTooltip="Create Endpoint"
+        matTooltipPosition="above"
+       (click)="open(confirmAction)" 
+  
+[disabled]="isViewMode" 
+     
+      >
+        Confirm
+      </button>
+      <!-- (click)="openDialog()"    -->
+      <button *ngIf="isUpdateMode" style="float: right; margin-right: 5px !important"
+      mat-flat-button
+      class="tf_button"
+      id="createBtn"
+     matTooltip="Create Endpoint"
+      matTooltipPosition="above"
+       (click)="updateDatasetService()" 
+     >Update</button>
+      <!-- [disabled]="isUpdateMode" -->
+    </div>
+  </div>
+ 
+
+  <div class="row " [style.max-width.px]="width">
+    <div class="col-lg-12" style="margin-top: 8px">
+      <div class="app_panel scrollable-container" style="padding: 16px 24px">
+        <div class="table-wrapper" [style.height.px]="height">
+          <div class="row" style="padding: 16px 24px">
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always" >
+                <mat-label>Name</mat-label> 
+                <input 
+                  
+                  matInput
+                  [(ngModel)]="model.dataset['name']"
+               
+                  required [disabled]="isViewMode || isUpdateMode"
+                />
+
+                <!-- <mat-error *ngIf="errorMessage">
+                  {{ errorMessage }}                </mat-error> -->
+                 </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Version</mat-label>
+                <input matInput [(ngModel)]="model.dataset['version']" required [disabled]="isViewMode || isUpdateMode"/>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row" style="padding: 16px 24px">
+            <div class="col-md-12">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Description</mat-label>
+                <input
+                  matInput
+                  [(ngModel)]="model.dataset['description']"
+                  required [disabled]="isViewMode"
+                />
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row" style="padding: 16px 24px">
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Scope</mat-label>
+                <mat-select [(ngModel)]="model.dataset['scope']" required [disabled]="isViewMode">
+                  <mat-option value="public">public</mat-option>
+                  <mat-option value="restricted">restricted</mat-option>
+                </mat-select>
+              
+              </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Size</mat-label>
+                <input
+                  type="number"
+                  matInput
+                  [(ngModel)]="model.dataset['size']"
+                  required [disabled]="isViewMode"
+                />
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row" style="padding: 16px 24px">
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Task</mat-label>
+                <input matInput [(ngModel)]="model.dataset['task']" required [disabled]="isViewMode"/>
+              </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Modality</mat-label>
+                <input matInput [(ngModel)]="model.dataset['modality']" required [disabled]="isViewMode" />
+              </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Language</mat-label>
+                <input matInput [(ngModel)]="model.dataset['language']" required  [disabled]="isViewMode"/>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row" style="padding: 16px 24px">
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>License</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [(ngModel)]="model.dataset['license']" [disabled]="isViewMode"
+                />
+              </mat-form-field>
+            </div>
+
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Purpose</mat-label>
+                <input matInput [(ngModel)]="model.dataset['purpose']" [disabled]="isViewMode" />
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row" style="padding: 16px 24px">
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Use Case</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [(ngModel)]="model.dataset['usecase']" [disabled]="isViewMode"
+                />
+              </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Format</mat-label>
+                <input matInput [(ngModel)]="model.dataset['format']"  [disabled]="isViewMode"/>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row" style="padding: 16px 24px; align-items: end">
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Limitation</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [(ngModel)]="model.dataset['limitation']" [disabled]="isViewMode"
+                />
+              </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field class="example-chip-list">
+                <mat-chip-list #chipList>
+                  <mat-chip
+                    *ngFor="let tag of model.dataset.tags"
+                    [selectable]="selectable"
+                    [removable]="removable"
+                    (removed)="remove(tag)"
+                    [disabled]="isViewMode"  >
+                    {{ tag }}
+                    <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+                  </mat-chip>
+                  <input
+                    placeholder="Add a Tag..."
+                    [matChipInputFor]="chipList"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                    [matChipInputAddOnBlur]="addOnBlur"
+                    (matChipInputTokenEnd)="add($event)" 
+                    />
+                </mat-chip-list>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row" style="padding: 16px 24px">
+            <div class="col-md-12">
+              <div style="margin-bottom: 24px">
+                <h5
+                  style="
+                    color: black;
+                    display: flex;
+                    justify-content: space-between;
+                  "
+                >
+                  Storage
+                </h5>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="padding: 16px 24px">
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Storage Type</mat-label>
+                <mat-select
+                  disableOptionCentering
+                  class="mat-select-dropdown"
+                  [(ngModel)]="model.dataset.dataStorage['storageType']"
+                  [disabled]="isReadOnly"
+                  required [disabled]="isViewMode"
+                >
+                  <mat-option
+                    *ngFor="let store of storage"
+                    [value]="store.value"
+                  >
+                    {{ store.viewValue }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>URI</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [(ngModel)]="model.dataset.dataStorage['uri']"
+                  required [disabled]="isViewMode"
+                />
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+  </div>
+
+</div>
+
+
+
+<ng-template #confirmAction let-modal let-c="close" let-s="confirm" let-d="dismiss">
+  <app-dialog-confirm  (close)="c('Close click');" (confirm)="saveDataset()">
+  </app-dialog-confirm>
+</ng-template>
+

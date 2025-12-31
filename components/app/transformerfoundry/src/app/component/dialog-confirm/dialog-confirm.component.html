@@ -1,0 +1,23 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="modal-header" style="display: flex;">
+  <h4 class="float-left" id="modalTitle"style="border: none;">Confirmation</h4>
+  <button class="close" aria-label="Close" (click)="onClose();" style="border: none; background: white">
+      <mat-icon style="color: black !important;">close</mat-icon>
+  </button>
+</div>
+<div class="modal-body text-center" style="border: none;">
+  <p>Are you sure you want to continue?</p>
+</div>
+<div class="modal-footer" style="float: right;"style="border: none;">
+  <button mat-flat-button class="tf_button marR24" id="confirmBtn" (click)="onConfirm();">Yes</button>
+  <button mat-flat-button class="tf_button" id="closeBtn" (click)="onClose();">No</button>
+</div>

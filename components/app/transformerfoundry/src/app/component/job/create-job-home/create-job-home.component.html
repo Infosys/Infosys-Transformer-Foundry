@@ -1,0 +1,48 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<ng-container *ngIf="!model.isDataLoaded">
+  <tr class="row" style="justify-content: center;">
+    <td>
+      <div class="loading-dots">
+        <div class="loading-dots--dot"></div>
+        <div class="loading-dots--dot"></div>
+        <div class="loading-dots--dot"></div>
+      </div>
+    </td>
+  </tr>
+</ng-container>
+<ng-container *ngIf="model.isDataLoaded">
+  <div class="secondary_style marT8">
+    <mat-tab-group (selectedTabChange)="onTabChange($event)" [selectedIndex]="model.selectedTabIndex" disableRipple>
+      <mat-tab label="&#10112; Experiment">
+        <ng-template matTabContent>
+          <app-create-job-details [isDataLoaded]="model.isDataLoaded" [isReadOnly]="model.isReadOnly"
+            [inputJobDetails]="model.jobDetails" [height]=this.model.height [width]=this.model.width
+            (jobDetails)="onJobDetails($event)"></app-create-job-details>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="&#10113; Summary">
+        <ng-template matTabContent>
+          <app-create-job-summary [inputJobDetails]="model.jobDetails" [isReadOnly]="model.isReadOnly"
+            [height]=this.model.height [width]=this.model.width [isDataLoaded]="model.isDataLoaded"
+            (pipelineId)="onCreatePipeline($event)"></app-create-job-summary>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="&#10114; Trial Runs">
+        <ng-template matTabContent>
+          <app-create-job-execution [inputJobDetails]="model.jobDetails" [inputTrialData]="model.trailData" [runName]="model.runName"
+            [height]=this.model.height [width]=this.model.width [isDataLoaded]="model.isDataLoaded"
+            [isReadOnly]="model.isReadOnly" [projectId]="model.projectId" [pipelineId]="model.jobDetails.id" [inputExperimentId]="model.experimentId"></app-create-job-execution>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</ng-container>

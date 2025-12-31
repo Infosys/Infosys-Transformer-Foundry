@@ -1,0 +1,151 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="tf-content content-left" [style.width.px]="width" style="padding-bottom: 8px;">
+  <div class="row" style="display: flex; justify-content: space-between; margin-bottom: 8px; margin-top: 8px;">
+    <div class="jobName_style">
+      <span>
+        Experiment Name : {{ inputJobDetails.name }}
+      </span>
+    </div>
+    <button mat-flat-button class="tf_button" (click)="open(docActions, normalModalConfig, false);"
+       [disabled]="!(model.isPipelineCreated && model.permissionStatus)" matTooltip="Execute Trial"
+      matTooltipPosition="above" style="margin-right: 20px;" [style.cursor]="!(model.isPipelineCreated && model.permissionStatus) ? 'not-allowed' : 'pointer'">
+      Execute
+    </button>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="app_panel" style="padding: 16px 24px 0px 24px;">
+        <div class="table-wrapper" [style.height.px]="height">
+          <table class="app_tables">
+            <thead>
+              <tr>
+                <th width="40%">Run Name</th>
+                <th width="25%">Executed On</th>
+                <th width="25%">Status
+                  <button mat-icon-button 
+                    matTooltip="Refresh table" matTooltipPosition="above" (click)="refreshExecutionDetails()"
+                    style="margin-top:-10px; min-width:20px;">
+                    <mat-icon class="action-icons">refresh</mat-icon>
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngIf="!model.isDataLoaded">
+                <tr>
+                  <td colspan="4">
+                    <div class="loading-dots">
+                      <div class="loading-dots--dot"></div>
+                      <div class="loading-dots--dot"></div>
+                      <div class="loading-dots--dot"></div>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+              <ng-container *ngIf="model.isDataLoaded && model.trialDataList?.length == 0">
+                <tr>
+                  <td colspan="4" class="text-center">
+                    {{model.message}}
+                  </td>
+                </tr>
+              </ng-container>
+              <ng-container *ngIf="model.isDataLoaded">
+                <tr *ngFor="let item of getDataForCurrentPage(); let i = index">
+                  <td title="{{item.id}}">
+                    <ng-container *ngIf="item.status == model.success">
+                      <a class="hyperlink" style="text-decoration: underline !important;" (click)="open(mlfowOpen, largeModalConfig, false, item.id)">
+                      {{item.name}}
+                      </a>
+                    </ng-container>
+                    <ng-container *ngIf="item.status !== model.success">
+                      {{item.name}}
+                    </ng-container>
+                  </td>
+                  <td>{{ item.createdOn | utcToLocal}}</td>
+                  <td [style.color]="getStatusColor(item.status)"
+                    [matTooltip]="item?.reason" matTooltipPosition="above" class="status-cls">
+                    <ng-container *ngIf="model.refreshRowId==i">
+                      <span class="loading-dots">
+                        <span class="loading-dots--dot"></span>
+                        <span class="loading-dots--dot"></span>
+                        <span class="loading-dots--dot"></span>
+                      </span>
+                    </ng-container>
+                    <ng-container *ngIf="model.refreshRowId!=i">
+                      {{ item.status }}
+                    </ng-container>
+                    <ng-container *ngIf="item.status !== model.success">
+                      <button mat-icon-button
+                        matTooltip="Refresh status" matTooltipPosition="above" (click)="refreshTrialIDStatus(item, i)">
+                        <mat-icon class="action-icons">refresh</mat-icon>
+                      </button>
+                    </ng-container>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+        <div class="flex-container pagination">
+          <mat-paginator [length]="model.totalItems" [pageSize]="model.pageSize" [hidePageSize]="true"
+            (page)="onPageChange($event)">
+          </mat-paginator>
+        </div>
+        <!-- <div class="flex-container" style="align-items: center;border-top: 1px solid #ccc;">
+          <div class="pagination flex-item-80"
+            style="display:flex; float:left; justify-content: center; margin-top: 5px; margin-bottom: 5px;">
+            <span class="marR24 marT8 goToPage">
+              <label class="pagination-label">Go to:</label>
+              <mat-form-field style="width:20px !important; margin-top:-5px">
+                <input matInput [(ngModel)]="model.pageDefault">
+              </mat-form-field>
+            </span>
+            <ngb-pagination [collectionSize]="model.totalItems" [(page)]="model.pageDefault" [maxSize]="3"
+              [pageSize]="model.pageSize" class=" d-inline-block marT4" (pageChange)="onPageChange($event)">
+              <ng-template ngbPaginationPrevious>
+                <mat-icon>keyboard_arrow_left</mat-icon>
+              </ng-template>
+              <ng-template ngbPaginationNext>
+                <mat-icon style="padding-top: inherit;">keyboard_arrow_right</mat-icon>
+              </ng-template>
+              <ng-template ngbPaginationNumber let-q>{{ q }}</ng-template>
+            </ngb-pagination>
+          </div>
+          <div class="total-records float-right" style="margin-top: -15px; justify-content: center;">
+            Total Records: {{ model.totalItems }}
+          </div>
+        </div> -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #docActions let-modal let-c="close" let-d="dismiss">
+  <app-create-job-dialog-content [inputJobDetailsData]="inputJobDetails" [trialCount]="model.totalItems" (close)="c('Close click')" (save)="refreshExecutionDetails()">
+  </app-create-job-dialog-content>
+</ng-template>
+
+<ng-template #mlfowOpen let-modal>
+  <div class="mlfflowContainer modal-body  padR16 textcenter">
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')"
+      style="margin-top: -15px;">
+      <mat-icon class="action-icons">close</mat-icon>
+    </button>
+    <div class="loading-icon" *ngIf="showLoadingIcon" [style.height.px]="25">
+      <span class="loading-dots--dot"></span>
+      <span class="loading-dots--dot"></span>
+      <span class="loading-dots--dot"></span>
+    </div>
+    <iframe [src]='model.iFrameUrl' id="iframe" (load)="showLoadingIcon=false">
+    </iframe>
+  </div>
+</ng-template>

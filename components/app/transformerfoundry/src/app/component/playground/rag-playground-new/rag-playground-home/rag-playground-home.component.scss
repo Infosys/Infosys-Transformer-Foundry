@@ -1,0 +1,329 @@
+@import "src/styles.scss";
+
+// tab styles
+.rag-playground-home {
+  font-size: 14px;
+  ::ng-deep .mat-tab-label {
+    height: 25px !important;
+    font-size: 15px !important;
+  }
+
+  ::ng-deep .mat-tab-group .mat-tab-labels {
+    display: flex; /* Ensure tabs are in a row */
+  }
+
+  ::ng-deep .mat-tab-group .mat-tab-label {
+    flex: 1; /* Allow tabs to take equal space */
+    min-width: 0; /* Prevent minimum width from causing overflow */
+  }
+  ::ng-deep .mat-tab-body {
+    padding-top: 10px;
+  }
+}
+
+.menu-panel {
+  border-right: 2px solid $primary-color;
+}
+
+.col-lg-3.metadata-panel {
+  padding-left: 2px;
+}
+
+.message {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: flex;
+}
+
+.message-content {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #e1e1e1;
+  max-width: 70%;
+  width: fit-content;
+  min-width: 30%; /* Optional: Set a minimum width if desired */
+  word-wrap: break-word; /* Ensure long words break to fit within the container */
+}
+
+.user-message {
+  justify-content: flex-end;
+}
+
+.user-message .message-content {
+  background-color: $primary-color;
+  color: white;
+}
+
+.rag-message {
+  justify-content: flex-start;
+}
+
+.message-input {
+  display: flex;
+  padding: 10px;
+  //   border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.message-input textarea {
+  flex: 1;
+  resize: none;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.message-input button {
+  flex-shrink: 0;
+  background-color: $primary-color;
+}
+
+.setup-form-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.setup-form-fields {
+  flex: 1;
+  // overflow-y: scroll;
+  max-height: 355px;
+  // max-height: 0.7vh;
+  // padding-right: 10px; /* Optional: Add some padding for better UX */
+
+  ::ng-deep .mat-form-field {
+    background: #e1dede32;
+    border-radius: 5px;
+    // font-size: 14px; /* Adjust the font size as needed */
+  }
+
+  // ::ng-deep mat-label {
+  //   font-size: 14px;
+  //   font-weight: normal;
+  // }
+
+  ::ng-deep .mat-form-field-underline {
+    display: none;
+  }
+
+  ::ng-deep .mat-select-placeholder.mat-select-min-line {
+    font-size: 14px; /* Adjust the font size as needed */
+    color: blue;
+    font-weight: bolder;
+  }
+}
+
+.fixed-footer {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-shrink: 0;
+  padding: 10px;
+  background-color: #fff; /* Optional: Add background color */
+  // margin-right: 11px;
+  // border-top: 1px solid #ccc; /* Optional: Add border for separation */
+}
+
+.dnd-area {
+  height: 50px; /* Adjust the height as needed */
+  border: 2px dashed $primary-color;
+  border-radius: 5px;
+  padding: 20px;
+  text-align: center;
+  color: $primary-color;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.disclaimer-txt {
+  font-size: xx-small;
+  color: #c84a4ab1;
+}
+
+.tf_button {
+  padding: 0px 5px !important;
+  margin-right: -5px !important;
+  margin-left: 25px;
+
+  &_secondary {
+    background: #ffffff;
+    color: #42619d;
+    border: 0.5px solid #42619d;
+    padding: 0px 5px !important;
+
+    &[disabled] {
+      background-color: #4b587477;
+      border: 0.5px solid #4b587477;
+    }
+  }
+
+  &[disabled] {
+    background-color: #4b587477;
+  }
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.5; /* Optional: to visually indicate that the div is disabled */
+}
+
+mat-label {
+  // font-weight: bold;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.vertical-radio-group mat-radio-button {
+  display: block;
+  margin-bottom: 8px; /* Optional: Add some space between the radio buttons */
+}
+.horizontal-radio-group {
+  display: flex;
+  justify-content: space-around;
+}
+
+mat-radio-button {
+  font-size: 10px;
+  padding-right: 5px;
+}
+
+.placeholder {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+  font-size: 1.2em;
+}
+
+// Slider styles.
+.mat-slider-horizontal {
+  min-width: 100%;
+  margin-top: -12px;
+  overflow-x: hidden;
+}
+
+::ng-deep .mat-accent .mat-slider-track-fill {
+  background-color: #42619d !important;
+}
+
+::ng-deep .mat-slider-thumb-label {
+  background-color: #42619d !important;
+}
+
+::ng-deep .mat-slider-thumb {
+  background-color: #42619d !important;
+}
+
+.radio-groups-container {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 0px; /* Optional: Add some space between groups */
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep .mat-radio-container {
+  height: 12px;
+  width: 12px;
+}
+:host ::ng-deep .mat-radio-outer-circle {
+  height: 12px;
+  width: 12px;
+  border-color: #42619d;
+}
+:host ::ng-deep .mat-radio-inner-circle {
+  height: 12px;
+  width: 12px;
+  border-color: #42619d;
+}
+:host ::ng-deep .mat-radio-button .mat-radio-ripple {
+  height: 20px; /*double of your required circle radius*/
+  width: 20px; /*double of your required circle radius*/
+  left: calc(50% - 10px); /*'10px'-same as your required circle radius*/
+  top: calc(50% - 10px); /*'10px'-same as your required circle radius*/
+}
+:host ::ng-deep .mat-radio-label-content {
+  padding-left: 6px;
+}
+
+::ng-deep
+  .mat-radio-button.mat-accent.mat-radio-checked
+  .mat-radio-outer-circle {
+  border-color: #42619d !important;
+}
+::ng-deep
+  .mat-radio-button.mat-accent.mat-radio-checked
+  .mat-radio-inner-circle,
+::ng-deep
+  .mat-radio-button.mat-accent.mat-radio-checked
+  .mat-radio-persistent-ripple {
+  background-color: #42619d !important;
+}
+
+.search-form-fields {
+  ::ng-deep .mat-form-field {
+    background: #e1dede32;
+    border-radius: 5px;
+  }
+
+  ::ng-deep .mat-form-field-underline {
+    display: none;
+  }
+
+  // ::ng-deep mat-label {
+  //   font-size: 14px;
+  //   font-weight: normal;
+  // }
+}
+
+.refresh-icon {
+  cursor: pointer;
+  font-size: 14px !important;
+  color: $primary-color;
+}
+
+.centered {
+  justify-content: center;
+}
+
+.mat-autocomplete-option {
+  ::ng-deep .mat-option-text {
+    font-size: 14px;
+  }
+}
+
+.success-dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 488px;
+
+  mat-icon {
+    margin-bottom: 20px;
+    font-size: 34px;
+  }
+
+  .success {
+    color: green;
+  }
+
+  .failure {
+    color: red;
+  }
+}
+
+.slider {
+  font-size: 12px;
+
+  &-label {
+    font-weight: bold;
+  }
+}

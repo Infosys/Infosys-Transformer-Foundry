@@ -1,0 +1,128 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div>
+    <!-- <div id="playground" [style.--dndflow-max-height.px]="model.height"> -->
+    <div id="playground" style="height:max-content; background: white;">
+
+        <react-app></react-app>
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  <ng-template #confirmAction let-modal let-c="close" let-s="confirm" let-d="dismiss">
+    <div class="dialog-container">
+      <h3 class="dialog-title" style="text-align: center;background-color: #4f6aa1; color: white;">Confirmation</h3>
+      <div class="dialog-body">
+        <form #dialogform="ngForm">
+             <!-- name field -->
+          <div class="row" style="padding: 16px 24px;">
+            <div class="col-md-12">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Name</mat-label>
+                <input
+                  matInput
+                  [(ngModel)]="dialogData.name"
+                  name="name"
+                  required
+                />
+              </mat-form-field>
+            </div>
+          </div>
+          <!-- Domain Field -->
+          <div class="row" style="padding: 16px 24px;">
+            <div class="col-md-12">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Domains</mat-label>
+                <input
+                  matInput
+                  [(ngModel)]="dialogData.domain"
+                  name="domain"
+                  placeholder="Enter domains separated by commas"
+                  required
+                />
+              </mat-form-field>
+            </div>
+          </div>
+       
+  
+          <!-- Category Field -->
+          <div class="row" style="padding: 16px 24px;">
+            <div class="col-md-12">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>ConversationRole</mat-label>
+                <mat-select [(ngModel)]="dialogData.conversationRole"  name="mode" required >
+                  <mat-option value="user" >User</mat-option>
+                  <mat-option value="system" >System</mat-option>
+                  <mat-option value="assistant" >Assistant</mat-option>
+                </mat-select>
+                <!-- <input
+                  matInput
+                  [(ngModel)]="dialogData.conversationRole"
+                  name="conversationRole"
+                  required
+                /> -->
+              </mat-form-field>
+            </div>
+          </div>
+  
+     
+  
+          <!-- Mode Field -->
+          <div class="row" style="padding: 16px 24px;">
+            <div class="col-md-12">
+              <mat-form-field class="standard" floatLabel="always"  >
+                <mat-label>Mode</mat-label>
+               
+                <mat-select [(ngModel)]="dialogData.mode"  name="mode" required >
+                  <mat-option value="text" >Text</mat-option>
+                  <mat-option value="chat" >Chat</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- usecase -->
+          <div class="row" style="padding: 16px 24px;">
+            <div class="col-md-12">
+              <mat-form-field class="standard" floatLabel="always">
+                <mat-label>Use Case</mat-label>
+                <input
+                  matInput
+                  [(ngModel)]="dialogData.usecase"
+                  name="usecase"
+                  required
+                />
+              </mat-form-field>
+            </div>
+          </div>
+         
+
+        </form>
+      </div>
+  
+      <!-- Footer Buttons -->
+      <div
+        class="dialog-footer"
+        style="float: right; gap: 10px; display: flex; margin-bottom: 6px; padding-right: 10px;"
+      >
+        <button class="btn btn-primary" (click)="handleConfirmSave(modal)"   [disabled]="!dialogform.valid" style="background-color: #4f6aa1; color: white; border: none; padding: 8px 16px;">OK</button>
+        <button class="btn btn-secondary" (click)="c('Close click')" style="background-color: #4f6aa1; color: white; border: none; padding: 8px 16px;">Cancel</button>
+      </div>
+    </div>
+  </ng-template>
+

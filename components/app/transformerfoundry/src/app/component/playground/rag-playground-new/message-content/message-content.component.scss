@@ -1,0 +1,70 @@
+/* chat-message.component.scss */
+.message {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: flex;
+}
+
+.message-content {
+  padding: 10px;
+  // background-color: #e1e1e186;
+  max-width: 65%;
+  width: fit-content;
+  font-size: 10px;
+  min-width: 30%; /* Optional: Set a minimum width if desired */
+  word-wrap: break-word; /* Ensure long words break to fit within the container */
+  display: flex;
+  flex-direction: column;
+}
+
+.user-message {
+  justify-content: flex-end;
+  display: flex;
+  width: 100%;
+  .message-content {
+    // background-color: #c8c8c8;
+    border-radius: 10px 10px 0px 10px;
+  }
+}
+
+.rag-message {
+  justify-content: flex-start;
+  display: flex;
+  width: 100%;
+  .message-content {
+    border-radius: 10px 10px 10px 0px;
+  }
+}
+
+.message-metadata {
+  font-size: 0.8em;
+  // color: #888;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.message-author {
+  font-weight: bold;
+  display: flex;
+  align-items: flex-start;
+  font-size: 12px;
+  mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
+
+.message-timestamp {
+}
+
+.message-text {
+  font-size: 1em;
+  display: inline;
+}
+
+.highlighted {
+  background-color: #42609d33 !important; /* Change to your desired highlight color */
+  // color: black !important; /* Change to your desired highlight color */
+}

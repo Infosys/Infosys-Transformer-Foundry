@@ -1,0 +1,51 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="container">
+  <div class="row" style="display: flex; justify-content: space-between; margin-bottom: 24px;" [style.width.px]="width">
+      <div class="pipelineId_style">
+        <span>
+          Pipeline Id : {{ model.pipelineId }}
+        </span>
+      </div>
+      <ng-container *ngIf="!model.isDataLoaded">
+        <tr>
+          <td style="padding: 5px 5px 0px 5px;">
+            <div class="loading-dots">
+              <div class="loading-dots--dot"></div>
+              <div class="loading-dots--dot"></div>
+              <div class="loading-dots--dot"></div>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+      <button mat-flat-button class="tf_button" id="createBtn" [disabled]="model.isBtnDisabled"
+        matTooltip="Create Pipeline" matTooltipPosition="above"
+        (click)="open(confirmAction,true);" [style.cursor]="model.isBtnDisabled ? 'not-allowed' : 'pointer'">
+        Create
+      </button>
+    </div>
+    <div class="card" [style.width.px]="width">
+      <!-- <ng-container *ngIf="model.isDataLoaded"> -->
+        <button id="exptButton" mat-icon-button class="highlight-button"
+          matTooltip="Export Pipeline" matTooltipPosition="above" (click)="downloadSummaryData()">
+          <span class="only-show-on-hover">
+            <mat-icon class="action-icons" style="font-size: 24px !important;">file_download</mat-icon>
+          </span>
+        </button>
+        <pre [style.height.px]="height" [style.width.px]="width">{{ model.maskedSummaryData | json }}</pre>
+      <!-- </ng-container> -->
+    </div>
+  <!-- </ng-container> -->
+</div>
+<ng-template #confirmAction let-modal let-c="close" let-s="confirm" let-d="dismiss">
+  <app-dialog-confirm [isBtnDisabled]="model.isBtnDisabled" (close)="c('Close click');" (confirm)="createPipeline()">
+  </app-dialog-confirm>
+</ng-template>

@@ -1,0 +1,433 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<!-- chat area code -->
+<div
+  class="rag-playground-home secondary_style mar8"
+  style="background-color: white"
+>
+  <ng-container class="container-fluid">
+    <div class="row" [style.height.px]="modelSetup.height">
+      <!-- side column with tabs -->
+      <div class="col-lg-3 menu-panel">
+        <mat-tab-group (selectedTabChange)="onTabChanged($event)">
+          <mat-tab label="Setup"
+            ><ng-container *ngTemplateOutlet="setupMenu"></ng-container>
+          </mat-tab>
+          <mat-tab label="Query"
+            ><ng-container *ngTemplateOutlet="searchMenu"></ng-container>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+      <!-- main column with user input -->
+      <div class="col-lg-6">
+        <!-- Chat Container -->
+        <chat-window
+          [messages]="messages"
+          [disableChat]="disableChat"
+          [waitingForAPI]="modelSearch.waitingForAPI"
+          (sendMessage)="submitSearch($event)"
+          [(selectedMessage)]="modelSearch.selectedMessage"
+          (selectedMessageChange)="handleSelectMessage($event)"
+          (clearMessages)="handleClearMessages()"
+        ></chat-window>
+      </div>
+      <!-- display the metadata information for selected message -->
+      <div class="col-lg-3 metadata-panel">
+        <message-metadata-container
+          [messageData]="modelSearch.selectedMessage"
+          [messageMetadata]="modelSearch.selectedMessageMetadata"
+        ></message-metadata-container>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+<!-- setup menu template -->
+<ng-template matTabContent #setupMenu>
+  <div class="setup-form-container">
+    <div class="setup-form-fields">
+      <mat-form-field class="standard" floatLabel="never">
+        <mat-label>Pipeline Template</mat-label>
+        <mat-select
+          required
+          [(ngModel)]="modelSetup.selectedTemplate"
+          (selectionChange)="onPipelineTemplateChange($event, 'setup')"
+        >
+          <mat-option
+            *ngFor="let template of modelSetup.templateList"
+            [value]="template"
+            >{{ template["pipeline"]["name"] }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field
+        class="standard"
+        floatLabel="never"
+        style="margin-bottom: 8px"
+      >
+        <mat-label>Index Name</mat-label>
+        <input
+          type="text"
+          matInput
+          [matAutocomplete]="auto"
+          required
+          maxlength="20"
+          pattern="^[a-zA-Z][a-zA-Z0-9_]{0,19}$"
+          #indexInput="ngModel"
+          [(ngModel)]="modelSetup.setupData.indexName"
+          (ngModelChange)="onIndexNameChange($event)"
+        />
+        <mat-autocomplete
+          #auto="matAutocomplete"
+          (optionSelected)="onOptionSelected($event)"
+        >
+          <mat-option
+            class="mat-autocomplete-option"
+            style="font-size: 14px !important"
+            disabled
+            *ngIf="isEmptyObject(modelSetup.selectedTemplate)"
+          >
+            Please select a pipeline template.
+          </mat-option>
+          <mat-option
+            disabled
+            *ngIf="
+              !isEmptyObject(modelSetup.selectedTemplate) &&
+              modelSetup.indexList.length == 0
+            "
+          >
+            Please enter a new index.
+          </mat-option>
+          <mat-option
+            *ngFor="let index of modelSetup.indexList"
+            [value]="index"
+          >
+            {{ index.indexName }}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error
+          *ngIf="indexInput.invalid && (indexInput.dirty || indexInput.touched)"
+        >
+          Please enter a valid index name.
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="standard" floatLabel="never">
+        <mat-label>Embedding Model</mat-label>
+        <mat-select
+          required
+          [(ngModel)]="modelSetup.setupData.embeddingModelName"
+        >
+          <mat-option
+            *ngFor="let embedding of embedModelList"
+            [value]="embedding.value"
+            >{{ embedding.view }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+      <h6>Chunking Strategy</h6>
+      <div class="radio-groups-container">
+        <div class="radio-group">
+          <mat-radio-group
+            class="vertical-radio-group"
+            [(ngModel)]="chunkingStrategy"
+            (change)="onChunkingStrategyChange($event)"
+          >
+            <mat-radio-button
+              *ngFor="let option of chunkOptions"
+              [value]="option.value"
+            >
+              {{ option.view }}
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+        <div class="radio-group" *ngIf="chunkingStrategy === 'segment'">
+          <mat-radio-group
+            class="vertical-radio-group"
+            [(ngModel)]="pageSegment"
+            (change)="onPageSegmentChange($event)"
+          >
+            <mat-radio-button
+              *ngFor="let option of pageOptions"
+              [value]="option.value"
+            >
+              {{ option.view }}
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+        <div class="radio-group" *ngIf="chunkingStrategy === 'page-segment'">
+          <mat-form-field class="standard" floatLabel="never">
+            <input
+              matInput
+              type="number"
+              placeholder="no. of chars"
+              required
+              autocomplete="off"
+              (change)="onCharLimitChange($event)"
+            />
+          </mat-form-field>
+        </div>
+        <div
+          class="radio-group"
+          *ngIf="chunkingStrategy === 'segment' && pageSegment === 'multiCol'"
+        >
+          <mat-radio-group
+            class="vertical-radio-group"
+            (change)="onPageSubSegmentChange($event)"
+          >
+            <mat-radio-button
+              *ngFor="let suboption of subPageOptions"
+              [value]="suboption.value"
+            >
+              {{ suboption.view }}
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+      <span class="disclaimer-txt">
+        <mat-icon class="warning-icon">warning</mat-icon>
+        Disclaimer: Files uploaded here are visible to other users. Please do
+        not upload any sensitive or personal information.
+      </span>
+      <!-- this is the code for file upload -->
+      <div
+        class="dnd-area"
+        (click)="fileDropRef.click()"
+        (drop)="onFileDrop($event)"
+        (dragover)="onDragOver($event)"
+      >
+        <input
+          type="file"
+          #fileDropRef
+          id="fileDropRef"
+          style="display: none"
+          accept=".pdf,.doc,.docx,.txt"
+          (change)="onFileSelected($event.target.files)"
+        />
+        <ng-container
+          *ngIf="modelSetup.uploadedFile === null; else showFileName"
+        >
+          Drag and drop files here
+          <!-- <mat-icon>upload</mat-icon> -->
+        </ng-container>
+        <ng-template #showFileName>
+          {{ modelSetup.uploadedFile.name }}
+        </ng-template>
+      </div>
+    </div>
+    <div class="fixed-footer">
+      <button
+        mat-flat-button
+        class="tf_button"
+        type="Submit"
+        [disabled]="false"
+        (click)="submitSetup()"
+      >
+        Submit
+      </button>
+      <button
+        mat-flat-button
+        class="tf_button_secondary"
+        [disabled]="modelSetup.indexId === null"
+        (click)="deleteIndex()"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- search menu template -->
+<ng-template matTabContent #searchMenu>
+  <div class="search-form-fields">
+    <mat-form-field class="standard" floatLabel="never">
+      <mat-label>Pipeline Template</mat-label>
+      <mat-select
+        required
+        [(ngModel)]="modelQuery.selectedTemplate"
+        (selectionChange)="onPipelineTemplateChange($event, 'query')"
+      >
+        <mat-option
+          *ngFor="let template of modelSetup.templateList"
+          [value]="template"
+          >{{ template["pipeline"]["name"] }}</mat-option
+        >
+      </mat-select>
+    </mat-form-field>
+    <h6>Select query type</h6>
+    <mat-radio-group
+      class="horizontal-radio-group"
+      [(ngModel)]="modelQuery.queryType"
+      [disabled]="isEmptyObject(modelQuery.selectedTemplate)"
+      style="justify-content: flex-start; gap: 30px"
+      (change)="onQueryTypeChange($event)"
+    >
+      <mat-radio-button
+        *ngFor="let query of queryTypeOptions"
+        [value]="query.value"
+      >
+        {{ query.view }}
+      </mat-radio-button>
+    </mat-radio-group>
+    <ng-container *ngIf="modelQuery.queryType === 'search'">
+      <mat-form-field class="standard" floatLabel="never">
+        <mat-label>Select an Index</mat-label>
+        <mat-select
+          disableOptionCentering
+          required
+          [(ngModel)]="modelSearch.searchData.retrieval.index_id"
+          #indexInputSearch="ngModel"
+        >
+          <mat-option
+            *ngIf="
+              isEmptyObject(modelQuery.selectedTemplate) ||
+              !modelSearch.indexList
+            "
+            disabled
+          >
+            Please select a template first
+          </mat-option>
+          <mat-option
+            *ngFor="let index of modelSearch.indexList"
+            [value]="index.indexId"
+          >
+            {{ index.indexName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <h6>Index Type</h6>
+      <mat-radio-group
+        [(ngModel)]="modelSearch.selectedIndex"
+        class="horizontal-radio-group"
+        (change)="onSearchTypeChange($event)"
+      >
+        <mat-radio-button
+          *ngFor="let option of indexOptions"
+          [value]="option.value"
+        >
+          {{ option.view }}
+        </mat-radio-button>
+      </mat-radio-group>
+      <h6>Generation Model</h6>
+      <mat-form-field class="standard" floatLabel="never">
+        <mat-label>Select a Model</mat-label>
+        <mat-select required [(ngModel)]="modelSearch.generationModel">
+          <mat-option
+            *ngFor="let template of modelList"
+            value="template.value"
+            >{{ template.view }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+      <span class="slider">
+        <span class="slider-label"> temprature:</span>
+        {{ modelSearch.searchData.generation.temperature }}
+        <mat-slider
+          [max]="1"
+          [min]="0"
+          [step]="0.01"
+          [thumbLabel]="false"
+          [(ngModel)]="modelSearch.searchData.generation.temperature"
+          (input)="modelSearch.searchData.generation.temperature = $event.value"
+        >
+        </mat-slider>
+      </span>
+      <!-- <span class="slider">
+        top_k: {{ modelSearch.searchData.retrieval.top_k }}
+        <mat-slider
+          [max]="20"
+          [min]="1"
+          [step]="1"
+          [thumbLabel]="false"
+          [(ngModel)]=" modelSearch.searchData.retrieval.top_k"
+          (input)=" modelSearch.searchData.retrieval.top_k = $event.value"
+        >
+        </mat-slider>
+      </span> -->
+      <span class="slider">
+        <span class="slider-label">top_k: </span
+        >{{ modelSearch.searchData.generation.top_k_used }}
+        <mat-slider
+          [max]="100"
+          [min]="1"
+          [step]="1"
+          [thumbLabel]="false"
+          [(ngModel)]="modelSearch.searchData.generation.top_k_used"
+          (input)="modelSearch.searchData.generation.top_k_used = $event.value"
+        >
+        </mat-slider>
+      </span>
+    </ng-container>
+    <ng-container *ngIf="modelQuery.queryType === 'status'">
+      <div *ngIf="modelSearch.loading">
+        <span
+          class="spinner-border spinner-border-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+      </div>
+      <mat-form-field
+        *ngIf="!modelSearch.loading"
+        class="standard"
+        floatLabel="never"
+      >
+        <mat-label>Select an Index</mat-label>
+        <mat-select
+          disableOptionCentering
+          required
+          [(ngModel)]="modelQuery.indexItem"
+          [displayWith]="displayIndex"
+        >
+          <mat-option
+            *ngIf="
+              isEmptyObject(modelQuery.selectedTemplate) ||
+              !modelSearch.indexList
+            "
+            disabled
+          >
+            Please select a template first
+          </mat-option>
+          <mat-option
+            *ngFor="let index of modelQuery.indexList"
+            [value]="index"
+          >
+            {{ index.indexName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <h6>Status</h6>
+      {{ modelQuery.indexItem?.status ?? "Select an index" }}
+      <mat-icon
+        class="refresh-icon"
+        *ngIf="
+          modelQuery.indexItem && modelQuery.indexItem?.status == 'Inprogress'
+        "
+        (click)="refreshIndexStatus()"
+      >
+        refresh
+      </mat-icon>
+    </ng-container>
+
+    <ng-template #messageDialog let-data>
+      <!-- <h1 mat-dialog-title><mat-icon style="color: green; ">check_circle_outlined</mat-icon></h1> -->
+      <div mat-dialog-content class="success-dialog">
+        <mat-icon [ngClass]="data.success ? 'success' : 'failure'">
+          {{ data.success ? "check_circle_outlined" : "error_outlined" }}
+        </mat-icon>
+        <p>{{ data.message }}</p>
+      </div>
+      <div mat-dialog-actions style="justify-content: flex-end">
+        <button mat-button class="tf_button centered" (click)="closeDialog()">
+          Close
+        </button>
+      </div>
+    </ng-template>
+  </div></ng-template
+>

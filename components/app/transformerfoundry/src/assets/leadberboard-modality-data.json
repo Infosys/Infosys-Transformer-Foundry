@@ -1,0 +1,28 @@
+{
+  "leaderboard":[
+  {
+    "modelName":"Codegen-2B-multi",
+    "modality":"code"
+  },
+  {
+    "modelName":"Codegen-2B-multi-FT",
+    "modality":"code"
+  },
+  {
+    "modelName":"CodeLlama-7B",
+    "modality":"text"
+  },
+  {
+    "modelName":"Whisper-m",
+    "modality":"text"
+  },
+  {
+    "modelName":"Llama-2-7b-chat-hf ",
+    "modality":"text"
+  },
+  {
+    "modelName":"Starcoderbase-15B",
+    "modality":"code"
+  }
+]
+}

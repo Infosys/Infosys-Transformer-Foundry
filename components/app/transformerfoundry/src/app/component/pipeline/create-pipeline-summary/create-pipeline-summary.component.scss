@@ -1,0 +1,39 @@
+.card {
+  background-color: #f2f2f2;
+  border-radius: 5px;
+  margin-top: -18px;
+}
+pre {
+  margin-bottom: 0px;
+  // overflow-x: hidden;
+}
+.container{
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-right: 0px;
+  margin-left: 0px;
+  padding-right: 0px;
+}
+.pipelineId_style{
+  font-size: small;
+  margin-top: 5px;
+  margin-left: 25px;
+  margin-bottom: 5px;
+}
+#createBtn{
+  height: auto;
+}
+#exptButton{
+  height: fit-content;
+  position:absolute;
+  top:0;
+  right:20px;
+  float: right;
+}
+div span.only-show-on-hover {
+  visibility: hidden;
+  float: right;
+}
+div:hover span.only-show-on-hover {
+  visibility: visible;
+}

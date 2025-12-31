@@ -1,0 +1,37 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div
+  [ngClass]="{
+    'message user-message': messageData.role === 'user',
+    'message rag-message': messageData.role === 'rag'
+  }"
+>
+  <span class="message-author">
+    <mat-icon>
+      {{ messageData.role == "user" ? "person" : "bubble_chart" }}
+    </mat-icon>
+  </span>
+  <div
+    class="message-content"
+    [ngClass]="{
+      highlighted: selectedState
+    }"
+  >
+    <div class="message-text">
+      {{ messageData.content }}
+    </div>
+    <div class="message-metadata">
+      <span class="message-timestamp">
+        {{ messageData.timestamp | date : "shortTime" }}
+      </span>
+    </div>
+  </div>
+</div>

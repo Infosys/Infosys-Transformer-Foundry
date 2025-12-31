@@ -1,0 +1,12 @@
+.mat-tab-body-content {
+    overflow: hidden;
+}
+::ng-deep.mat-tab-label{
+    font-size: 15px !important;
+    max-height: 25px !important;
+}
+::ng-deep.secondary_style .mat-tab-label,
+.secondary_style .mat-tab-link {
+  height: 25px !important;
+  font-size: 15px !important;
+}

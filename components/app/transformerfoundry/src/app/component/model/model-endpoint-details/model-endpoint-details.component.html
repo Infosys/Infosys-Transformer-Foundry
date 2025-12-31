@@ -1,0 +1,87 @@
+
+<!--
+ ================================================================================================================
+ # ===============================================================================================================
+ # Copyright 2025 Infosys Ltd.
+ # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at
+ # http://www.apache.org/licenses/
+ # ===============================================================================================================
+ ================================================================================================================
+-->
+<div class="container" [style.max-width.px]="width">
+  <div class="row" [style.width.px]="width">
+    <div class="col-md-6" style="display: flex;justify-content: right;">
+        <ng-container *ngIf="!model.isDataLoaded">
+            <tr>
+                <td>
+                    <div class="loading-dots">
+                        <div class="loading-dots--dot"></div>
+                        <div class="loading-dots--dot"></div>
+                        <div class="loading-dots--dot"></div>
+                    </div>
+                </td>
+            </tr>
+        </ng-container>
+    </div>
+    <div class="col" style="display: flex; justify-content: right; margin-top: 7px;">
+      <button style="float: right; margin-right: 5px !important;" mat-flat-button class="tf_button" id="createBtn"
+         matTooltip="Create Endpoint" matTooltipPosition="above" (click)="open(confirmAction)"
+        [disabled]="model.isBtnDisabled">
+        Save
+      </button>
+      <button style="float: right;" mat-flat-button class="tf_button" id="createBtn"
+         matTooltip="Next Tab" matTooltipPosition="above" (click)="nextTab.emit(2)">
+        Next
+      </button>
+    </div>
+  </div>
+  <div class="row" [style.max-width.px]="width">
+    <div class="col-lg-12" style="margin-top: 8px">
+      <div class="app_panel" style="padding: 16px 24px;">
+        <div class="table-wrapper" [style.height.px]="height">
+          <div class="row" style="padding: 16px 24px;">
+              <div class="col-md-6">
+                <mat-form-field class="standard" floatLabel="always">
+                  <mat-label>Endpoint Name</mat-label>
+                  <input type="text" matInput [matAutocomplete]="auto" [ngModel]="model.endpointData.name"
+                    (ngModelChange)="getEndpoint($event)"#myEndpointName="ngModel" required>
+                  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="getEndpoint($event.option); model.endpointData.contextUri = $event.option.id.contextUri">
+                      <mat-option *ngFor="let option of model.endpointList" [value]="option.name" [id]="option">
+                          {{option.name}}
+                      </mat-option>
+                  </mat-autocomplete>
+                  <!-- <input type="text" placeholder="" matInput [matAutocomplete]="auto" [(ngModel)]="model.endpointData.name"
+                    (ngModelChange)="getEndpoint($event.id)" [ngModelOptions]="{ updateOn: 'blur' }" #myEndpointName="ngModel" required>
+                  <mat-autocomplete #auto="matAutocomplete">
+                    <mat-option *ngFor="let option of model.endpointList" [value]="option.name" (ngModelChange)="getEndpoint(option.id)">
+                      {{option.name}}
+                    </mat-option>
+                  </mat-autocomplete> -->
+                </mat-form-field>
+                <div *ngIf="myEndpointName.invalid && myEndpointName.errors.required" class="err-msg-div">
+                  <mat-error>Mandatory field</mat-error>
+                </div>
+              </div>
+              <!---contextUri--->
+              <div class="col-md-6">
+                <mat-form-field class="standard" floatLabel="always">
+                  <mat-label>Context URI</mat-label>
+                  <input matInput value="{{ model.endpointData.contextUri }}"
+                    [(ngModel)]="model.endpointData.contextUri" (ngModelChange)="model.endpointData.contextUri = $event" required #myContextUri="ngModel" [disabled]="disableContextUri()"/>
+                </mat-form-field>
+                <div *ngIf="myContextUri.invalid && myContextUri.errors.required" class="err-msg-div">
+                  <mat-error>Mandatory field</mat-error>
+                </div>
+              </div>
+            </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #confirmAction let-modal let-c="close" let-s="confirm" let-d="dismiss">
+  <app-dialog-confirm (close)="c('Close click');" (confirm)="createEndpoint()">
+  </app-dialog-confirm>
+</ng-template>
