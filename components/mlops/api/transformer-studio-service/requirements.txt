@@ -1,0 +1,17 @@
+#[dev-packages]
+pytest==7.3.1
+pytest-cov==2.12.1
+autopep8==1.5.1
+pylint==2.4.4
+
+
+#[packages]
+uvicorn==0.20.0
+fastapi==0.88.0
+python-multipart==0.0.6
+aiofiles==23.1.0
+pymongo==4.3.3
+python-dotenv==1.0.0
+requests==2.31.0
+# above requests has latest version of urllib and it failes in unix server. hence downgrading it.
+urllib3==1.26.7

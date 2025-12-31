@@ -1,0 +1,230 @@
+{
+    "accessLevelCdeRelTemp": {
+        "hidden": 0,
+        "disabled": 1,
+        "na": 2,
+        "enabled": 3
+    },
+    "roleTypeCodeRelTemp": {
+        "ADMIN": 101,
+        "AGENT": 102
+    },
+    "appRoleBasedAccessControlMapping": [
+        {
+            "featureId": "project-create",
+            "featureDescription": "Create new project",
+            "permissions": [
+                {
+                    "roleTypeCde": 101,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 102,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 103,
+                    "accessLevelCde": 3
+                }
+            ]
+        },
+        {
+            "featureId": "project-delete",
+            "featureDescription": "Delet existing project",
+            "permissions": [
+                {
+                    "roleTypeCde": 101,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 102,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 103,
+                    "accessLevelCde": 1
+                }
+            ]
+        },
+        {
+            "featureId": "project-list",
+            "featureDescription": "List all projects",
+            "permissions": [
+                {
+                    "roleTypeCde": 101,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 102,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 103,
+                    "accessLevelCde": 1
+                }
+            ]
+        },
+        {
+            "featureId": "project-view",
+            "featureDescription": "View project",
+            "permissions": [
+                {
+                    "roleTypeCde": 101,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 102,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 103,
+                    "accessLevelCde": 1
+                }
+            ]
+        },
+        {
+            "featureId": "pipeline-create",
+            "featureDescription": "Create new pipeline",
+            "permissions": [
+                {
+                    "roleTypeCde": 101,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 102,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 103,
+                    "accessLevelCde": 1
+                }
+            ]
+        },
+        {
+            "featureId": "pipeline-execute",
+            "featureDescription": "Execute pipeline",
+            "permissions": [
+                {
+                    "roleTypeCde": 101,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 102,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 103,
+                    "accessLevelCde": 1
+                }
+            ]
+        },
+        {
+            "featureId": "pipeline-list",
+            "featureDescription": "List all pipeline",
+            "permissions": [
+                {
+                    "roleTypeCde": 101,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 102,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 103,
+                    "accessLevelCde": 1
+                }
+            ]
+        },
+        {
+            "featureId": "pipeline-view",
+            "featureDescription": "View pipeline",
+            "permissions": [
+                {
+                    "roleTypeCde": 101,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 102,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 103,
+                    "accessLevelCde": 1
+                }
+            ]
+        },
+        {
+            "featureId": "model-deploy",
+            "featureDescription": "Deploy models to project",
+            "permissions": [
+                {
+                    "roleTypeCde": 101,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 102,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 103,
+                    "accessLevelCde": 1
+                }
+            ]
+        },
+        {
+            "featureId": "model-list",
+            "featureDescription": "List models in the project",
+            "permissions": [
+                {
+                    "roleTypeCde": 101,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 102,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 103,
+                    "accessLevelCde": 1
+                }
+            ]
+        },
+        {
+            "featureId": "model-view",
+            "featureDescription": "View models in the project",
+            "permissions": [
+                {
+                    "roleTypeCde": 101,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 102,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 103,
+                    "accessLevelCde": 1
+                }
+            ]
+        },
+        {
+            "featureId": "model-create",
+            "featureDescription": "Create models in the project",
+            "permissions": [
+                {
+                    "roleTypeCde": 101,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 102,
+                    "accessLevelCde": 3
+                },
+                {
+                    "roleTypeCde": 103,
+                    "accessLevelCde": 1
+                }
+            ]
+        }
+    ]
+}
