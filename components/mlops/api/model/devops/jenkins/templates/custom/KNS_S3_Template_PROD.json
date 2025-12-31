@@ -1,0 +1,162 @@
+# ===============================================================================================================#
+# Copyright 2024 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+{
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": {
+      "name": "",
+      "annotations": {
+        "autoscaling.knative.dev/class": "kpa.autoscaling.knative.dev",
+        "autoscaling.knative.dev/metric": "concurrency",
+        "autoscaling.knative.dev/minScale": "0",
+        "autoscaling.knative.dev/maxScale": "1",
+        "autoscaling.knative.dev/target": "1"
+      },
+      "labels": {
+        "app": "",
+        "version": "",
+        "project-id": "",
+        "user": ""
+      }
+    },
+    "spec": {
+      "replicas": 1,
+      "selector": {
+        "matchLabels": {
+          "app": "",
+          "version": ""
+        }
+      },
+      "template": {
+        "metadata": {
+          "annotations": {
+            "autoscaling.knative.dev/class": "kpa.autoscaling.knative.dev",
+            "autoscaling.knative.dev/metric": "concurrency",
+            "autoscaling.knative.dev/minScale": "0",
+            "autoscaling.knative.dev/maxScale": "1",
+            "autoscaling.knative.dev/target": "1"
+          },
+          "labels": {
+			      "app": "",
+            "version": ""
+          }
+        },
+        "spec": {
+          "initContainers": [
+            {
+              "args": [],
+              "env": [
+                {
+                  "name": "AWS_ACCESS_KEY_ID",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "awsAccessKeyID",
+                      "name": "minio-secret-1"
+                    }
+                  }
+                },
+                {
+                  "name": "AWS_SECRET_ACCESS_KEY",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "awsSecretAccessKey",
+                      "name": "minio-secret-1"
+                    }
+                  }
+                }
+              ],
+              "envFrom": [
+                {
+                  "configMapRef": {
+                    "name": "minio-configuration"
+                  }
+                }
+              ],
+              "image": "${STORAGE_INITIALIZER_IMAGE}",
+              "imagePullPolicy": "IfNotPresent",
+              "name": "storage-initializer",
+              "resources": {
+                "limits": {
+                  "cpu": "1",
+                  "memory": "1Gi"
+                },
+                "requests": {
+                  "cpu": "100m",
+                  "memory": "100Mi"
+                }
+              },
+              "volumeMounts": [
+                {
+                  "mountPath": "",
+                  "name": "storage-vol"
+                },
+                {
+                  "mountPath": "/dev/shm",
+                  "name": "dshm"
+                }
+              ]
+            }
+          ],
+          "containers": [
+            {
+              "image": "",
+              "name": "",
+              "env": [
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "ports": [],
+              "securityContext": {
+                "runAsUser": 0,
+                "privileged": true
+              },
+			        "command": [],
+			        "args": [],
+              "livenessProbe": {
+                "httpGet": {
+                  "path": "",
+                  "port": 0
+                }
+              },
+              "readinessProbe": {
+                "httpGet": {
+                  "path": "",
+                  "port": 0
+                }
+              },
+              "resources": {
+              },
+			        "volumeMounts": [
+                {
+                  "mountPath": "AICLOUD_MODEL_BASE_PATH/MODEL_NAME/MODEL_VERSION",
+                  "name": "storage-vol"
+                },
+                {
+                  "mountPath": "/dev/shm",
+                  "name": "dshm"
+                }
+              ]
+            }
+          ],
+          "volumes": [
+            {
+              "emptyDir": {},
+              "name": "storage-vol"
+            },
+            {
+              "emptyDir": {
+                "medium": "Memory"
+              },
+              "name": "dshm"
+            }
+          ]
+        }
+      }
+    }
+}

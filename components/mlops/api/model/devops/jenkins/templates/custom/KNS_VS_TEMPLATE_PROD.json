@@ -1,0 +1,49 @@
+# ===============================================================================================================#
+# Copyright 2024 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+{
+    "apiVersion": "networking.istio.io/v1alpha3",
+    "kind": "VirtualService",
+    "metadata": {
+      "name": "",
+	  "labels": {
+        "app": ""
+      }
+    },
+    "spec": {
+      "hosts": [
+        "*"
+      ],
+      "gateways": [
+        "mmsapp/api-gateway"
+      ],
+      "http": [
+        {
+          "match": [
+            {
+              "uri": {
+                "prefix": ""
+              }
+            }
+          ],
+          "rewrite": {
+            "uri": ""
+          },
+          "route": [
+            {
+              "destination": {
+                "host": "",
+                "subset": "",
+                "port": {
+                  "number": ""
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+}

@@ -70,6 +70,7 @@ class CustomLogger(logging.getLoggerClass()):
         if log_dir:
             self.add_file_handler(name, log_dir)
 
+    # Add a file handler for this logger with the specified name
     def add_file_handler(self, name, log_dir):
         """Add a file handler for this logger with the specified `name` (and store the log file
         under `log_dir`)."""
@@ -98,37 +99,45 @@ class CustomLogger(logging.getLoggerClass()):
         self.file_handler.setFormatter(formatter)
         self.addHandler(self.file_handler)
 
+    #Function to check if console handler is present
     def has_console_handler(self):
         return len([h for h in self.handlers if type(h) == logging.StreamHandler]) > 0
 
+    # Function to check if file handler is present
     def has_file_handler(self):
         return len([h for h in self.handlers if isinstance(h, logging.FileHandler)]) > 0
 
+    # Function to disable/enable console and file output
     def disable_console_output(self):
         if not self.has_console_handler():
             return
         self.removeHandler(self.stdout_handler)
 
+    # Function to enable/disable file output
     def enable_console_output(self):
         if self.has_console_handler():
             return
         self.addHandler(self.stdout_handler)
 
+    # Function to disable file output
     def disable_file_output(self):
         if not self.has_file_handler():
             return
         self.removeHandler(self.file_handler)
 
+    # Function to enable file output
     def enable_file_output(self):
         if self.has_file_handler():
             return
         self.addHandler(self.file_handler)
 
+    # Custom logging method for the FRAMEWORK level
     def framework(self, msg, *args, **kwargs):
         """Logging method for the FRAMEWORK level. The `msg` gets logged both to stdout and to file
         (if a file handler is present), irrespective of verbosity settings."""
         return super().info(msg, *args, **kwargs)
 
+    # Helper method for logging DEBUG through CRITICAL messages by calling the appropriate `func()` from the base class.
     def _custom_log(self, func, msg, *args, **kwargs):
         """Helper method for logging DEBUG through CRITICAL messages by calling the appropriate
         `func()` from the base class."""

@@ -1,0 +1,79 @@
+# ===============================================================================================================#
+# Copyright 2025 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+name: COMPONENT_NAME 
+description: |
+  Run COMPONENT_NAME.
+  
+inputs:
+- {name: filename, type: str, default: '{}', description: 'python file name to execute.'}
+- {name: Parameters, type: JsonObject, default: '{}', description: 'Map with python paramater values.'}
+- {name: Log path, type: str, default: '{}', description: 'python log file name to write logs.'}
+- {name: rgex, type: str, default: '{}', description: 'regex for metrics.'}
+- {name: metricname, type: str, default: '{}', description: 'mericname.'}
+- {name: run id, type: str, default: '{}', description: 'run id.'}
+- {name: Packages to install, optional: true, type: JsonArray, default: '', description: 'Python packages to install'}
+- {name: Input data, optional: true, description: 'Optional data that can be passed to python. '}
+outputs:
+- {name: Output data, description: 'Directory with any output data. '}
+
+implementation:
+  container:
+    image: COMPONENT_BASE_IMAGE
+    command:
+    - sh
+    - -exc
+    - |
+      input_python_file="$0"
+      arguments="$1"
+      log_path="$2"
+      regex="$3"
+      metricname="$4"
+      run_id="$5"
+      packages_to_install="$6"
+      input_data_path="$7"
+      output_data_path="$8"
+      output_data_path='/tmp/outputs/Output_data/data'
+      file=$(basename $log_path)
+      logdir=$(dirname $log_path)
+      mkdir -p "$output_data_path"
+      mkdir -p "$logdir"
+      mkdir -p "/tmp/mlogs/"
+      echo "$5"
+      echo "$2"
+      inputArtifacts="S3_INPUT_ARTIFACTS"
+      outputArtifacts="S3_OUTPUT_ARTIFACTS"
+      sh -c "python3 -m pip install --upgrade --quiet pytest-shutil zipfile38 minio boto3 botocore --no-cache"
+      sh -c "python3 /s3util/minioUtility.py download 's3://BUCKET_NAME/utility/pipelinemetrics.py' './pipelinemetrics.py'"
+      [ $inputArtifacts != "NA" ] && python3 /s3util/minioUtility.py download $inputArtifacts './' || echo "NOT ABLE TO DOWNLOAD ARTIFACTS"
+      dependancyFile="NA"
+      [ $dependancyFile != "NA" ] && python3 -m pip install --upgrade --quiet -r $dependancyFile --no-cache || echo "DEPENDANCY FILE NOT FOUND"
+     
+      # Running the python       
+      ls -ltr /app
+      sh -c "python3 $input_python_file $arguments"  
+      sh -c "ls -ltr /tmp/"
+      sh -c "ls -ltr $logdir"
+      [ $outputArtifacts != "NA" ] && python3 /s3util/minioUtility.py upload 's3://BUCKET_NAME/PROJECT_ID/PIPELINEID/RUNID/artifacts' $log_path || echo "NOT ABLE TO UPLOAD ARTIFACTS"
+      [ $outputArtifacts != "NA" ] && python3 /s3util/minioUtility.py upload 's3://BUCKET_NAME/PROJECT_ID/PIPELINEID/RUNID/artifacts' $outputArtifacts || echo "NOT ABLE TO UPLOAD ARTIFACTS"
+
+      sh -c "python3 pipelinemetrics.py --run_id $run_id --logs_path $log_path --metricname $metricname --regex \"$regex\" --keyval train --deployEnv DEPLOYENVIRONMENT"
+      
+    - {inputValue: filename}
+    - {inputValue: Parameters}
+    - {inputValue: Log path}
+    - {inputValue: rgex}
+    - {inputValue: metricname}
+    - {inputValue: run id}
+    - if:
+        cond: {isPresent: Packages to install}
+        then: [{inputValue: Packages to install}]
+        else: ""
+    - if:
+        cond: {isPresent: Input data}
+        then: [{inputPath: Input data}]
+        else: ""
+    - {outputPath: Output data}

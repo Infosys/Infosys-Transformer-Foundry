@@ -1,0 +1,251 @@
+# ===============================================================================================================#
+# Copyright 2024 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+import groovy.json.JsonOutput
+import groovy.json.*
+
+pipeline {
+    agent any
+
+    environment {
+        props = load '/var/lib/jenkins_scripts/Prod/mlops_env.properties';
+        transformerImageName = ''
+        PREDICTION_URL = 'none'
+        errMsg = ''
+        errorInfo = ''
+    }
+
+    parameters{
+        string(name: 'jobId', defaultValue: '', description: '')
+        string(name: 'modelName', defaultValue: '', description: '')
+        string(name: 'modelVersion', defaultValue: '', description: '')
+        string(name: 'deployFramework', defaultValue: '', description: '')
+        string(name: 'deployEnv', defaultValue: '', description: '')
+        string(name: 'projectId', defaultValue: '', description: '')
+    }
+
+    stages {
+        stage('Loading Environment Variables') {
+            steps {
+                script {
+                    try {
+                        env.BIN_PATH = "$BIN_PATH"
+                        env.WORKSPACE_PATH = "$WORKSPACE_PATH"
+                        env.JENKINS_URL = "$JENKINS_URL"
+
+                        switch (deployEnv) {
+                            case 'PRODUCTION':
+                                env.KUBE_CONFIG = "$KUBE_CONFIG_BCMPROD"
+                                env.RETURN_URL = "$DELETEDEPLOY_PROD_RETURN_URL"
+                                env.COOKIE_URL="$COOKIE_URL_PROD"
+                                env.GET_PIPELINE_INPUT_DET="$PROD_AICLD_GET_PIPELINE_INPUT_DET_URL"
+                                break
+                            case 'DEVELOPMENT':
+                                env.KUBE_CONFIG = "$KUBE_CONFIG_DEV"
+                                env.RETURN_URL = "$DELETEDEPLOY_DEV_RETURN_URL"
+                                break
+                            default:
+                                env.KUBE_CONFIG = "$KUBE_CONFIG_BCMPROD"
+                                env.RETURN_URL = "$DELETEDEPLOY_DEV_RETURN_URL"
+                        }
+                    }
+                    catch(err) {
+                        jenkinsConsole = "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                        errorInfo = "Knative Serving Model Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}. Please Check with administrator "
+                        echo "$errorInfo"
+                        throw err
+                    }
+                }
+            }
+        }
+
+        stage('Get Input Details') {
+        steps {
+            script {
+                try {
+                /* Invoke the Utility service */
+                    input = sh(returnStdout: true, script:'''curl --request GET --url $GET_PIPELINE_INPUT_DET/$jobId''')
+                /* Parsing JSON */
+                    print input
+                    def jsonSlurper = new JsonSlurperClassic()
+                    def requestJson = jsonSlurper.parseText(input)
+                    env.tenant_name = requestJson.data.inputData.tenantName
+                    env.NAMESPACE = env.tenant_name+"-infer"
+                }
+                catch(err) {
+                       throw err
+                    }
+                }
+           }
+    }
+
+        stage('Create Temporary Path') {
+            steps {
+                script {
+                    try {
+                        def deployframework = "${params.deployFramework}"
+                        if (deployframework.toLowerCase() == 'custom' || deployframework.toLowerCase() == 'djl') {
+                            sh'''
+                                cd ${WORKSPACE_PATH}/input/KnativeServing
+                                mkdir $jobId
+                                cd $jobId
+                            '''
+                        }
+                        else if (deployframework.toLowerCase() == 'triton') {
+                            sh'''
+                                cd ${WORKSPACE_PATH}/input/TritonServer
+                                mkdir $jobId
+                                cd $jobId
+                            '''
+                        }
+                    }
+                    catch(err) {
+                        jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                        errorInfo= "Knative Serving Model Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}.Please Check with administrator "
+                        echo "$errorInfo"
+                        throw err
+                    }
+                }
+            }
+        }
+
+        stage('Delete Model Deployment') {
+            steps {
+                script {
+                    try {
+            
+                        def deployframework = "${params.deployFramework}"
+                        echo "$NAMESPACE"
+
+                        if (deployframework.toLowerCase() == 'custom' || deployframework.toLowerCase() == 'djl') {
+                            sh'''
+                            cd ${WORKSPACE_PATH}/input/KnativeServing/$jobId
+                            $BIN_PATH/kubectl delete deployment $modelName-$modelVersion-$projectId -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                            $BIN_PATH/kubectl delete service $modelName-$modelVersion-$projectId -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                            $BIN_PATH/kubectl delete vs -l app=$modelName-$modelVersion-$projectId -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                            $BIN_PATH/kubectl delete destinationrule $modelName-$modelVersion-$projectId -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                            '''
+                        }
+                        else if (deployframework.toLowerCase() == 'triton') {
+                            sh'''
+                            cd ${WORKSPACE_PATH}/input/TritonServer/$jobId
+                            $BIN_PATH/kubectl delete deployment $modelName-$modelVersion-$projectId -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                            $BIN_PATH/kubectl delete service $modelName-$modelVersion-$projectId -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                            $BIN_PATH/kubectl delete vs -l app=$modelName-$modelVersion-$projectId -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                            '''
+                        }
+                    }
+                    catch(err) {
+                        jenkinsConsole = "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                        errorInfo = "Knative Serving Model Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}. Please Check with administrator "
+                        echo "$errorInfo"
+                        throw err
+                    }
+                }
+            }
+        }
+
+        stage('Verify Delete Model Deployment') {
+            options {
+                timeout(time: 10, unit: 'MINUTES')
+            }
+            steps {
+                script {
+                    def loop_flag = 1
+                    echo "Loop flag: $loop_flag"
+                    Exception caughtException = null
+                    catchError(buildResult: 'FAILURE', stageResult: 'ABORTED') {
+
+                        try {
+                            while (loop_flag == 1) {
+                                MODEL_STATE = sh(returnStdout: true, script:"""$BIN_PATH/kubectl -n $NAMESPACE --kubeconfig=$KUBE_CONFIG get pod | awk '/${modelName}-${modelVersion}-${projectId}/ {print \$3;exit}'""")
+                                echo "====$MODEL_STATE===="
+                                if (MODEL_STATE?.trim()?.equals('Running')) {
+                                    echo "Loop flag inside while if: $loop_flag"
+                                    sleep(time: 60, unit: 'SECONDS')
+                                }
+                                else {
+                                    loop_flag = 0
+                                    echo "Loop flag inside while else: $loop_flag"
+                                    env.errorMsg = ''
+                                }
+                                echo "Final Loop flag in while loop: $loop_flag"
+                            }
+                        }
+                        catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {    
+                            jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                            errorInfo= "Delete Model Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}. Please Check with administrator "
+                            echo "$errorInfo"
+                            caughtException = "$err"
+                        }
+                        catch (Throwable err) {
+                            jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                            errorInfo= "Delete Model Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}. Please Check with administrator "
+                            echo "$errorInfo"
+                            caughtException = "$err"
+                        }
+                    }
+                    if (caughtException) {
+                        error caughtException.message
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                sh"""
+                cd ${WORKSPACE_PATH}/input/KnativeServing
+                rm -rf $jobId
+                cd ${WORKSPACE_PATH}/input/TritonServer
+                rm -rf $jobId
+                """
+            }
+        }
+        success {
+            script {
+                def errorMsg = "$errorMsg"
+                if (errorMsg != '') {
+                    env.jobStatus = 'FAILURE'
+                    env.suMessage = ''
+                }
+                else {
+                    env.errorMsg = ''
+                    env.jobStatus = 'SUCCESS'
+                    env.suMessage = 'Model Deployment is deleted successfully'
+                }
+                if (env.deployEnv == 'PRODUCTION') {
+                    sh"""
+                    curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":\"${jobStatus}\","message":\"${suMessage}\","errorMsg":\"${errorMsg}\"}'
+                    """
+                }
+                else {
+                    sh"""
+                    curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":\"${jobStatus}\","message":\"${suMessage}\","errorMsg":\"${errorMsg}\"}'
+                    """
+                }
+            }
+        }
+        failure {
+            script {
+                PREDICTION_URL = ''
+                SERVICE_NAME = ''
+                env.errorMsg = "$errorInfo"
+                echo "$errorMsg"
+                if (env.deployEnv == 'PRODUCTION') {
+                    sh"""
+                    curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":"FAILURE","message":\"${suMessage}\","errorMsg":\"${errorMsg}\"}'
+                    """                }
+                else {
+                    sh"""
+                    curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":"FAILURE","message":\"${suMessage}\","errorMsg":\"${errorMsg}\"}'
+                    """
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,57 @@
+# ===============================================================================================================#
+# Copyright 2025 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+name: RUN Status 
+description: |
+  Run Status.
+  
+inputs:
+- {name: run id, type: str, default: '{}', description: 'python file name to execute.'}
+- {name: run status, type: str, default: '{}', description: 'Map with python paramater values.'}
+- {name: Packages to install, optional: true, type: JsonArray, default: '', description: 'Python packages to install'}
+- {name: Input data, optional: true, description: 'Optional data that can be passed to python. '}
+outputs:
+- {name: Output data, description: 'Directory with any output data. '}
+
+implementation:
+  container:
+    image: ${IMAGE_NAME}
+    command:
+    - sh
+    - -exc
+    - |
+      run_id="$0"
+      run_status="$1"
+      packages_to_install="$2"
+      input_data_path="$3"
+      output_data_path="$4"
+      output_data_path='/tmp/outputs/Output_data/data'
+      mkdir -p "$output_data_path"
+      echo "$2"
+
+      # Converting packages_to_install from JSON to command-line arguments
+      packages_to_install=$(echo "$packages_to_install" | sed -E -e 's/^\[//' -e 's/]$//' -e 's/",/" /g' -e "s/\"/'/g")
+      # Installing packages
+      #sh -c "python3 -m pip install --upgrade --quiet ${packages_to_install}"
+
+      #sh -c "python3 -m pip install --upgrade -r requirements.txt"
+      # Running the python
+      sh -c "ls -ltr"
+      unset http_proxy
+      unset https_proxy 
+      sh -c "unset http_proxy;python3 /s3util/runstatus_v1_0.py --run_id $run_id --status $run_status --deployEnv DEPLOYENVIRONMENT"  
+      
+    - {inputValue: run id}
+    - {inputValue: run status}
+    - if:
+        cond: {isPresent: Packages to install}
+        then: [{inputValue: Packages to install}]
+        else: ""
+    - if:
+        cond: {isPresent: Input data}
+        then: [{inputPath: Input data}]
+        else: ""
+    - {outputPath: Output data}

@@ -1,0 +1,503 @@
+# ===============================================================================================================#
+# Copyright 2025 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+import groovy.json.JsonOutput
+import groovy.json.*
+
+pipeline {
+    agent any
+
+environment{
+	props=load "/var/lib/jenkins_scripts/Prod/mlops_env.properties";
+	app =""
+	errMsg=""
+	errorInfo=""
+	runid=""
+	errorDescription=""            
+	}
+
+    parameters{
+		string(name: 'jobId', defaultValue: '', description: '')
+		string(name: 'deployEnv', defaultValue: '', description: '')
+
+    }
+stages{
+    stage('Loading Environment Variables') {
+            steps {
+                script {
+                try{
+            env.WORKSPACE_PATH="$WORKSPACE_PATH"
+            env.PROD_UTIL_FOLDER_PATH="$PROD_UTIL_FOLDER_PATH"
+            env.JENKINS_URL="$JENKINS_URL"
+            switch(deployEnv){
+                case "PRODUCTION":
+                       env.GET_PIPELINE_INPUT_DET="$PROD_AICLD_GET_PIPELINE_INPUT_DET_URL"
+                       env.RETURN_URL="$PROD_AICLD_PIPELINE_RETURN_URL"
+                       env.MINIO_BUCKETNAME="$MINIO_PRODUCTION_BUCKETNAME"
+                       env.MINIO_CREDS="$MINIO_PRODUCTION_CREDS"
+                       env.MINIO_HOST="$MINIO_PRODUCTION_HOST"
+                       env.MINIO_TARGET="$MINIO_PRODUCTION_TARGET"
+                       env.COOKIE_URL="$BCM_COOKIE_PROD"
+                       env.KUBE_CONFIG="$KUBE_CONFIG_BCMPROD"
+                       break;
+
+               case "CONTAINER":
+                        env.MINIO_BUCKETNAME="$MINIO_CONTAINER_BUCKETNAME"
+                        env.MINIO_CREDS="$MINIO_CONTAINER_CREDS"
+                        env.MINIO_HOST="$MINIO_CONTAINER_HOST"
+                        env.MINIO_TARGET="$MINIO_CONTAINER_TARGET"
+                        env.RETURN_URL="$RETURN_URL_CONTAINER"
+                        env.COOKIE_URL="$COOKIE_URL_CONTAINER"
+                        break;
+                case "DEVELOPMENT":
+                        env.GET_PIPELINE_INPUT_DET="$DEV_AICLD_GET_PIPELINE_INPUT_DET_URL"
+                        env.MINIO_BUCKETNAME="$MINIO_PRODUCTION_BUCKETNAME"
+                        env.MINIO_CREDS="$MINIO_PRODUCTION_CREDS"
+                        env.MINIO_HOST="$MINIO_PRODUCTION_HOST"
+                        env.MINIO_TARGET="$MINIO_PRODUCTION_TARGET"
+                        env.RETURN_URL="$DEV_AICLD_PIPELINE_RETURN_URL"
+                        env.COOKIE_URL="$BCM_COOKIE_PROD"
+                        env.KUBE_CONFIG="$KUBE_CONFIG_BCMPROD"
+                        break;
+                default:
+                        env.MINIO_BUCKETNAME="$MINIO_DEVELOPMENT_BUCKETNAME"
+                        env.MINIO_CREDS="$MINIO_DEVELOPMENT_CREDS"
+                        env.MINIO_HOST="$MINIO_DEVELOPMENT_HOST"
+                        env.MINIO_TARGET="$MINIO_DEVELOPMENT_TARGET"
+                        env.RETURN_URL="$DEV_AICLD_PIPELINE_RETURN_URL"    
+                }
+                }catch(err){
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    errorInfo= "Run Trial Pipeline job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}."
+                    throw err
+                }
+                    
+                }
+            }
+            }
+    stage('Get Input Details') {
+        steps{
+                script{
+                def errormsg = "Utility Service is Down, Please try again after sometime or contact administrator"
+                try {
+                      /* Invoke the Utility service */
+                        input=sh(returnStdout: true, script:'''curl --request GET --url $GET_PIPELINE_INPUT_DET/$jobId''')
+                        def validate  = {data, key, raise_err ->
+                            if (data == null || data == ''){
+                                errormsg = "${key} should not be empty"
+                                if (raise_err){
+                                    throw new Exception(errormsg)
+                                }
+                                return false
+                            }
+                            return true
+                        }
+                       /*Parsing json*/
+                       def jsonSlurper = new JsonSlurper()
+                       def inputdata = jsonSlurper.parseText(input)
+                        if(inputdata.status == "FAILURE"){
+                            errormsg = inputdata.message
+                            throw new Exception(errormsg)
+                        }
+                        /*print the json key modelName value */ 
+                        def compdetails = ""
+                        def src_dir = ""
+                        validate(inputdata.data.inputData.projectId, "projectId", true)
+                        validate(inputdata.data.inputData.pipelineId, "pipelineId", true)
+                        validate(inputdata.data.inputData.runId, "runId", true)
+                        validate(inputdata.data.inputData.pipelineName, "pipelineName", true)
+                        validate(inputdata.data.inputData.pipelineVersion, "pipelineVersion", true)
+                        validate(inputdata.data.inputData.experimentName, "experimentName", true)
+                        
+                        env.container_image = "train;" + inputdata.data.inputData.containerImage
+                        env.project_id = inputdata.data.inputData.projectId
+                        env.pipeline_id = inputdata.data.inputData.pipelineId
+                        env.prunid = inputdata.data.inputData.runId
+                        env.pipeline_name = inputdata.data.inputData.pipelineName
+                        env.tenant_name = inputdata.data.inputData.tenantName
+			env.pipeline_name = env.pipeline_name.replace('-','')
+                        env.pipeline_version = inputdata.data.inputData.pipelineVersion
+                        env.preTrainedMdlVal=""
+                        def func_args =""
+                        run_arg_name = ""
+                        pipeline_args_json ="{"
+                        format_brackets = ""
+                        train_args = ""
+                        i = 0
+                        for(run_arg in inputdata.data.inputData.runArguments){
+                            i = i + 1
+                            validate(run_arg.name, "(${i}) runArguments name", true)
+                            validate(run_arg.argValue, "(${i}) runArguments value", true)
+                            format_brackets = format_brackets + "{} {} "
+                            run_arg_name = run_arg_name + run_arg.name +","
+                            train_args = train_args + "\\x27--" + run_arg.name + "\\x27, " + run_arg.name + ","
+                            pipeline_args_json = pipeline_args_json + "\"" + run_arg.name + "\": \"" + run_arg.argValue + "\","
+                        }
+                        
+                        echo "$inputdata.data.inputData.preTrainedMdl"
+						if(inputdata.data.inputData.preTrainedMdl != null && inputdata.data.inputData.preTrainedMdl != "NA" ){
+                          echo "PreTraineModel"
+                          if(inputdata.data.inputData.storageType !=null && inputdata.data.inputData.storageType  == "INFY_AICLD_MINIO"){
+                                env.TEMPLATE_PY_FILE = "$BCM_MINIO_PRETRAIN_PIPELINE_TEMPLATE_FILE"
+                          }else if(inputdata.data.inputData.storageType !=null && inputdata.data.inputData.storageType  == "INFY_AICLD_NUTANIX"){
+                                env.TEMPLATE_PY_FILE = "$BCM_NUTANIX_PRETRAIN_PIPELINE_TEMPLATE_FILE"
+
+                          }else if(inputdata.data.inputData.preTrainedMdl!=null && inputdata.data.inputData.preTrainedMdl.artifacts.storageType == "PVC"){
+                                env.TEMPLATE_PY_FILE = "$BCM_MINIO_BASIC_PIPELINE_TEMPLATE_FILE"
+                          }else{
+                                validate(inputdata.data.inputData.preTrainedMdl.storageType, "preTrainedMdl storageType", false)
+                          }
+                          env.preTrainedMdlVal=inputdata.data.inputData.preTrainedMdl.artifacts.uri
+                        }
+						else{
+                          if(inputdata.data.inputData.storageType !=null && inputdata.data.inputData.storageType  == "INFY_AICLD_MINIO"){
+                                env.TEMPLATE_PY_FILE = "$BCM_MINIO_BASIC_PIPELINE_TEMPLATE_FILE"
+                          }else if(inputdata.data.inputData.storageType !=null && inputdata.data.inputData.storageType  == "INFY_AICLD_NUTANIX"){
+                                env.TEMPLATE_PY_FILE = "$BCM_NUTANIX_BASIC_PIPELINE_TEMPLATE_FILE"
+
+                          }else if(inputdata.data.inputData.storageType !=null && inputdata.data.inputData.storageType  == "PVC"){
+                                env.TEMPLATE_PY_FILE = "$BCM_MINIO_BASIC_PIPELINE_TEMPLATE_FILE"
+                          }else{
+                              validate(inputdata.data.inputData.preTrainedMdl.artifacts.storageType, "preTrainedMdl storageType", true)
+                          }
+                        }  
+                        
+                        env.TRAIN_COMP_TEMPLATE="$BCM_AICLD_TRAIN_COMP_TEMPLATE_FILE"
+                        env.EXIT_TASK_TEMPLATE="$BCM_AICLD_EXIT_COMP_TEMPLATE_FILE"
+                        env.inputArtifacts = "NA"
+                        env.outputArtifacts = "NA"
+                        env.bucketName="mmsrepo"
+                        if(inputdata.data.inputData.containsKey('inputArtifacts')){
+                            env.inputArtifacts = inputdata.data.inputData.inputArtifacts.uri
+                            if(inputdata.data.inputData.inputArtifacts.uri.indexOf("s3:") != -1){
+                              inputArtifacts_part1=inputArtifacts.replaceAll("s3://","")
+                              env.bucketName=inputArtifacts_part1.substring(0,inputArtifacts_part1.indexOf("/"))
+                          }  
+                        }
+                        
+                        if(inputdata.data.inputData.containsKey('outputArtifacts')) {
+                              env.outputArtifacts = inputdata.data.inputData.outputArtifacts
+                        }
+                        env.replace_word = ""
+                        if (env.deployEnv == 'PRODUCTION'){
+                           env.namespace = "$PROD_NAMESPACE"
+                           env.pipelineUrl= "$PROD_PIPELINE_URL"
+						   env.experimentName="$PROD_EXPERIMENT_NAME"
+                            
+                        }else if(env.deployEnv == 'DEVELOPMENT'){
+                           env.namespace="$DEV_NAMESPACE"
+                           env.pipelineUrl= "$PROD_PIPELINE_URL"
+                        }
+                        
+                        env.checkGPUAvailbility="False"
+                        env.gpu_set_limit = ""
+                        env.cpu_set_limit = ""
+                        env_memory_limit = ""
+                        env.volume_size_gb = "10Gi"
+                        if(validate(inputdata.data.inputData.resourceConfig.volumeSizeinGB, "", false) && inputdata.data.inputData.resourceConfig.volumeSizeinGB != 0){
+                            env.volume_size_gb = inputdata.data.inputData.resourceConfig.volumeSizeinGB + "Gi"
+                        }
+
+                        for(comp in inputdata.data.inputData.resourceConfig.computes){
+                            if(comp.type == 'GPU'){
+                                env.checkGPUAvailbility="True"
+                                env.gpuQty=comp.maxQty
+                                env.gpuMemory=comp.memory
+                                if (comp.maxQty) {
+                                    env.gpu_set_limit = "train.set_gpu_limit("+ comp.maxQty +")"
+                                }
+			                    print(env.tenant_name)
+                                def prop_key = env.tenant_name+"-train"
+                                if(comp.memory == '80GB'){
+                                    env.replace_word = "nvidia.com/gpu"
+                                    env.namespace = prop_key
+                                }
+                                else if(comp.memory == '40GB'){
+                                    env.replace_word = "nvidia.com/mig-7g.40gb"
+                                    env.namespace = prop_key
+                                }
+                                else if(comp.memory == '20GB'){
+                                    env.replace_word = "nvidia.com/mig-3g.20gb"
+                                    env.namespace = prop_key
+                                }
+                                else{
+                                    env.errorMsg="Requested GPU Memory not allowed.Please check with administrator."
+                                    throw new Exception("Requested GPU Memory not allowed.Please check with administrator.") 
+                                } 
+		                    }
+                            if(comp.type == 'CPU'){
+                                if (comp.maxQty) {
+                                    env.cpu_set_limit = "train.set_cpu_limit(\""+ comp.maxQty +"\")"
+                                }
+                                if(comp.memory){
+                                    env.memory_limit = "train.set_memory_limit(\""+ comp.memory +"\")"
+                                }
+                            }
+                        }
+                        
+                        env.dependancyFilePath = "NA"
+                        env.pipeline_run_name = inputdata.data.inputData.runName
+                        pipeline_args_json = pipeline_args_json[0..pipeline_args_json.size()-2]
+                        env.pipeline_args_json = pipeline_args_json + "}"
+                        env.run_arg_name = run_arg_name[0..run_arg_name.size()-2]
+                        env.train_args = "\"" + format_brackets[0..format_brackets.size()-2]+"\".format(" + train_args[0..train_args.size()-2] + ")"
+                        validate(inputdata.data.inputData.mainScriptFile, "mainScriptFile", true)
+                        python_cmd = inputdata.data.inputData.mainScriptFile.split(' ')
+                        env.main_script_file = ''
+                        for(cmd in python_cmd){
+                            if(cmd.endsWith('.py')){
+                                env.main_script_file =  cmd
+                                break;
+                            }
+                        }
+                        env.compdetails = "train:" + inputdata.data.inputData.stepName + ";;"+env.main_script_file
+                        env.metric_name = "NA"
+                        env.metric_log_path = "NA"
+                        env.metric_regex ="NA"
+                        validate(inputdata.data.inputData.metricDetails, "Metric Details", true)
+                        if (inputdata.data.inputData.containsKey("metricDetails")){
+                          if(validate(inputdata.data.inputData.metricDetails.name, "", false)){
+                               env.metric_name = inputdata.data.inputData.metricDetails.name
+                          }
+                          if(validate(inputdata.data.inputData.metricDetails.logFileUri, "", false)){
+							  env.metric_log_path = inputdata.data.inputData.metricDetails.logFileUri
+							  if(env.metric_log_path != null || env.metric_log_path != "NA" || env.metric_log_path != ''){
+								def parts = env.metric_log_path.split("/")
+								env.train_log_dir = parts[0..-2].join("/")
+							  }
+							}
+                          if(validate(inputdata.data.inputData.metricDetails.regex, "", false)){
+                                metric_regex = inputdata.data.inputData.metricDetails.regex
+                                env.metric_regex =metric_regex.replace("\\", "\\\\")
+							} 
+                        }
+                        env.memory_limit = ""   
+                    }
+                catch(err){
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    print("inside err")
+                    base_error_msg = "Run Trail Pipeline build job ${currentBuild.number} (correlationId= ${jobId})"
+                    errorInfo = base_error_msg + " failed in stage ${env.STAGE_NAME}."
+                    print(errorInfo + " -" + errormsg)
+                    errorInfo = "Error Occured while running the trail, Please contact Administrator for further assistance.Ref Id:${currentBuild.number} (correlationId= ${jobId}) "
+                    throw err
+                    }
+                 catch(Exception ex){
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    base_error_msg = "Run Trail Pipeline build job ${currentBuild.number} (correlationId= ${jobId})"
+                    errorInfo = base_error_msg + " failed in stage ${env.STAGE_NAME}."
+                    print(errorInfo + " -" + errormsg)
+                    errorInfo = "Error Occured while running the trail, Please contact Administrator for further assistance.Ref id :${currentBuild.number}(correlationId= ${jobId}) "
+                    throw ex
+                    }
+
+                }
+           }
+        }
+    stage('Create Temporary Path') {
+        steps{
+            script{
+            try {
+                sh'''
+                cd ${WORKSPACE_PATH}/input/RunPipeline
+                mkdir $jobId
+                cd $jobId
+                '''	
+                }
+            catch(err){
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    errorInfo= "Error Occured while running the trail, Please contact Administrator for further assistance.Ref id :${currentBuild.number}(correlationId= ${jobId}) "
+                    throw err
+                }
+            }
+        }
+    }
+   stage('Python Script Error'){
+		steps{
+			script{
+				env.traceback=""
+                try{  
+				sh'''
+				cd ${WORKSPACE_PATH}/input/RunPipeline/$jobId
+				mkdir scripts
+				chmod 777 scripts
+				cp ${PROD_UTIL_FOLDER_PATH}/compilation_erro_check.py ${WORKSPACE_PATH}/input/RunPipeline/$jobId/scripts
+				cp ${PROD_UTIL_FOLDER_PATH}/s3utilityservice.py ${WORKSPACE_PATH}/input/RunPipeline/$jobId/scripts
+				cp ${PROD_UTIL_FOLDER_PATH}/nutanix-ca.pem ${WORKSPACE_PATH}/input/RunPipeline/$jobId/scripts
+				chmod 777 ${WORKSPACE_PATH}/input/RunPipeline/$jobId/scripts/compilation_erro_check.py
+				chmod 777 ${WORKSPACE_PATH}/input/RunPipeline/$jobId/scripts/s3utilityservice.py
+				chmod 777 ${WORKSPACE_PATH}/input/RunPipeline/$jobId/scripts/nutanix-ca.pem
+				cd ${WORKSPACE_PATH}/input/RunPipeline/$jobId/scripts
+				python3 s3utilityservice.py download s3://${bucketName}/${project_id}/pipeline/$pipeline_name/${pipeline_version}/input/${main_script_file} ${WORKSPACE_PATH}/input/RunPipeline/$jobId/scripts
+				chmod 777 $main_script_file
+				'''
+				def result = sh(returnStdout: true, script: """cd ${WORKSPACE_PATH}/input/RunPipeline/$jobId/scripts/; python3 compilation_erro_check.py ${main_script_file}""")
+
+				env.traceback=result.replaceAll("[\r\n]+", " ");
+				echo "error message"
+		        	echo "${result}"
+				if(env.traceback!="success "){
+				    env.errorMsg="fdffd"
+                    		throw new Exception("Script file having syntax issue. Please try Later") 
+				}
+                }
+
+                catch(err){
+                   echo "after result"
+                    if(env.traceback==""){
+                        echo "env.traceback"
+                        errorInfo = "Script not found, please upload the script file"
+                    }
+                    else{
+                    errorInfo = env.traceback
+                    }                    
+                    throw err                
+		}
+			}
+		}
+	}
+stage('Verify GPU Availbility ') {
+when{
+	expression {
+        return env.checkGPUAvailbility=="True" ;
+        }
+	}
+	steps{
+		script{
+		try {           
+                print(env.gpuMemory)
+                print(env.gpuQty)
+                is_gpu_available = sh(returnStdout: true, script:"""python3 ${WORKSPACE_PATH}/utils/prod/ResourceUtility.py $KUBE_CONFIG ${env.namespace} ${env.gpuQty} ${env.gpuMemory}""")
+                print(is_gpu_available)
+                env.isGPUAvailable=is_gpu_available.trim()
+
+                if(is_gpu_available.trim() =="" || is_gpu_available.trim() == "False"){
+                    env.errorMsg="Requested GPUs not available.Please try Later"
+                    throw new Exception("Requested GPUs not available.Please try Later") 
+                }
+			}
+		catch(err){
+			jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+			if("$errorMsg" != ""){
+			 echo err.getMessage()
+                         errorInfo= "$errorMsg"
+			}else{
+
+			errorInfo= "Error Occured while running the trail, Please contact Administrator for further assistance.Ref id :${currentBuild.number}(correlationId= ${jobId}) "
+			}
+			echo "$errorInfo"
+			throw err
+        }
+            catch(Exception ex){
+			jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+			if("$errorMsg" != ""){
+			 echo ex.getMessage()
+                         errorInfo= "$errorMsg"
+			}else{
+
+			errorInfo= "Error Occured while running the trail, Please contact Administrator for further assistance.Ref id :${currentBuild.number}(correlationId= ${jobId}) "
+			}
+			echo "$errorInfo"
+			throw ex
+        }
+
+
+		}
+	}
+}
+
+stage('Run pipeline') {
+when{
+	expression {
+        return (env.checkGPUAvailbility=="False" || (env.checkGPUAvailbility=="True" && env.isGPUAvailable == "True"));
+        }
+	}
+	steps{
+		script{
+		try {                       
+
+            COOKIE=sh(returnStdout: true, script:'''curl --request GET --url $COOKIE_URL''')
+            echo "$COOKIE" 
+            sh """
+               cd ${WORKSPACE_PATH}/input/RunPipeline/$jobId
+                cp ${WORKSPACE_PATH}/utils/templates/dev/pipln_v1/J2_PRETRAINED_PIPELINE_TEMPLATE.j2 ${WORKSPACE_PATH}/input/RunPipeline/$jobId
+                cp ${TRAIN_COMP_TEMPLATE} ${WORKSPACE_PATH}/input/RunPipeline/$jobId/component_keyword_arg_train.yaml
+                cp ${EXIT_TASK_TEMPLATE} ${WORKSPACE_PATH}/input/RunPipeline/$jobId/component_exit_task.yaml
+                cp ${WORKSPACE_PATH}/utils/prod/Trial_pipeline_template_v1.py ${WORKSPACE_PATH}/input/RunPipeline/$jobId
+                cd ${WORKSPACE_PATH}/input/RunPipeline/$jobId
+                python3 Trial_pipeline_template_v1.py $GET_PIPELINE_INPUT_DET/$jobId $COOKIE
+                cat ${env.pipeline_name}.py
+                python3 ${env.pipeline_name}.py >> output.txt
+                """
+      
+            runId=sh(returnStdout: true, script:"""cat ${WORKSPACE_PATH}/input/RunPipeline/$jobId/output.txt| cut -d'=' -f 2| sed s@')'@@g""").trim()
+			echo "Run id: $runId"
+		
+			if ( runId == "" ){
+			throw new Exception("Run Id is empty please try again") 
+			}          
+			}
+		catch(err){
+			jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+			errorInfo= "Error Occured while running the trail, Please contact Administrator for further assistance.Ref id :${currentBuild.number}(correlationId= ${jobId}) "
+			echo "$errorInfo"
+			throw err
+                	}
+		}
+	}
+}
+}
+post {
+	always {
+		script {
+			sh"""
+			cd ${WORKSPACE_PATH}/input/RunPipeline
+                        rm -rf $JOBID   
+			"""
+		}
+	}
+    	success {
+		script {
+			env.errorMsg= ''
+			 echo "$deployEnv"
+             if (env.deployEnv == 'PRODUCTION')
+			 {
+
+			 sh"""
+			 curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":"SUCCESS","runId":\"'$runId'\","errorMsg":\"${errorMsg}\"}'
+			 """
+			 }
+			 else
+			 {
+			 sh"""
+			 curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":"SUCCESS","runId":\"'$runId'\","errorMsg":\"${errorMsg}\"}'
+			 """
+			 }
+			
+		}
+	}
+	failure {
+		script {
+			env.errorMsg="$errorInfo"
+			echo "$errorMsg"
+			echo "$deployEnv"
+            if (env.deployEnv == 'PRODUCTION')
+			{
+
+			sh"""
+			curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":"FAILURE","runId":"","errorMsg":\"${errorMsg}\"}'
+			 """
+			 }
+			 else
+			 {
+			 sh"""
+			 curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":"FAILURE","runId":"","errorMsg":\"${errorMsg}\"}'
+			 """
+			 }	
+		}
+	} 
+}
+}

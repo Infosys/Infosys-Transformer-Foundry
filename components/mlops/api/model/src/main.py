@@ -1,6 +1,6 @@
 
 # ===============================================================================================================#
-# Copyright 2024 Infosys Ltd.                                                                                    #
+# Copyright 2025 Infosys Ltd.                                                                                    #
 # Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
 # http://www.apache.org/licenses/                                                                                #
 # ===============================================================================================================#
@@ -14,6 +14,9 @@ description: Model Management Services provides a collection of REST APIs
     in machine learning.
 
 """
+from typing import List
+
+
 import uvicorn
 from dotenv import dotenv_values
 from typing import List
@@ -27,7 +30,7 @@ from aicloudlibs.db_management.core.db_utils import connect_mongodb, get_db
 from aicloudlibs.exceptions.global_exception import *
 from aicloudlibs.exceptions import global_exception_handler
 from mms.config.logger import CustomLogger
-from mms.routing import model_router
+from mms.routing import model_router, endpoint_router
 from mms.exception.exception import ModelException, ModelAPIException
 from mms.constants.local_constants import *
 
@@ -125,7 +128,8 @@ def healthProbeCheck(request: Request, response: Response) :
 incude the routing details of model service
 """
 app.include_router(model_router.router, prefix='/api/v1', tags=['Model Management'])
-
+app.include_router(endpoint_router.router, prefix='/api/v1', tags=['Deployment Management'])
+#app.include_router(inference_router.router, prefix='/api/v1', tags=['Model Inference'])
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8090)

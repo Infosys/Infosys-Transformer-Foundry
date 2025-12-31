@@ -1,0 +1,374 @@
+# ===============================================================================================================#
+# Copyright 2024 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+import groovy.json.JsonOutput
+import groovy.json.*
+
+pipeline {
+    agent any
+
+    environment {
+        props = load "/var/lib/jenkins_scripts/Prod/mlops_env.properties";
+        transformerImageName = ""
+        PREDICTION_URL = "none"
+        errMsg = ""
+        errorInfo = ""
+    }
+
+    parameters {
+        string(name: 'jobId', defaultValue: '', description: '')
+        string(name: 'deploymentId', defaultValue: '', description: '')
+        string(name: 'deployEnv', defaultValue: '', description: '')
+        string(name: 'userName', defaultValue: '', description: '')
+    }
+
+    stages {
+    stage('Loading Environment Variables') {
+        steps {
+            script {
+                try {
+                    env.BIN_PATH = "$BIN_PATH"
+                    env.WORKSPACE_PATH = "$WORKSPACE_PATH"
+                    env.JENKINS_URL = "$JENKINS_URL"
+                        
+                    switch(deployEnv) {
+                        case "PRODUCTION" :
+                            env.KUBE_CONFIG = "$KUBE_CONFIG_BCMPROD"
+                            env.RETURN_HOST = "$RETURN_HOST_PROD"
+                            env.RETURN_URL = "$KNATIVE_RETURN_URL"
+                            env.MINIO_BUCKETNAME = "$MINIO_PRODUCTION_BUCKETNAME"
+                            env.MINIO_CREDS = "$MINIO_PRODUCTION_CREDS"
+                            env.MINIO_HOST = "$MINIO_PRODUCTION_HOST"
+                            env.MINIO_TARGET = "$MINIO_PRODUCTION_TARGET"
+                            env.COOKIE_URL = "$COOKIE_URL_PROD"
+                            env.GET_PIPELINE_INPUT_DET="$PROD_AICLD_GET_PIPELINE_INPUT_DET_URL"
+                            break
+                        case "DEVELOPMENT" :
+                            env.KUBE_CONFIG = "$KUBE_CONFIG_BCMPROD"
+                            env.RETURN_HOST = "$RETURN_HOST_DEV"
+                            env.RETURN_URL = "$RETURN_URL_DEV"
+                            env.MINIO_BUCKETNAME = "$MINIO_DEVELOPMENT_BUCKETNAME"
+                            env.MINIO_CREDS = "$MINIO_DEVELOPMENT_CREDS"
+                            env.MINIO_HOST = "$MINIO_DEVELOPMENT_HOST"
+                            env.MINIO_TARGET = "$MINIO_DEVELOPMENT_TARGET"
+                            env.GET_PIPELINE_INPUT_DET="$DEV_AICLD_GET_PIPELINE_INPUT_DET_URL"
+                            break
+                        default :
+                            env.KUBE_CONFIG = "$KUBE_CONFIG_DEV"
+                            env.RETURN_HOST = "$RETURN_HOST_DEV"
+                            env.RETURN_URL = "$RETURN_URL_DEV"
+                            env.MINIO_BUCKETNAME = "$MINIO_DEVELOPMENT_BUCKETNAME"
+                            env.MINIO_CREDS = "$MINIO_DEVELOPMENT_CREDS"
+                            env.MINIO_HOST = "$MINIO_DEVELOPMENT_HOST"
+                            env.MINIO_TARGET = "$MINIO_DEVELOPMENT_TARGET"
+                    }
+                }
+                catch(err) {
+                    jenkinsConsole = "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    errorInfo= "Triton Serving Model Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}. Please Check with administrator "
+                    echo "$errorInfo"
+                    throw err
+                }
+            }
+        }
+    }
+
+    stage('Get Input Details') {
+        steps {
+            script {
+                try {
+                /* Invoke the Utility service */
+                    input = sh(returnStdout: true, script:'''curl --request GET --url $GET_PIPELINE_INPUT_DET/$jobId''')
+                /* Parsing JSON */
+                    print input
+                    def jsonSlurper = new JsonSlurperClassic()
+                    def requestJson = jsonSlurper.parseText(input)
+                    env.projectId = requestJson.data.inputData.projectId
+                    env.tenant_name = requestJson.data.inputData.tenantName
+
+                    env.isGPUAvailable = "NA"
+
+                    env.replace_word = ""
+                    env.NAMESPACE = env.tenant_name+"-infer"
+
+                    env.inputMode = requestJson.data.inputData.inputMode
+                    env.modelS3RepoPath = requestJson.data.inputData.modelS3RepoPath
+                    env.modelVersion = requestJson.data.inputData.modelVersion
+                    env.modelName = requestJson.data.inputData.modelName
+
+                    computes = requestJson.data.inputData.inferenceSpec.containerResourceConfig.computes
+                    computes.each { item ->
+                        if (item.type.toLowerCase()=='cpu') {
+                            env.cpuComputeType = 'Y'
+                            env.cpuMinQty = item.minQty
+                            env.cpuMaxQty = item.maxQty
+                            env.cpuMemory = item.memory
+                            env.gpuMaxQty = ''
+                            env.gpuMemory = ''
+                        }
+                        else if (item.type.toLowerCase()=='gpu') {
+                            env.gpuComputeType = 'Y'
+                            env.gpuMinQty = item.minQty
+                            env.gpuMaxQty = item.maxQty
+                            env.gpuMemory = item.memory
+                        }
+                    }
+                    echo "---------------------Lastt.... Line......"
+                }
+                catch(err) {
+                       throw err
+                    }
+                }
+           }
+    }
+
+    stage('Create Temporary Path') {
+        steps {
+            script {
+                try {
+                    sh'''
+                    cd ${WORKSPACE_PATH}/input/TritonServer
+                    mkdir $jobId
+                    cd $jobId
+                    '''
+                }
+                catch(err){
+                    jenkinsConsole = "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    errorInfo = "Triton Serving Model Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}.Please Check with administrator "
+                    echo "$errorInfo"
+                    throw err
+                }
+            }
+        }
+    }
+
+    
+    stage('Verify GPU Availbility ') {
+        when {
+            expression {
+                return gpuMemory != "" && gpuMaxQty != '' ;
+            }
+        }
+
+        steps {
+            script {
+                try {
+                    is_gpu_available = sh(returnStdout: true, script:"""python3 ${WORKSPACE_PATH}/utils/prod/ResourceUtility.py $KUBE_CONFIG $NAMESPACE $gpuMaxQty $gpuMemory""")
+                    print(is_gpu_available)
+                    env.isGPUAvailable = is_gpu_available.trim()
+                    if(is_gpu_available.trim() == "" || is_gpu_available.trim() == "False") {
+                        env.errorMsg = "Requested GPUs not available.Please try Later"
+                        throw new Exception("Requested GPUs not available.Please try Later")
+                    }
+                }
+                catch(err) {
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    if("$errorMsg" != "") {
+                        echo err.getMessage()
+                        errorInfo= "$errorMsg"
+                    }
+                    else {
+                        errorInfo= "Triton Serving Model  Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}. Please Check with administrator "
+                    }
+                    echo "$errorInfo"
+                    throw err
+                }
+                catch(Exception ex){
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    if("$errorMsg" != "") {
+                        echo ex.getMessage()
+                        errorInfo= "$errorMsg"
+                    }
+                    else {
+                        errorInfo= "Triton Serving Model  Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}. Please Check with administrator "
+                    }
+                    echo "$errorInfo"
+                    throw ex
+                }
+            }
+        }
+    }
+
+    stage('Create Deployment File') {
+        when {
+            expression {
+                return (env.isGPUAvailable=="True" || env.isGPUAvailable=="NA") ;
+            }
+        }
+        steps {
+            script {
+                try {
+                    env.PROD_K8S_MODEL_JSON_TEMPLATE_PATH = "$PROD_K8S_MODEL_JSON_TEMPLATE_PATH"
+                    env.KNS_Template_File = "$KNS_Template_File"
+                    env.KNS_S3_Template_File = "$KNS_S3_Template_File"
+                    env.KNS_S3_Nutanix_Template_File = "$KNS_S3_Nutanix_Template_File"
+                    env.aicloudModelBasePath = "$AICLOUD_MODEL_BASE_PATH"
+                    
+                    sh'''
+                    cd ${WORKSPACE_PATH}/input/TritonServer/$jobId
+                    cp ${WORKSPACE_PATH}/utils/prod/DeploymentFileCreation.py .
+                    chmod 777 DeploymentFileCreation.py
+                    python3 DeploymentFileCreation.py $PROD_K8S_MODEL_JSON_TEMPLATE_PATH $GET_PIPELINE_INPUT_DET/$jobId $NAMESPACE triton
+                    '''
+                }
+                catch(err) {
+                    jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    if("$errorMsg" != "") {
+                        echo err.getMessage()
+                        errorInfo = "$errorMsg"
+                    }
+                    else {
+                        errorInfo= "Triton Serving Model Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}. Please Check with administrator "
+                    }
+                    echo "$errorInfo"
+                    throw err
+                }
+            }
+        }
+    }
+
+    stage('Model Deployment') {
+        when {
+            expression {
+                return (env.isGPUAvailable=="True" || env.isGPUAvailable=="NA") ;
+            }
+        }
+        steps {
+            script {
+                try {
+                    echo "$NAMESPACE"
+                    sh'''
+                    cd ${WORKSPACE_PATH}/input/TritonServer/$jobId
+                    $BIN_PATH/kubectl apply -f service.json -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                    $BIN_PATH/kubectl apply -f deployment.json -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                    $BIN_PATH/kubectl apply $(ls virtualservice*.json | awk '{print "-f" $1}') -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                    '''
+                }
+                catch(err){
+                    jenkinsConsole = "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                    errorInfo = "Triton Serving Model Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}. Please Check with administrator "
+                    echo "$errorInfo"
+                    throw err
+                }
+            }
+        }
+    }
+
+    stage('Verify Model Deployment') {
+        when {
+            expression {
+                return (env.isGPUAvailable== "True" || env.isGPUAvailable== "NA") ;
+            }
+        }
+        options {
+            timeout(time: 30, unit: "MINUTES")
+        }
+        steps {
+            script {
+                def loop_flag = 1
+                echo "Loop flag: $loop_flag"
+                Exception caughtException = null
+                catchError(buildResult: 'FAILURE', stageResult: 'ABORTED') {
+                    try {
+                        while (loop_flag == 1) {
+                            MODEL_STATE = sh(returnStdout: true, script:"""$BIN_PATH/kubectl -n $NAMESPACE --kubeconfig=$KUBE_CONFIG get pod | awk '/${modelName}-${modelVersion}-${projectId}/ {print \$3;exit}'""")
+                            echo "====$MODEL_STATE==== "
+                            if (MODEL_STATE.trim().equals('Running')) {
+                                loop_flag = 0    
+                                echo "Loop flag inside while if-if: $loop_flag"
+                                MODEL_POD_NAME_PRED = sh(returnStdout: true, script:"""$BIN_PATH/kubectl -n $NAMESPACE --kubeconfig=$KUBE_CONFIG get pod | awk '/${modelName}-${modelVersion}-${projectId}/ {print \$1;exit}'""").trim()
+                                sh"""
+                                $BIN_PATH/kubectl -n $NAMESPACE --kubeconfig=$KUBE_CONFIG label pod $MODEL_POD_NAME_PRED project-id=$projectId --overwrite=true
+                                $BIN_PATH/kubectl -n $NAMESPACE --kubeconfig=$KUBE_CONFIG label pod $MODEL_POD_NAME_PRED user=$userName --overwrite=true
+                                """
+                                echo "====$MODEL_POD_NAME_PRED==== "
+                                env.errorMsg= ""
+                            }
+                            else {
+                                echo "Loop flag inside while else: $loop_flag"
+                                sleep(time: 60, unit: "SECONDS")
+                            }
+                            echo "Final Loop flag in while loop: $loop_flag"
+                        }
+                    }
+                    catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
+                        jenkinsConsole = "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                        errorInfo = "Triton Serving Model Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}. Please Check with administrator "
+                        sh'''
+                        cd ${WORKSPACE_PATH}/input/TritonServer/$jobId
+                        $BIN_PATH/kubectl delete deployment $modelName-$modelVersion-$projectId -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                        $BIN_PATH/kubectl delete service $modelName-$modelVersion-$projectId -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                        $BIN_PATH/kubectl delete vs -l app=$modelName-$modelVersion-$projectId -n $NAMESPACE --kubeconfig=$KUBE_CONFIG
+                        '''
+
+                        echo "$errorInfo"
+                        error "Caught ${err.toString()}"
+                    }
+                    catch (Throwable err) {
+                        jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                        errorInfo= "Triton Serving Model Deployment job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}. Please Check with administrator "
+                        echo "$errorInfo"
+                        caughtException = "$err"
+                    }
+                }
+                if (caughtException) {
+                    error caughtException.message
+                }
+            }
+        }
+    }
+}
+post {
+    always {
+        script {
+            sh"""
+            cd ${WORKSPACE_PATH}/input/TritonServer
+            rm -rf $jobId
+            """
+        }
+    }
+    success {
+        script {
+            def errorMsg = "$errorMsg"
+            if(errorMsg != "") {
+                env.jobStatus = "FAILURE"
+            }
+            else {
+                env.errorMsg= ""
+                env.jobStatus = "SUCCESS"
+            }
+            if (env.deployEnv == 'PRODUCTION') {
+                sh"""
+                curl --request POST --url $RETURN_URL --header 'content-type: application/json'  --data '{"jobId":\"'${JOBID}'\","jobStatus":\"${jobStatus}\","modelEndpoint":\"''\","errorMsg":\"${errorMsg}\"}'
+                """
+            }
+            else {
+                sh"""
+                curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":\"${jobStatus}\","modelEndpoint":\"''\","errorMsg":\"${errorMsg}\"}'
+                """
+            }
+        }
+    }
+    failure {
+        script {
+            PREDICTION_URL = ""
+            SERVICE_NAME = ""
+            env.errorMsg = "$errorInfo"
+            echo "$errorMsg"
+            if (env.deployEnv == 'PRODUCTION') {
+                sh"""
+                curl --request POST --url $RETURN_URL --header 'content-type: application/json'  --data '{"jobId":\"'${JOBID}'\","jobStatus":"FAILURE","modelEndpoint":\"''\","errorMsg":\"${errorMsg}\"}'
+                """
+            }
+            else {
+                sh"""
+                curl --request POST --url $RETURN_URL --header 'content-type: application/json' --data '{"jobId":\"'${JOBID}'\","jobStatus":"FAILURE","modelEndpoint":\"''\","errorMsg":\"${errorMsg}\"}'
+                """
+            }
+        }
+    }
+}
+}

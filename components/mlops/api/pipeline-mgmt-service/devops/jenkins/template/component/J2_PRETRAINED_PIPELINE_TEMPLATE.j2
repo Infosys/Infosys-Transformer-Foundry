@@ -1,0 +1,264 @@
+import kfp as kfp
+import kfp.dsl as dsl
+from kubernetes import client as k8s_client
+from kfp import components
+import kfp.compiler as compiler
+import gzip
+import string
+import time
+import tarfile
+from kubernetes.client import V1Affinity, V1Toleration,V1NodeAffinity,V1NodeSelector,V1NodeSelectorTerm,V1NodeSelectorRequirement
+
+run_train_op=components.load_component('component_train.yaml')
+
+run_exit_task_op=components.load_component('component_exit_task.yaml')
+
+@dsl.pipeline(
+	name='{{PIPELINE_NAME}}',
+	description='null')
+
+def {{PIPELINE_NAME}}({{RUN_ARG_NAME}}):
+
+	dsl.get_pipeline_conf().set_image_pull_secrets([k8s_client.V1ObjectReference(name="infyartifactory-mms-cred")])
+	train_params={{PIPELINE_TRAIN_ARGS}}
+	run_id=dsl.RUN_ID_PLACEHOLDER
+
+    {% if (input_artifacts['storageType'] != None and input_artifacts['storageType'] == "INFY_AICLD_NUTANIX") or (pretrained_model_artifacts['storageType'] != None and pretrained_model_artifacts['storageType'] == "INFY_AICLD_NUTANIX") %}
+	nutanix_config_ref=k8s_client.V1ConfigMapEnvSource(name='nutanix-configuration')
+	env_nutanix_config_from=k8s_client.V1EnvFromSource(config_map_ref=nutanix_config_ref)
+
+	nutanix_accesskey_ref=k8s_client.V1SecretKeySelector(key='awsAccessKeyID',name='nutanix-secret-1')
+	nutanix_accesskey_value_from=k8s_client.V1EnvVarSource(secret_key_ref=nutanix_accesskey_ref)
+	env_nutanix_accessKey = k8s_client.V1EnvVar(name='AWS_ACCESS_KEY_ID', value_from=nutanix_accesskey_value_from)
+
+	nutanix_secretkey_ref=k8s_client.V1SecretKeySelector(key='awsSecretAccessKey',name='nutanix-secret-1')
+	nutanix_secretkey_value_from=k8s_client.V1EnvVarSource(secret_key_ref=nutanix_secretkey_ref)
+	env_nutanix_secretKey = k8s_client.V1EnvVar(name='AWS_SECRET_ACCESS_KEY', value_from=nutanix_secretkey_value_from)
+
+	#volume_mount3 = k8s_client.V1VolumeMount(mount_path='/s3cert',name='s3-cert-vol')
+	secretvol=k8s_client.V1SecretVolumeSource(default_mode=420,secret_name="s3-cert")
+	vol4 = k8s_client.V1Volume(name='s3-cert-vol', secret=secretvol)
+	volume4={"/s3cert": vol4}
+	{% endif %}
+
+	{% if (input_artifacts['storageType'] != None and input_artifacts['storageType'] == "INFY_AICLD_MINIO") or (pretrained_model_artifacts['storageType'] != None and pretrained_model_artifacts['storageType'] == "INFY_AICLD_MINIO") %}
+	minio_config_ref=k8s_client.V1ConfigMapEnvSource(name='minio-configuration')
+	env_minio_config_from=k8s_client.V1EnvFromSource(config_map_ref=minio_config_ref)
+
+	minio_accesskey_ref=k8s_client.V1SecretKeySelector(key='awsAccessKeyID',name='minio-secret-1')
+	minio_acccesskey_value_from=k8s_client.V1EnvVarSource(secret_key_ref=minio_accesskey_ref)
+	env_minio_accessKey = k8s_client.V1EnvVar(name='AWS_ACCESS_KEY_ID', value_from=minio_acccesskey_value_from)
+
+	minio_secretkey_ref=k8s_client.V1SecretKeySelector(key='awsSecretAccessKey',name='nutanix-secret-1')
+	minio_secretkey_value_from=k8s_client.V1EnvVarSource(secret_key_ref=minio_secretkey_ref)
+	env_minio_secretKey = k8s_client.V1EnvVar(name='AWS_SECRET_ACCESS_KEY', value_from=minio_secretkey_value_from)
+	
+	{% endif %}
+
+	secret_ref3=k8s_client.V1SecretKeySelector(key='artifactoryID',name='artifactory-creds')
+	value_from3=k8s_client.V1EnvVarSource(secret_key_ref=secret_ref3)
+	env_artifactoryId = k8s_client.V1EnvVar(name='ARTIFACTORY_UN', value_from=value_from3)
+
+	secret_ref4=k8s_client.V1SecretKeySelector(key='artifactoryToken',name='artifactory-creds')
+	value_from4=k8s_client.V1EnvVarSource(secret_key_ref=secret_ref4)
+	env_artifactoryToken = k8s_client.V1EnvVar(name='ARTIFACTORY_TOKEN', value_from=value_from4)
+
+	#volume_mount = k8s_client.V1VolumeMount(mount_path='/dev/shm',name='dshm')
+	empty_dir_src=k8s_client.V1EmptyDirVolumeSource(medium='Memory')
+	vol1 = k8s_client.V1Volume(name='dshm',empty_dir=empty_dir_src)
+	volume={"/dev/shm": vol1}
+
+	#volume_mount1 = k8s_client.V1VolumeMount(mount_path='/s3util',name='s3-utility-vol')
+	empty_dir_src1=k8s_client.V1EmptyDirVolumeSource(medium='Memory')
+	vol2 = k8s_client.V1Volume(name='s3-utility-vol',empty_dir=empty_dir_src1)
+	volume2={"/s3util": vol2}
+
+	#volume_mount2 = k8s_client.V1VolumeMount(mount_path='/mnt/models',name='storage-vol')
+	empty_dir_src2=k8s_client.V1EmptyDirVolumeSource(medium='Memory')
+	vol3 = k8s_client.V1Volume(name='storage-vol',empty_dir=empty_dir_src2)
+	volume3={"/mnt/models": vol3}
+
+	#volume_mount4 = k8s_client.V1VolumeMount(mount_path='{{TRAIN_LOG_FILE_DIR}}',name='log-vol')
+	empty_dir_src3=k8s_client.V1EmptyDirVolumeSource(medium='Memory')
+	vol5 = k8s_client.V1Volume(name='log-vol',empty_dir=empty_dir_src3)
+	volume5={"{{TRAIN_LOG_FILE_DIR}}": vol5}
+
+	vop = dsl.VolumeOp(    
+				name ="{{PIPELINE_RUN_NAME}}-model-store-vol",
+				resource_name="{{PIPELINE_RUN_NAME}}-model-store-vol",
+				size="{{VOLUMESIGEINGB}}",
+				storage_class='nfs-client',
+				modes=dsl.VOLUME_MODE_RWM
+	)
+
+	volume6={"/output/genModel/": vop.volume}
+
+	env_pretrainedMdlPath = k8s_client.V1EnvVar(name='AI_CLD_PRETRAINED_MDL_PATH', value='/mnt/models')
+	env_modelStorePath = k8s_client.V1EnvVar(name='AICLD_MODEL_STORE_PATH', value='/output/genModel/') 
+	env_inputArtifactsPath = k8s_client.V1EnvVar(name='AICLD_INPUT_ARTIFACTS_PATH', value='/input/artifacts/') 
+	env_logFilePath = k8s_client.V1EnvVar(name='LOG_FILE_PATH', value='{{METRIC_LOG_PATH}}')
+	env_s3LogFilePath = k8s_client.V1EnvVar(name='S3_LOG_FILE_PATH', value='{{PROJECT_ID}}/pipeline/{{PIPELINENAME}}/{{VERSION}}/runs/{{RUNNAME}}/outputartifacts/logs/')
+	env_tfLogFilePath = k8s_client.V1EnvVar(name='TF_LOG_FILE_PATH', value='s3://{{BUCKET_NAME}}/{{PROJECT_ID}}/pipeline/{{PIPELINENAME}}/{{VERSION}}/runs/{{RUNNAME}}/outputartifacts/tf_logs/')
+	env_mlflowExpName = k8s_client.V1EnvVar(name='MLFLOW_EXPERIMENT_NAME', value='{{MLFLOW_EXPNAME}}')
+	env_mlflowUrl = k8s_client.V1EnvVar(name='MLFLOW_TRACKING_URI', value='{{MLFLOW_URL}}')
+	env_mlflowLogArtifacts = k8s_client.V1EnvVar(name='MLFLOW_LOG_ARTIFACT',value='{{MLFLOW_LOG_ARTIFACT}}')
+	env_mlflow_run_id = k8s_client.V1EnvVar(name='MLFLOW_RUN_ID', value='{{trial_id}}')
+	env_mlflow_nested_run = k8s_client.V1EnvVar(name='MLFLOW_NESTED_RUN',value='True')
+	env_var11 = k8s_client.V1EnvVar(name='S3BUCKETNAME', value='{{BUCKET_NAME}}')
+	{# setting the global variables#}
+	{% set env_var_list =[] %}
+	{% for env_v in globalvariables%}
+	{% set gk=env_v['name']%}
+	{% set gv=env_v['value']%}
+
+	{% set env_var_name = 'glb_env_var_'+loop.index|string %}
+	{%set _ = env_var_list.append(env_var_name) %}
+	{{env_var_name}} = k8s_client.V1EnvVar(name='{{gk}}', value='{{gv}}')
+	{% endfor %}
+
+	capab=k8s_client.V1Capabilities(add=['SYS_ADMIN']) 
+	securityctx=k8s_client.V1SecurityContext(privileged=True,capabilities=capab) 
+
+	storage_op = dsl.Sidecar(
+			name="download-from-s3",
+			{% set image="{{$STORAGE_INITIALIZER_IMAGE}}" %},
+			args=["{{PIPL_PRETRAINED_MODEL_PATH}}", "/mnt/models"],
+			mirror_volume_mounts=True
+		)
+	storage_op.add_env_from(env_nutanix_config_from)
+	storage_op.add_env_variable(env_nutanix_accessKey)
+	storage_op.add_env_variable(env_nutanix_secretKey)
+
+
+	util_storage_op = dsl.Sidecar(
+				name="download-util-files-from-s3",
+				{% set image="{{$STORAGE_INITIALIZER_IMAGE}}" %},
+				args=["s3://aicloudprd/utility", "/s3util"],
+				mirror_volume_mounts=True
+          )
+	util_storage_op.add_env_from(env_nutanix_config_from)
+	util_storage_op.add_env_variable(env_nutanix_accessKey)
+	util_storage_op.add_env_variable(env_nutanix_secretKey)
+
+	log_stream_op = dsl.Sidecar(
+				name="stream-log-s3",
+				{% set image="{{$LOG_STREAMING_IMAGE}}" %},
+                command=["/app/startup.sh"],
+				mirror_volume_mounts=True
+          )
+	{%  if (input_artifacts['storageType'] != None and input_artifacts['storageType'] == "INFY_AICLD_MINIO")%}
+	log_stream_op.add_env_from(env_minio_config_from)
+	log_stream_op.add_env_variable(env_minio_accessKey)
+	log_stream_op.add_env_variable(env_minio_secretKey)
+	{%  elif (input_artifacts['storageType'] != None and input_artifacts['storageType'] == "INFY_AICLD_NUTANIX")%}
+	log_stream_op.add_env_from(env_nutanix_config_from)
+	log_stream_op.add_env_variable(env_nutanix_accessKey)
+	log_stream_op.add_env_variable(env_nutanix_secretKey)
+	{% endif %}
+	log_stream_op.set_image_pull_policy('Always')
+	log_stream_op.add_env_variable(env_logFilePath)
+	log_stream_op.add_env_variable(env_s3LogFilePath)
+	log_stream_op.add_env_variable(env_var11)
+
+	upload_s3_op = dsl.Sidecar(
+				name="upload-s3",
+				{% set image="{{$PLOAD_TO_S3_IMAGE}}" %},
+				command=["/app/runScript"],
+				args=["/output/genModel/", "s3://{{BUCKET_NAME}}/{{PROJECT_ID}}/pipeline/{{PIPELINENAME}}/{{VERSION}}/runs/{{RUNNAME}}/outputartifacts/models"],
+				mirror_volume_mounts=True
+          )
+	{%  if (input_artifacts['storageType'] != None and input_artifacts['storageType'] == "INFY_AICLD_MINIO")%}
+	upload_s3_op.add_env_from(env_minio_config_from)
+	upload_s3_op.add_env_variable(env_minio_accessKey)
+	upload_s3_op.add_env_variable(env_minio_secretKey)
+	{%  elif (input_artifacts['storageType'] != None and input_artifacts['storageType'] == "INFY_AICLD_NUTANIX")%}
+	upload_s3_op.add_env_from(env_nutanix_config_from)
+	upload_s3_op.add_env_variable(env_nutanix_accessKey)
+	upload_s3_op.add_env_variable(env_nutanix_secretKey)
+	{% endif %}
+	upload_s3_op.set_image_pull_policy('Always')
+
+	exit_task = run_exit_task_op(
+				run_id=run_id,
+				run_status='{{"{{workflow.status}}"}}'
+				)
+	exit_task.add_init_container(util_storage_op)
+	exit_task.add_pvolumes(volume2)
+	exit_task.add_pvolumes(volume4)
+	exit_task.execution_options.caching_strategy.max_cache_staleness ="P0D"
+
+	with dsl.ExitHandler(exit_task):
+				train=run_train_op(
+						filename="{{INPUT_FILE_NAME}}",
+						parameters=train_params,
+						log_path="{{METRIC_LOG_PATH}}",
+						rgex="{{METRIC_REGEX}}",
+						metricname="{{METRIC_NAME}}",
+						run_id=run_id
+				)
+				train.add_pvolumes(volume)
+				train.add_pvolumes(volume2)
+				train.add_pvolumes(volume3)				
+				train.add_pvolumes(volume5)
+				train.add_pvolumes(volume6)
+				train.add_init_container(storage_op)
+				train.add_init_container(util_storage_op)
+				train.add_sidecar(log_stream_op)
+				train.add_sidecar(upload_s3_op)
+				{% if (input_artifacts['storageType'] != None and input_artifacts['storageType'] == "INFY_AICLD_MINIO")%}
+				train.add_env_from(env_minio_config_from)
+				train.add_env_variable(env_minio_accessKey)
+				train.add_env_variable(env_minio_secretKey)
+				{% elif (input_artifacts['storageType'] != None and input_artifacts['storageType'] == "INFY_AICLD_NUTANIX")%}
+				train.add_env_from(env_nutanix_config_from)
+				train.add_env_variable(env_nutanix_accessKey)
+				train.add_env_variable(env_nutanix_secretKey)
+				
+				{% endif %}
+				train.add_pvolumes(volume4)
+				train.add_env_variable(env_artifactoryId)
+				train.add_env_variable(env_artifactoryToken)
+				train.add_env_variable(env_pretrainedMdlPath)
+				train.add_env_variable(env_modelStorePath)
+				train.add_env_variable(env_inputArtifactsPath)
+				train.add_env_variable(env_tfLogFilePath)
+				train.add_env_variable(env_mlflowExpName)
+				train.add_env_variable(env_mlflowUrl)
+				train.add_env_variable(env_mlflowLogArtifacts)
+				train.add_env_variable(env_mlflow_run_id)
+				train.add_env_variable(env_mlflow_nested_run)
+				train.add_pod_label("pipeline/trialid","{{trial_id}}")
+				train.add_pod_label("pipeline/pipelineid","{{pipeline_id}}")
+				train.set_security_context(securityctx)
+				train.set_image_pull_policy('Always')
+				{% for env_v in env_var_list%}
+				train.add_env_variable({{env_v}})
+				{% endfor %}
+				{{GPU_LIMIT_CONFIG}}
+				{{CPU_LIMIT_CONFIG}}
+				{{MEMORY_LIMIT_CONFIG}}
+				train.execution_options.caching_strategy.max_cache_staleness ="P0D"
+
+args={{PIPELINE_ARGS_JSON }}
+
+if __name__ == '__main__':
+	compiler.Compiler().compile({{PIPELINE_NAME}},__file__ +'.tar.gz')
+	tfile = tarfile.open(__file__ +'.tar.gz')
+	tfile.extractall()
+	tfile.close()
+	file = open('pipeline.yaml', "r")
+	outfile=open(__file__ + '.yaml', "w")
+	word='nvidia.com/gpu'
+	replaceword='{{GPU_REPLACE_WORD}}'
+	for line in file:
+		if word in line:
+			new_line =line.replace(word,replaceword)
+			outfile.write(new_line)
+		else:
+			outfile.write(line)
+
+	outfile.close()
+	file.close()
+	pipelin_run = kfp.Client(host='{{PIPELINE_URL}}',cookies='{{AUTH_TOKEN}}').create_run_from_pipeline_package(__file__ + '.yaml', arguments=args,run_name="{{PIPELINE_RUN_NAME}}",namespace="{{TRAIN_NAMESPACE}}",experiment_name="{{PIPL_EXPERIMENT_NAME}}")
+	print(pipelin_run) 
+

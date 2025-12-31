@@ -1,0 +1,96 @@
+# ===============================================================================================================#
+# Copyright 2024 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+import groovy.json.JsonOutput
+import groovy.json.*
+
+pipeline {
+    agent any
+
+    environment {
+        props = load '/var/lib/jenkins_scripts/Prod/mlops_env.properties';
+        transformerImageName = ''
+        PREDICTION_URL = 'none'
+        errorInfo = ''
+    }
+    parameters {
+         string(name: 'endpointId', defaultValue: '', description: '')
+         string(name: 'jobId', defaultValue: '', description: '')
+         string(name: 'deployEnv' , defaultValue: '', description: '')     
+    }
+   
+    stages {
+        stage('Loading Environment Variables') {
+            steps {
+                script {
+                    try {     
+                        env.WORKSPACE_PATH = "$WORKSPACE_PATH"
+                        env.JENKINS_URL = "$JENKINS_URL"
+                        env.FETCH_URL = "$PROD_AICLD_GET_PIPELINE_INPUT_DET_URL"            
+                    }
+                    catch(err) {
+                        jenkinsConsole = "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                        errorInfo = "Delete endpoint job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}. Please Check with administrator "
+                        echo "$errorInfo"
+                        throw err
+                    }
+                }
+            }
+        }
+         stage('Create Temporary Path') {
+            steps {
+                script {
+                    try {
+                           sh'''
+                                cd ${WORKSPACE_PATH}/input/EndpointServer
+                                mkdir $jobId
+                                cd $jobId
+                            '''
+                        }
+                       
+                    catch(err) {
+                        jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                        errorInfo= "Delete endpoint job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}.Please Check with administrator "
+                        echo "$errorInfo"
+                        throw err
+                    }
+                }
+            }
+        }
+       
+         stage('Delete Endpoint')  {
+             steps {
+                 script{
+                       try{
+                           sh'''
+                           cd ${WORKSPACE_PATH}/input/EndpointServer/$jobId
+                           cp ${WORKSPACE_PATH}/utils/prod/EndpointFileDeletion.py .
+                           chmod 777 EndpointFileDeletion.py
+                           python3 EndpointFileDeletion.py $FETCH_URL/${jobId}
+                           sh'''          
+                     }
+                     catch(err) {
+                        jenkinsConsole= "$JENKINS_URL/${env.JOB_NAME}/${currentBuild.number}/consoleText"
+                        errorInfo= "Delete endpoint job ${currentBuild.number} (correlationId= ${jobId}) failed in stage ${env.STAGE_NAME}.Please Check with administrator "
+                        echo "$errorInfo"
+                        throw err
+                    }
+                 }
+             }
+         }
+}
+        
+      post {
+            always {
+               script {
+                  sh"""
+                  cd ${WORKSPACE_PATH}/input/EndpointServer
+                  rm -rf $jobId
+                  """
+            }
+       }
+     }
+}

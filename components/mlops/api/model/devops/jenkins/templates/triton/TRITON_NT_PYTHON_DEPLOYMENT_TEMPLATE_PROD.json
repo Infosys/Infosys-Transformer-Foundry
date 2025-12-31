@@ -1,0 +1,240 @@
+# ===============================================================================================================#
+# Copyright 2024 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+{
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": {
+      "name": "",
+      "labels": {
+        "app": ""
+      }
+    },
+    "spec": {
+      "replicas": 1,
+      "selector": {
+        "matchLabels": {
+          "app": ""
+        }
+      },
+      "template": {
+        "metadata": {
+          "labels": {
+            "app": ""
+          }
+        },
+        "spec": {
+          "volumes": [
+            {
+              "name": "dshm",
+              "emptyDir": {
+                "medium": "Memory"
+              }
+            },
+            {
+              "name": "s3-utility-vol",
+              "persistentVolumeClaim": {
+                "claimName": "s3-util-vol"
+              }
+            },
+            {
+              "emptyDir": {},
+              "name": "model-storage-vol"
+            },
+            {
+              "emptyDir": {},
+              "name": "model-repo-vol"
+            }
+          ],
+          "initContainers": [
+            {
+              "args": [],
+              "env": [
+                {
+                  "name": "AWS_ACCESS_KEY_ID",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "awsAccessKeyID",
+                      "name": "nutanix-secret-1"
+                    }
+                  }
+                },
+                {
+                  "name": "AWS_SECRET_ACCESS_KEY",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "awsSecretAccessKey",
+                      "name": "nutanix-secret-1"
+                    }
+                  }
+                }
+              ],
+              "envFrom": [
+                {
+                  "configMapRef": {
+                    "name": "nutanix-configuration"
+                  }
+                }
+              ],
+              "image": "${STORAGE_INITIALIZER_IMAGE}",
+              "imagePullPolicy": "Always",
+              "name": "model-storage-initializer",
+              "resources": {
+                "limits": {
+                  "cpu": "1",
+                  "memory": "1Gi"
+                },
+                "requests": {
+                  "cpu": "100m",
+                  "memory": "100Mi"
+                }
+              },
+              "volumeMounts": [
+                {
+                  "mountPath": "/s3cert",
+                  "name": "s3-utility-vol"
+                },
+                {
+                  "mountPath": "/base/models/MODEL_NAME",
+                  "name": "model-storage-vol"
+                },
+                {
+                  "mountPath": "/dev/shm",
+                  "name": "dshm"
+                }
+              ]
+            },
+            {
+              "args": [],
+              "env": [
+                {
+                  "name": "AWS_ACCESS_KEY_ID",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "awsAccessKeyID",
+                      "name": "nutanix-secret-1"
+                    }
+                  }
+                },
+                {
+                  "name": "AWS_SECRET_ACCESS_KEY",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "awsSecretAccessKey",
+                      "name": "nutanix-secret-1"
+                    }
+                  }
+                }
+              ],
+              "envFrom": [
+                {
+                  "configMapRef": {
+                    "name": "nutanix-configuration"
+                  }
+                }
+              ],
+              "image": "${STORAGE_INITIALIZER_IMAGE}",
+              "imagePullPolicy": "Always",
+              "name": "model-repo-initializer",
+              "resources": {
+                "limits": {
+                  "cpu": "1",
+                  "memory": "1Gi"
+                },
+                "requests": {
+                  "cpu": "100m",
+                  "memory": "100Mi"
+                }
+              },
+              "volumeMounts": [
+                {
+                  "mountPath": "/s3cert",
+                  "name": "s3-utility-vol"
+                },
+                {
+                  "mountPath": "/mnt/models/MODEL_NAME",
+                  "name": "model-repo-vol"
+                },
+                {
+                  "mountPath": "/dev/shm",
+                  "name": "dshm"
+                }
+              ]
+            }
+          ],
+          "containers": [
+            {
+              "name": "",
+              "env": [
+                {
+                  "name": "ARTIFACTORY_UN",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "artifactoryID",
+                      "name": "artifactory-creds"
+                    }
+                  }
+                },
+                {
+                  "name": "ARTIFACTORY_TOKEN",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "artifactoryToken",
+                      "name": "artifactory-creds"
+                    }
+                  }
+                }
+              ],
+              "envFrom": [
+                {
+                  "configMapRef": {
+                    "name": "proxy-configuration"
+                  }
+                }
+              ],
+              "ports": [],
+              "image": "",
+              "command": [
+                "/bin/sh",
+                "-c"
+              ],
+              "livenessProbe": {
+                "httpGet": {
+                  "path": "",
+                  "port": 0
+                }
+              },
+              "readinessProbe": {
+                "httpGet": {
+                  "path": "",
+                  "port": 0
+                }
+              },
+              "volumeMounts": [
+                {
+                  "mountPath": "/dev/shm",
+                  "name": "dshm"
+                },
+                {
+                  "mountPath": "/s3util",
+                  "name": "s3-utility-vol"
+                },
+                {
+                  "mountPath": "/base/models/MODEL_NAME",
+                  "name": "model-storage-vol"
+                },
+                {
+                  "mountPath": "/mnt/models/MODEL_NAME",
+                  "name": "model-repo-vol"
+                }
+              ],
+              "resources": "REQUESTSDET CPU_DET MEMORY_DET GPU_LIMIT GPU_DET"
+            }
+          ]
+        }
+      }
+    }
+}
