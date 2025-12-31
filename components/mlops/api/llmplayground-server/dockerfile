@@ -1,0 +1,23 @@
+# ===============================================================================================================#
+# Copyright 2024 Infosys Ltd.                                                                                    #
+# Use of this source code is governed by Apache License Version 2.0 that can be found in the LICENSE file or at  #
+# http://www.apache.org/licenses/                                                                                #
+# ===============================================================================================================#
+
+FROM python:3.9
+ENV DEBIAN_FRONTEND=noninteractive
+
+COPY . .
+
+# Install dependencies using pyproject.toml
+RUN pip install --upgrade pip
+RUN pip install .
+
+WORKDIR src
+
+CMD ["sh", "-c", "python main.py"]
+
+
+## How to run for development
+
+python3 -m server.app
